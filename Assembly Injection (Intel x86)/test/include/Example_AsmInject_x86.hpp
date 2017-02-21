@@ -18,7 +18,7 @@ uint32_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code 
 
 #ifdef _MSC_VER
 // Using a Microsoft compiler
-void __declspec(naked) __stdcall asmCodeExample();
+void __stdcall asmCodeExample();
 #else
 // Non-Microsoft compiler
 void asmCodeExample();
