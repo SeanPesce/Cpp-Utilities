@@ -16,6 +16,15 @@
 int NUMBER = 10; // Will be printed as feedback to show when the injection occurs
 uint32_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code cave to resume normal program logic
 
+#ifdef _WIN32
+    // Define Windows-specific values here
+    #define MEM_PROTECT_SIZE 10
+#else
+    // Define Unix-specific values here
+    #define MEM_PROTECT_SIZE 1
+#endif // _WIN32
+
+
 #ifdef _MSC_VER
 // Using a Microsoft compiler
 void __stdcall asmCodeExample();
