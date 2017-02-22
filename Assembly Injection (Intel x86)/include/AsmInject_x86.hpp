@@ -26,6 +26,28 @@ const uint8_t JMP_INSTR_OPCODE = 0xE9;   // JMP opcode byte value (JMP rel32)
 const uint8_t NOP_INSTR_OPCODE = 0x90;   // NOP opcode byte value
 const int JMP_INSTR_LENGTH = 5;   // The length of a 'JMP rel32' instruction (in bytes).
 
+// Portable memory protection setting constants:
+#ifdef _WIN32
+    // NOTE: Not all Windows protection settings are included. See Microsoft documentation for more info:
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/aa366786(v=vs.85).aspx
+    #define MEM_PROTECT_NONE PAGE_NOACCESS
+    #define MEM_PROTECT_R PAGE_READONLY
+    #define MEM_PROTECT_W PAGE_WRITECOPY
+    #define MEM_PROTECT_X PAGE_EXECUTE
+    #define MEM_PROTECT_RW PAGE_READWRITE
+    #define MEM_PROTECT_RX PAGE_EXECUTE_READ
+    #define MEM_PROTECT_WX PAGE_EXECUTE_WRITECOPY
+    #define MEM_PROTECT_RWX PAGE_EXECUTE_READWRITE
+#else
+    #define MEM_PROTECT_NONE PROT_NONE
+    #define MEM_PROTECT_R PROT_READ
+    #define MEM_PROTECT_W PROT_WRITE
+    #define MEM_PROTECT_X PROT_EXEC
+    #define MEM_PROTECT_RW PROT_READ|PROT_WRITE
+    #define MEM_PROTECT_RX PROT_READ|PROT_EXEC
+    #define MEM_PROTECT_WX PROT_WRITE|PROT_EXEC
+    #define MEM_PROTECT_RWX PROT_READ|PROT_WRITE|PROT_EXEC
+#endif // _WIN32
 
 
 //////////// Function prototypes and descriptions ////////////
