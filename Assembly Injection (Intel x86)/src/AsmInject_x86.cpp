@@ -49,7 +49,7 @@ int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint3
 
         // Unix (use mprotect)
         oldProtection = NULL; // This line is to avoid compiler errors; oldProtection is not used on Unix systems @todo: implement oldProtection for Unix
-        return mprotect(address, size, (int)newProtection); // NOTE: getMemPage should be used to obtain page base address before calling SET_MEM_PROTECTION
+        return mprotect(getMemPage(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
 }
