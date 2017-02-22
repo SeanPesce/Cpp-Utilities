@@ -1,5 +1,10 @@
 
-all: example_program_on_x64
+all: example_program
+	# This should be used when compiling on 32-bit systems.
+
+all64: example_program_on_x64
+	# This should be used when compiling on 64-bit systems.
+	# NOTE: Make sure the following packages are installed: gcc-multilib g++-multilib
 	
 example_program: compile_asm_inject_x86_funcs
 	mkdir -p bin
@@ -18,13 +23,10 @@ example_asm_on_x64: compile_asm_inject_x86_funcs_on_x64
 	g++ -std=c++11 -masm=intel -S -m32 -I include -I ../include src/Example_AsmInject_x86.cpp build/AsmInject_x86.o -o asm/example.a
 
 compile_asm_inject_x86_funcs:
-	# If compiling on a 64-bit system, compile with 'compile_asm_inject_x86_funcs_on_x64'
 	mkdir -p build
 	g++ -std=c++11 -masm=intel -c -I ../include ../src/AsmInject_x86.cpp -o build/AsmInject_x86.o
 
 compile_asm_inject_x86_funcs_on_x64:
-	# If compiling on a 32-bit system, compile with 'compile_asm_inject_x86_funcs'
-	# On a 64-bit system, make sure the following packages are installed: gcc-multilib g++-multilib
 	mkdir -p build
 	g++ -std=c++11 -masm=intel -m32 -c -I ../include ../src/AsmInject_x86.cpp -o build/AsmInject_x86.o
 
