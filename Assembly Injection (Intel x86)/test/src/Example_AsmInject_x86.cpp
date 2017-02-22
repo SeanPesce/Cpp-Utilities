@@ -34,12 +34,8 @@ int main()
         if(i == 4)
         {
             // Unprotect the memory:
-            #ifdef _WIN32
-                uint32_t oldProtection;
-                SET_MEM_PROTECTION(getMemPage((uint8_t*)&main + MAIN_OFFSET), 1, PAGE_EXECUTE_READWRITE, &oldProtection);
-            #else
-                SET_MEM_PROTECTION(getMemPage((uint8_t*)&main + MAIN_OFFSET), 1, PROT_READ|PROT_WRITE|PROT_EXEC, NULL);
-            #endif  // _WIN32
+            uint32_t oldProtection; // oldProtection is not utilized in Unix (might add this functionality later) @todo
+            SET_MEM_PROTECTION((uint8_t*)&main + MAIN_OFFSET, 10, MEM_PROTECT_RWX, &oldProtection);
             
             // Write the jump to the assembly function:
             injectASM(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, 3, (void*)&asmCodeExample);
