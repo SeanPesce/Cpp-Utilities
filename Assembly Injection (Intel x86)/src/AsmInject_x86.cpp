@@ -14,7 +14,7 @@ void injectASM(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, v
     // Write the JMP instruction at the injection point:
     *injectionAddr = JMP_INSTR_OPCODE; // First byte of the instruction is the opcode (JMP)
 
-    // The remaining 4 bytes of the instruction specify the offset from this address to the code cave:
+    // The remaining 4 bytes of the instruction are the operand, specifying the offset from this address to the code cave:
     #ifdef _MSC_VER
         // Using a Microsoft compiler; jump straight to the code cave:
         *(uint32_t*)(injectionAddr + 1) = calculateJmpOffset(injectionAddr, asmCode);

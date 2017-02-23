@@ -67,8 +67,13 @@ const int JMP_INSTR_LENGTH = 5;   // The length of a 'JMP rel32' instruction (in
 int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
 
 /* injectASM
- *  Injects assembly code at the specified location in memory. NOTE: Memory must be
- *      writable before calling this function.
+ *  Injects assembly code at the specified location in memory.
+ *		NOTE:	Memory at the injection point must be writable before calling this function (use
+ *				SET_MEM_PROTECTION).
+ *		NOTE:	There must be AT LEAST 5 bytes of memory at the injection point that is either
+ *				unused or that can be overwritten without disrupting program logic; this space
+ *				is necessary to write the JMP instruction that directs execution to the injected
+ *				assembly code.
  *  @param injectionAddr    The location in memory where the assembly code will be injected. A
  *                          JMP instruction will be written at this location, containing the
  *                          address of the assembly function referenced by the asmCode parameter.
