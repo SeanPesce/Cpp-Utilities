@@ -2,7 +2,7 @@
 Created by Sean P  
   
 # Description:  
-This is an example program to demonstrate the use of my 32-bit Intel x86 Assembly functions. The program iterates through a loop 10 times, printing a number each time. In the loop, there are statements that add to and subtract from the number, but the net sum of these changes is zero, so the number remains unchanged at the end of each iteration.  
+This is an example program to demonstrate the use of my 32-bit Intel x86 Assembly injection functions. The program iterates through a loop 10 times, printing a number each time. In the loop, there are statements that add to and subtract from the number, but the net sum of these changes is zero, so the number remains unchanged at the end of each iteration.  
   
 Once the loop has executed 4 times, the program injects an empty assembly function into itself, overwriting one of the arithmetic statements that changes the number. With this statement removed, the sum of the arithmatic changes to the number is no longer zero (it becomes -1), and the number changes during each iteration for the remainder of execution.  
   
@@ -37,8 +37,8 @@ To compile this program on Windows:
   * Make sure "Add files to the project from these folders" is checked.  
   * Add the /test/src/ and /test/include/ folders to the project, as well as the /src/ and /include/ folders from the parent directory.  
   * On the "Specify Project Settings" screen, choose "Use Visual Studio" and "Console application project" (do not check any of the boxes).  
-  * On the "Specift Debug Configuration Settings" screen, add the previously-mentioned directories under "Include search paths".  
-  * On the "Specift Release Configuration Settings" screen, check off "Same as Debug Configuration" and then "Finish".  
+  * On the "Specify Debug Configuration Settings" screen, add the previously-mentioned directories under "Include search paths".  
+  * On the "Specify Release Configuration Settings" screen, check off "Same as Debug Configuration" and then "Finish".  
   * At the top of the screen, make sure the build configuration is set to "Release" (not "Debug") and "x86".  
   * Double-check that the necessary folders (same as before) are included under Project->Project Properties->C/C++->General->Additional Include Directories  
   * Compile the program by going to Build->Build Solution  
