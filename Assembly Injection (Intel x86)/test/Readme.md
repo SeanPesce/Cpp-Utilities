@@ -27,7 +27,7 @@ This program was tested on gcc version 5.4.0 (Ubuntu 16.04) and Visual Studio 20
 
 
 # Compiling on Linux:  
-To compile this program on Linux, navigate to this directory and use the Makefile commands. On 32-bit systems, use the command 'all' (or 'run' to automatically launch the program after compilation). On 64-bit systems, use the commands 'all64' or 'run64' (NOTE: compilation from a 64-bit system will require the packages gcc-multilib and g++-multilib).  
+To compile this program on Linux, navigate to this directory and use the Makefile commands. On 32-bit systems, use the command 'all' (or 'run' to automatically launch the program after compilation). On 64-bit systems, use the commands 'all64' or 'run64' (NOTE: compilation from a 64-bit system will require the packages gcc-multilib and g++-multilib). The compiled executable will be in the /test/bin/ folder.  
   
 
 # Compiling on Windows:  
