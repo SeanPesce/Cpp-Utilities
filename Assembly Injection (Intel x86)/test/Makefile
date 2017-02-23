@@ -5,6 +5,12 @@ all: example_program
 all64: example_program_on_x64
 	# This should be used when compiling on 64-bit systems.
 	# NOTE: Make sure the following packages are installed: gcc-multilib g++-multilib
+
+run: example_program
+	./bin/example
+
+run64: example_program_on_x64
+	./bin/example
 	
 example_program: compile_asm_inject_x86_funcs
 	mkdir -p bin
