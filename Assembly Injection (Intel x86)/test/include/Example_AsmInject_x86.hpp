@@ -25,12 +25,13 @@ uint32_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code 
 #endif // _WIN32
 
 
-#ifdef _MSC_VER
-// Using a Microsoft compiler
-void __stdcall asmCodeExample();
+#ifdef _MSC_VER // Using a Microsoft compiler
+    #define MAIN_OFFSET 211 // Depending on the compiler, the injection point could vary // @todo: determine whether this is correct in Visual Studio
+    void __stdcall asmCodeExample();
 #else
-// Non-Microsoft compiler
-void asmCodeExample();
+    // Non-Microsoft compiler
+    #define MAIN_OFFSET 211
+    void asmCodeExample();
 #endif // _MSC_VER
 
 
