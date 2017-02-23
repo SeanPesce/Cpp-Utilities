@@ -13,7 +13,7 @@
 #include <string> // string
 #include "AsmInject_x86.hpp" // Assembly Injection functions to be demonstrated with this program
 
-int NUMBER = 10; // Will be printed as feedback to show when the injection occurs
+int NUMBER = 12; // Will be printed as feedback to show when the injection occurs
 uint32_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code cave to resume normal program logic
 
 #ifdef _WIN32
@@ -26,11 +26,14 @@ uint32_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code 
 
 
 #ifdef _MSC_VER // Using a Microsoft compiler
-    #define MAIN_OFFSET 211 // Depending on the compiler, the injection point could vary // @todo: determine whether this is correct in Visual Studio
-    void __stdcall asmCodeExample();
+    // Depending on the compiler, many things can vary:
+    #define MAIN_OFFSET 278     // The injection point
+    #define NOP_COUNT 6         // The type of instructions used (more importantly here, the number of leftover bytes from those overwritten instructions)
+    void __stdcall asmCodeExample(); // Calling conventions for ASM code
 #else
     // Non-Microsoft compiler
-    #define MAIN_OFFSET 211
+    #define MAIN_OFFSET 278
+    #define NOP_COUNT 3
     void asmCodeExample();
 #endif // _MSC_VER
 
