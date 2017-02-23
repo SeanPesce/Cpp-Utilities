@@ -2,13 +2,6 @@
 
 #include "Example_AsmInject_x86.hpp"
 
-// Depending on the compiler, the injection point could vary:
-#ifdef _MSC_VER
-    #define MAIN_OFFSET 211 // @todo: determine whether this is correct in Visual Studio
-#else
-    #define MAIN_OFFSET 211
-#endif // _MSC_VER
-
 int main()
 {
     std::cout << "Press enter to begin.";
