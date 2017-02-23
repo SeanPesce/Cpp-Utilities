@@ -1,4 +1,7 @@
 .vscode
+Assembly Injection (Intel x86)/bin
+Assembly Injection (Intel x86)/build
+Assembly Injection (Intel x86)/asm
 Assembly Injection (Intel x86)/test/bin
 Assembly Injection (Intel x86)/test/build
 Assembly Injection (Intel x86)/test/asm
