@@ -1,3 +1,4 @@
+# Created by Sean P
 
 all: example_program
 	# This should be used when compiling on 32-bit systems.
