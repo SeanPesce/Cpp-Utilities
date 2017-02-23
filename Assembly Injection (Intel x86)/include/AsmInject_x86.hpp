@@ -73,7 +73,7 @@ int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint3
  *                          JMP instruction will be written at this location, containing the
  *                          address of the assembly function referenced by the asmCode parameter.
  *  @param returnJumpAddr   The location in memory where the code cave should return to
- *                          after execution. returnAddr should point to a uin32_t that
+ *                          after execution. returnJumpAddr should point to a uin32_t that
  *                          is referenced in a JMP instruction at the end of the assembly
  *                          function referenced by the asmCode parameter.
  *  @param nopCount         The number of NOP instructions to be written after the initial JMP
