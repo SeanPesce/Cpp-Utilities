@@ -242,10 +242,55 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo);
 void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
                     void *localTrampoline, int trampNopCount);
 
-/*
- * @TODO
+
+
+/* injectJmp_2B_Unsafe
+ *  Injects an relative JMP instruction (JMP rel8) at the given address. The JMP rel8 instruction
+ *      jumps to a local code cave with a injectJmp_14B instruction sequence, seen below.
+ *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
+ *      inserted into %rax. This is the smallest possible code injection, at only 2 bytes, but
+ *      it requires at least 16 bytes of local storage.
+ *
+ *  WARNING: Injection functions marked as "_Unsafe" don't preserve registers and/or require the user
+ *        to include specific instructions in their injected function to avoid data corruption.
+ *
+ * Notes:
+ *  Injection space required: 2 bytes
+ *  Local space required: 16 bytes (local code cave)
+ *      PUSH %rax               // 1 byte
+ *      MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the distant trampoline function
+ *      JMP %rax                // 2 bytes
+ *      POP %rax                // 1 byte
+ *      JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
+ *  Trampoline function used?   Yes, 1 (local)
+ *  Registers preserved?        No
+ *                              User should start code with POP %rax
+ *                              User should call PUSH %rax before final returning JMP instruction
+ *  
+ *  Necessary inclusion(s) to user code:
+ *      POP %rax    // Beginning of user code
+ *      PUSH %rax   // Before final returning JMP instruction
+ *
+ * Injected code:
+ *      JMP rel8        // rel8 is the relative offset of the local JMP r/m64 instruction
+ *
+ *  @params: See documentation for @injectJmp_2B
+ */
+void injectJmp_2B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+                    void *localTrampoline, int trampNopCount);
+
+
+
+/* Helper function that does the following for 2-byte JMP injections:
+ *      -Writes the bytecode for the JMP rel8 instruction.
+ *      -Overwrites remaining garbage bytecode with the specified number of NOP instructions.
+ *      -Creates the local trampoline function at the specified location.
+ *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
+ *          existing instructions.
  */
 void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+
+
 
 /* setTrampolineJmpValues
  *  Helper function that writes the appropriate values to the JMP pointers for the trampoline

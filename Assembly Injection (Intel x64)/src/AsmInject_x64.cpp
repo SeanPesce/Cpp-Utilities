@@ -45,6 +45,62 @@ void injectJmp_14B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount
 
 
 
+/* Injects a JMP rel8 instruction at the given address.
+ *  Notes:
+ *      Space required: 2 bytes
+ *      Local space required: 16 bytes (local code cave)
+ *          PUSH %rax               // 1 byte
+ *          MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the distant trampoline function
+ *          JMP %rax                // 2 bytes
+ *          POP %rax                // 1 byte
+ *          JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
+ *      Trampoline function? Yes, 2 (local and distant)
+ *      Registers preserved? Yes
+ */
+void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+                  void *localTrampoline, int trampNopCount)
+{
+    // Write the injected JMP rel8 instruction and local trampoline:
+    writeBytecode_2B(injectionAddr, nopCount, localTrampoline, trampNopCount, (void*)TRAMPOLINE_FUNC_13B);
+
+    // Set the values of the pointers for the distant code cave and the user's final returning JMP:
+    setTrampolineJmpValues(asmCode,
+                           (uint8_t*)localTrampoline + PUSH_RAX_INSTR_LENGTH
+                                                     + MOVABS_INSTR_LENGTH
+                                                     + JMP_ABS_RAX_INSTR_LENGTH,
+                           returnJmpAddr);
+}
+
+
+
+/* Injects a JMP rel8 instruction at the given address.
+ *  Notes:
+ *      Space required: 2 bytes
+ *      Local space required: 16 bytes (local code cave)
+ *          PUSH %rax               // 1 byte
+ *          MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the distant trampoline function
+ *          JMP %rax                // 2 bytes
+ *          POP %rax                // 1 byte
+ *          JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
+ *      Trampoline function? Yes, 1 (local)
+ *      Registers preserved? No
+ *              User must start their code with POP %rax and end their code with PUSH %rax (before the final JMP instruction)
+ */
+void injectJmp_2B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+                  void *localTrampoline, int trampNopCount)
+{
+    // Write the injected JMP rel8 instruction and local trampoline:
+    writeBytecode_2B(injectionAddr, nopCount, localTrampoline, trampNopCount, asmCode);
+
+    // Obtain the offset of the POP %rax instruction in the local trampoline function:
+    int popRaxOffset = PUSH_RAX_INSTR_LENGTH + MOVABS_INSTR_LENGTH + JMP_ABS_RAX_INSTR_LENGTH;
+
+    // Direct the user's return JMP to the POP %rax instruction in the local trampoline function:
+    *(uint64_t*)returnJmpAddr = (uint64_t)((uint8_t*)injectionAddr + popRaxOffset);
+}
+
+
+
 // Calculates the offset between a JMP rel instruction and some address:
 int64_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLength)
 {
@@ -126,8 +182,8 @@ void TRAMPOLINE_FUNC_13B()
 #endif // _MSC_VER
 
 
-/* Helper function that writes the bytecode for 14-byte JMP injections and overwrites remaining
- *     garbage bytecode with the specified number of NOP instructions.      */
+// Helper function that writes the bytecode for 14-byte JMP injections and overwrites remaining
+//     garbage bytecode with the specified number of NOP instructions.      
 int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo)
 {
     int writeOffset = 0; // Keep track of the offset to write to (relative to the injection point)
@@ -164,6 +220,35 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo)
     memset((void*)((uint8_t*)injectionAddr + writeOffset + POP_RAX_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
 
     return writeOffset;
+}
+
+
+// Helper function that writes bytecode for 2-byte JMP injections and the
+//  local trampoline functions they utilize.
+void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo)
+{
+    // Write the injected JMP rel8 instruction:
+    *(uint8_t*)injectionAddr = JMP_REL8_INSTR_OPCODE; // JMP rel8 opcode
+    //
+    *((uint8_t*)injectionAddr+1) = (int8_t)calculateJmpOffset(injectionAddr, localTrampoline, JMP_REL8_INSTR_LENGTH); // JMP rel8 operand
+    
+    // Erase trailing garbage bytes from overwritten instruction(s) at injection point:
+    memset((void*)((uint8_t*)injectionAddr + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+
+    // Create the local trampoline function:
+    int retJmpOffset = writeBytecode_14B(localTrampoline, trampNopCount+JMP_REL8_INSTR_LENGTH, (void*)jmpTo); // Extra NOPs because some NOPs will be overwritten with the "JMP rel8" returning JMP
+    
+    // Obtain the write offset of the local trampoline function's returning JMP rel8 instruction (relative to localTrampoline):
+    retJmpOffset += POP_RAX_INSTR_LENGTH;
+
+    // Write the local trampoline's returning JMP rel8 instruction:
+    *((uint8_t*)localTrampoline + retJmpOffset) = JMP_REL8_INSTR_OPCODE; // JMP rel8 opcode
+    //
+    *((uint8_t*)localTrampoline + retJmpOffset+1) = (int8_t)calculateJmpOffset(
+                                                                (uint8_t*)localTrampoline+retJmpOffset,
+                                                                (uint8_t*)injectionAddr+JMP_REL8_INSTR_LENGTH,
+                                                                JMP_REL8_INSTR_LENGTH); // JMP rel8 operand
+
 }
 
 
