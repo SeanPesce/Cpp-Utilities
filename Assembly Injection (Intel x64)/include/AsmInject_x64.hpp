@@ -203,8 +203,8 @@ int writeBytecode_13B(void *injectionAddr, int nopCount, void *jmpTo);
  *
  * Notes:
  *  Injection space required: 2 bytes
- *  Local space required: 13 bytes (total)
- *      5 bytes (JMP r/m64)
+ *  Local space required: 14 bytes (total)
+ *      6 bytes (JMP r/m64)
  *      8 bytes (absolute 64-bit address)
  *  Trampoline function used?   No
  *  Registers preserved?        Yes
@@ -226,7 +226,7 @@ int writeBytecode_13B(void *injectionAddr, int nopCount, void *jmpTo);
  *                          be necessary if the user wrote their chainJmp over existing instructions.
  *  @param chainPtr         The address of the local pointer which will hold the absolute address of the
  *                          user's code cave (same as asmCode). chainPtr must be in the range:
- *                          [chainJmp+?, chainJmp-?] @TODO: fill in range
+ *                          [chainJmp+2³¹-1, chainJmp-2³¹]
  *  @param chainPtrNopCount The number of NOP instructions to be written after the absolute address specified by chainPtr.
  *                          This might be necessary if the user wrote their absolute address over existing instructions.
  */

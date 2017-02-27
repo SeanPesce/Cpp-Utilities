@@ -142,7 +142,8 @@ void TRAMPOLINE_FUNC_13B()
 #endif // _MSC_VER
 
 
-
+/* Helper function that writes the bytecode for 13-byte JMP injections and overwrites remaining
+ *     garbage bytecode with the specified number of NOP instructions.      */
 int writeBytecode_13B(void *injectionAddr, int nopCount, void *jmpTo)
 {
     int writeOffset = 0; // Keep track of the offset to write to (relative to the injection point)
