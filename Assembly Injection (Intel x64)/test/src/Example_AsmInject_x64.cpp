@@ -37,7 +37,7 @@ int main()
             SET_MEM_PROTECTION((uint8_t*)&main + MAIN_OFFSET, MEM_PROTECT_SIZE, MEM_PROTECT_RWX, &oldProtection);
             
             // Write the jump to the assembly function:
-            injectJmp_13B(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
+            injectJmp_14B(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
             
             std::cout << "Injecting assembly at " << (int*)((uint8_t*)&main + MAIN_OFFSET) <<
                         " with return address " << (uint64_t*)JUMPBACK_ADDRESS << "..." << std::endl;
