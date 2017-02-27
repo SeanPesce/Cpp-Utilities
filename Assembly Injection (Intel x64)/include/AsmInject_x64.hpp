@@ -221,12 +221,12 @@ int writeBytecode_13B(void *injectionAddr, int nopCount, void *jmpTo);
  *                          overwriting existing instructions at the injection location.
  *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
  *  @param chainJmp         The address of the local JMP r/m64 instruction, which must be in the range:
- *                          [injectionAddr+127, injectionAddr-128]
+ *                          [injectionAddr+129, injectionAddr-126]
  *  @param chainJmpNopCount The number of NOP instructions to be written after the chained JMP. This might
  *                          be necessary if the user wrote their chainJmp over existing instructions.
  *  @param chainPtr         The address of the local pointer which will hold the absolute address of the
  *                          user's code cave (same as asmCode). chainPtr must be in the range:
- *                          [chainJmp+2³¹-1, chainJmp-2³¹]
+ *                          [chainJmp+2³¹+5, chainJmp-2³¹+6]
  *  @param chainPtrNopCount The number of NOP instructions to be written after the absolute address specified by chainPtr.
  *                          This might be necessary if the user wrote their absolute address over existing instructions.
  */
