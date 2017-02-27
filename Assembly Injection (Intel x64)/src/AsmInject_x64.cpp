@@ -5,8 +5,8 @@
 
 #ifndef _MSC_VER
     // Pointers for the JMP values from ASM trampoline function (GCC method):
-    uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC_13B + 20),  // To the user's code
-                *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC_13B + 28);  // To the original code after the injection point
+    uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 20),  // To the user's code
+                *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 28);  // To the original code after the injection point
 #endif // _MSC_VER
 
 
@@ -20,7 +20,7 @@
 void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode) // @TODO: complete/test this function for Windows
 {
     // Write the injected bytecode and store the final write offset (relative to the injection point):
-    int popRaxOffset = writeBytecode_14B(injectionAddr, nopCount, (void*)TRAMPOLINE_FUNC_13B); // The returned offset is also the offset of the POP %rax instruction
+    int popRaxOffset = writeBytecode_14B(injectionAddr, nopCount, (void*)TRAMPOLINE_FUNC); // The returned offset is also the offset of the POP %rax instruction
 
     setTrampolineJmpValues(asmCode, ((uint8_t*)injectionAddr + popRaxOffset), returnJmpAddr);
 }
@@ -61,7 +61,7 @@ void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
                   void *localTrampoline, int trampNopCount)
 {
     // Write the injected JMP rel8 instruction and local trampoline:
-    writeBytecode_2B(injectionAddr, nopCount, localTrampoline, trampNopCount, (void*)TRAMPOLINE_FUNC_13B);
+    writeBytecode_2B(injectionAddr, nopCount, localTrampoline, trampNopCount, (void*)TRAMPOLINE_FUNC);
 
     // Set the values of the pointers for the distant code cave and the user's final returning JMP:
     setTrampolineJmpValues(asmCode,
@@ -148,7 +148,7 @@ void *getMemPage(void *memAddress)
 
 #ifndef _MSC_VER
 // Non-Microsoft compiler; use GCC in-line ASM:
-void TRAMPOLINE_FUNC_13B()
+void TRAMPOLINE_FUNC()
 {
     // The first ASM instruction is +4 from &asmCodeExample when using GCC/G++
     __asm__ volatile
@@ -261,7 +261,7 @@ void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo)
     //   the instruction after the injected JMP:                        
     #ifndef _MSC_VER
         // If on GCC, make ASM trampoline function writable:
-        SET_MEM_PROTECTION((void*)&TRAMPOLINE_FUNC_13B, 1, MEM_PROTECT_RWX, NULL);
+        SET_MEM_PROTECTION((void*)&TRAMPOLINE_FUNC, 1, MEM_PROTECT_RWX, NULL);
     #endif // _MSC_VER
     *TRAMPOLINE_RET_TO_PTR = (uint64_t)trampRetTo;
     
@@ -275,5 +275,5 @@ void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo)
     #endif // _MSC_VER
 
     // Direct the user's return JMP to the intermediate trampoline function's return JMP:
-    *(uint64_t*)userRetTo = (uint64_t)((uint8_t*)TRAMPOLINE_FUNC_13B + TRAMPOLINE_JMPBACK_INSTR_OFFSET);
+    *(uint64_t*)userRetTo = (uint64_t)((uint8_t*)TRAMPOLINE_FUNC + TRAMPOLINE_JMPBACK_INSTR_OFFSET);
 }

@@ -79,19 +79,21 @@ const int   JMP_REL8_INSTR_LENGTH = 2,          // 'JMP short' (JMP rel8) instru
 
 //////////// Function prototypes and descriptions ////////////
 
-/* TRAMPOLINE_FUNC_13B
+/* TRAMPOLINE_FUNC
  *  ASM trampoline function that is called as a wrapping function for a user's 
- *      ASM code when that user calls injectJmp_14B(). The trampoline function is called
- *      first because we push %rax to the stack at the injection point to free a register 
- *      for the JMP r/m64 call, and we don't want the user to worry about push/popping %rax
- *      to preserve it and/or alter its contents. To inject without a trampoline function,
- *      use injectJmp_14B_Unsafe().
+ *      ASM code when that user calls injectJmp_14B or injectJmp_2B. The trampoline
+ *      function is called first because we push %rax to the stack at the injection 
+ *      point to free the register for the JMP r/m64 call. Injected code must pop %rax
+ *      to edit or utilize its contents, and must push %rax back onto the stack before
+ *      returning to avoid data corruption. The trampoline function does all of this
+ *      and wraps the user's code for ease of use (and to avoid user error). To inject
+ *      without a trampoline function, use the _Unsafe versions of these functions.
  */
 #ifdef _MSC_VER
     // Visual Studio doesn't support in-line ASM on 64-bit projects; use an external .asm file
-    extern "C" void * const TRAMPOLINE_FUNC_13B;
+    extern "C" void * const TRAMPOLINE_FUNC;
 #else
-    void TRAMPOLINE_FUNC_13B();
+    void TRAMPOLINE_FUNC();
 #endif // _MSC_VER
 
 
