@@ -1,17 +1,15 @@
 // Made by Sean Pesce
 
 /* @TODO:   "Safe" functions have fundamental flaw: they're singletons and can't be used multiple
- *          times in the same instance with overwriting each other. Fix this (heap/objects?)
+ *          times in the same instance without overwriting each other. Fix this (using heap/objects?)
  */
 
 #include "AsmInject_x64.hpp"
 
 
-#ifndef _MSC_VER
-    // Pointers for the JMP values from ASM trampoline function (GCC method):
-    uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 25),  // To the user's code
-                *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 15);  // To the original code after the injection point
-#endif // _MSC_VER
+// Pointers for the JMP values from ASM trampoline function (GCC method):
+uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 25),  // To the user's code
+            *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 15);  // To the original code after the injection point
 
 
 
@@ -259,10 +257,7 @@ void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo)
 {
     // Write the address for the JMP pointer from the intermediate ASM trampoline function to 
     //   the instruction after the injected JMP:                        
-    #ifndef _MSC_VER
-        // If on GCC, make ASM trampoline function writable:
-        SET_MEM_PROTECTION((void*)&TRAMPOLINE_FUNC, 1, MEM_PROTECT_RWX, NULL);
-    #endif // _MSC_VER
+    SET_MEM_PROTECTION((void*)&TRAMPOLINE_FUNC, TRAMP_FUNC_SIZE, MEM_PROTECT_RWX, NULL);
     *TRAMPOLINE_RET_TO_PTR = (uint64_t)trampRetTo;
     
     // Write the address for the JMP pointer from the intermediate ASM trampoline function to the user's ASM function:

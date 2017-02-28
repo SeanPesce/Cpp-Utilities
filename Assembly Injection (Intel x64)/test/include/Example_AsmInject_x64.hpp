@@ -15,7 +15,7 @@ uint64_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code 
 
 #ifdef _WIN32
     // Define Windows-specific values here
-    #define MEM_PROTECT_SIZE 10
+    #define MEM_PROTECT_SIZE 300
 #else
     // Define Unix-specific values here
     #define MEM_PROTECT_SIZE 1
@@ -24,9 +24,9 @@ uint64_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code 
 
 #ifdef _MSC_VER // Using a Microsoft compiler
     // Depending on the compiler, many things can vary:
-    #define MAIN_OFFSET 190     // The injection point
-    #define NOP_COUNT 41         // The type of instructions used (more importantly here, the number of leftover bytes from those overwritten instructions)
-    void __stdcall asmCodeExample(); // Calling conventions for ASM code
+    #define MAIN_OFFSET 221     // The injection point
+    #define NOP_COUNT 45         // The type of instructions used (more importantly here, the number of leftover bytes from those overwritten instructions)
+    extern "C" void asmCodeExample();
 #else
     // Non-Microsoft compiler
     #define MAIN_OFFSET 190
