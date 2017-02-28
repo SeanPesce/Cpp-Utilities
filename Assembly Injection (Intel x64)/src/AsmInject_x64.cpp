@@ -1,12 +1,16 @@
 // Made by Sean Pesce
 
+/* @TODO:   "Safe" functions have fundamental flaw: they're singletons and can't be used multiple
+ *          times in the same instance with overwriting each other. Fix this (heap/objects?)
+ */
+
 #include "AsmInject_x64.hpp"
 
 
 #ifndef _MSC_VER
     // Pointers for the JMP values from ASM trampoline function (GCC method):
-    uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 20),  // To the user's code
-                *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 28);  // To the original code after the injection point
+    uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 25),  // To the user's code
+                *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 15);  // To the original code after the injection point
 #endif // _MSC_VER
 
 
@@ -154,21 +158,13 @@ void TRAMPOLINE_FUNC()
     __asm__ volatile
     (
         "pop %rax\n"
-        "jmp QWORD PTR [TRAMPOLINE_JMP_TO_LBL]\n" // Depending on compiler, might need to prefix variables with "_"
+        "jmp QWORD PTR [TRAMPOLINE_JMP_TO_LBL]\n"
         "push %rax\n"
-        "jmp QWORD PTR [TRAMPOLINE_RET_TO_LBL]\n"
-        /* The following 16 NOP instructions will create a buffer for *TRAMPOLINE_JMP_TO_PTR and *TRAMPOLINE_RET_TO_PTR
-         *  to be stored locally, allowing for a known constant JMP operand size:       */
+        "movabs %rax, 0x1111111111111111\n" // This imm64 value will be overwritten with the return address
+        "jmp %rax\n"
+        /* The following 8 NOP instructions will create a buffer for *TRAMPOLINE_JMP_TO_PTR to
+         *  be stored locally, allowing for a known constant JMP operand size:       */
         "TRAMPOLINE_JMP_TO_LBL:\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "TRAMPOLINE_RET_TO_LBL:\n"
         "nop\n"
         "nop\n"
         "nop\n"
