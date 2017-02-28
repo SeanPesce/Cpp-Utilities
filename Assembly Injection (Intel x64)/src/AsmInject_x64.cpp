@@ -7,9 +7,14 @@
 #include "AsmInject_x64.hpp"
 
 
-// Pointers for the JMP values from ASM trampoline function (GCC method):
+// Pointers for the JMP values from ASM trampoline function:
+#ifdef _MSC_VER
+uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 20),  // To the user's code
+            *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 10);  // To the original code after the injection point
+#else
 uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 25),  // To the user's code
             *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 15);  // To the original code after the injection point
+#endif // _MSC_VER
 
 
 
@@ -19,7 +24,7 @@ uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 25
  *      Trampoline function? Yes
  *      Registers preserved? Yes
  */
-void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode) // @TODO: complete/test this function for Windows
+void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode)
 {
     // Write the injected bytecode and store the final write offset (relative to the injection point):
     int popRaxOffset = writeBytecode_14B(injectionAddr, nopCount, (void*)TRAMPOLINE_FUNC); // The returned offset is also the offset of the POP %rax instruction
@@ -115,14 +120,17 @@ int64_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLengt
 int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection)
 {
     #ifdef _WIN32
-    
         // Windows (use VirtualProtect)
+        if(oldProtection == NULL){
+            uint32_t oldProt; // If the user passes NULL for oldProtection, use &oldProt (otherwise VirtualProtect fails)
+            return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)&oldProt);
+        } // Else...
         return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)oldProtection);
     
     #else // _WIN32 not defined
 
         // Unix (use mprotect)
-        oldProtection = NULL; // This line is to avoid compiler errors; oldProtection is not used on Unix systems @todo: implement oldProtection for Unix
+        oldProtection = NULL; // This line is to avoid compiler errors; oldProtection is not used on Unix systems @TODO: implement oldProtection for Unix
         return mprotect(getMemPage(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
@@ -256,7 +264,7 @@ void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount)
 void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo)
 {
     // Write the address for the JMP pointer from the intermediate ASM trampoline function to 
-    //   the instruction after the injected JMP:                        
+    //   the instruction after the injected JMP:                       
     SET_MEM_PROTECTION((void*)&TRAMPOLINE_FUNC, TRAMP_FUNC_SIZE, MEM_PROTECT_RWX, NULL);
     *TRAMPOLINE_RET_TO_PTR = (uint64_t)trampRetTo;
     
