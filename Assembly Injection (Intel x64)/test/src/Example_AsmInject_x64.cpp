@@ -52,7 +52,7 @@ int main()
 // Non-Microsoft compiler; use GCC in-line ASM:
 void asmCodeExample()
 {
-    // The first ASM instruction is +4 from &asmCodeExample when using GCC/G++
+    // The first ASM instruction is +4 from a function's base address when using GCC/G++ 64-bit
     __asm__ volatile
     (
         "JMP [JUMPBACK_ADDRESS]" // To reference an outside variable, might need to prefix it with "_"
