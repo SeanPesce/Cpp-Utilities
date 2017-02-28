@@ -41,14 +41,17 @@ uint32_t calculateJmpOffset(void *fromAddress, void *toAddress)
 int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection)
 {
     #ifdef _WIN32
-    
         // Windows (use VirtualProtect)
+        if(oldProtection == NULL){
+            uint32_t oldProt; // If the user passes NULL for oldProtection, use &oldProt (otherwise VirtualProtect fails)
+            return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)&oldProt);
+        } // Else...
         return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)oldProtection);
     
     #else // _WIN32 not defined
 
         // Unix (use mprotect)
-        oldProtection = NULL; // This line is to avoid compiler errors; oldProtection is not used on Unix systems @todo: implement oldProtection for Unix
+        oldProtection = NULL; // This line is to avoid compiler errors; oldProtection is not used on Unix systems @TODO: implement oldProtection for Unix
         return mprotect(getMemPage(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
