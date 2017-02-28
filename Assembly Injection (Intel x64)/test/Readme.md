@@ -41,6 +41,7 @@ To compile this program on Windows:
   * On the "Specify Release Configuration Settings" screen, check off "Same as Debug Configuration" and then "Finish".  
   * At the top of the screen, make sure the build configuration is set to "Release" (not "Debug") and "x64".  
   * Double-check that the necessary folders (same as before) are included under Project->Project Properties->C/C++->General->Additional Include Directories  
+  * Turn off Incremental Linking under Project->Project Properties->Linker->General->Enable Incremental Linking (set it to "No")  
   * In the Solution Explorer side bar (right side of the screen by default), right-click on your project and choose Build Dependencies->Build Customization, select the "masm" checkbox, and press OK.
   * Compile the program by going to Build->Build Solution  
   * The compiled program can be found in the /x64/Release/ folder in the project directory.  
