@@ -36,7 +36,7 @@ void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void 
  *      Space required: 14 bytes
  *      Trampoline function? No
  *      Registers preserved? No
- *          User must start their code with POP %rax and end their code with PUSH %rax (before the final JMP instruction)
+ *          User must start their code with POP %rax and end their code with PUSH %rax/MOVABS %rax, returnJmpAddr/JMP %rax
  */
 void injectJmp_14B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode)
 {

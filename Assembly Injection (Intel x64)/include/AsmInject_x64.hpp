@@ -176,8 +176,11 @@ void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void 
  *                              User should call PUSH %rax before final returning JMP instruction
  *  
  *  Necessary inclusion(s) to user code:
- *      POP %rax    // Beginning
- *      PUSH %rax   // Before final returning JMP instruction
+ *      POP %rax    // Beginning of user code
+ *      // End of user code:
+ *      PUSH %rax
+ *      MOVABS %rax, returnJmpAddr
+ *      JMP %rax
  *  
  * Injected code:
  *      PUSH %rax
@@ -242,7 +245,7 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo);
  *                          existing instructions.
  */
 void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount);
+                    void *localTrampoline, int trampNopCount); // @TODO: test this 
 
 
 
@@ -271,7 +274,10 @@ void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
  *  
  *  Necessary inclusion(s) to user code:
  *      POP %rax    // Beginning of user code
- *      PUSH %rax   // Before final returning JMP instruction
+ *      // End of user code:
+ *      PUSH %rax
+ *      MOVABS %rax, returnJmpAddr
+ *      JMP %rax
  *
  * Injected code:
  *      JMP rel8        // rel8 is the relative offset of the local JMP r/m64 instruction
@@ -279,7 +285,7 @@ void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
  *  @params: See documentation for @injectJmp_2B
  */
 void injectJmp_2B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount);
+                    void *localTrampoline, int trampNopCount); // @TODO: test this 
 
 
 
