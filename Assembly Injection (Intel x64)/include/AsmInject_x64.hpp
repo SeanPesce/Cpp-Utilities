@@ -245,7 +245,7 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo);
  *                          existing instructions.
  */
 void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount); // @TODO: test this 
+                    void *localTrampoline, int trampNopCount);
 
 
 
@@ -285,7 +285,7 @@ void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
  *  @params: See documentation for @injectJmp_2B
  */
 void injectJmp_2B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount); // @TODO: test this 
+                    void *localTrampoline, int trampNopCount);
 
 
 
@@ -314,6 +314,19 @@ void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, 
  *                      user's code typically returns here after execution.
  */
 void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo);
+
+
+
+/* writeJmpRel8
+ *  Writes a JMP rel8 instruction at the specified writeTo address.
+ *
+ *  @param writeTo  The address where the JMP rel8 instruction will be written.
+ *  @param jmpTo    The address where the JMP rel8 instruction will jump to. After the JMP rel8
+ *                  instruction executes, %rip = jmpTo.
+ *                  NOTE: jmpTo must be in the range [writeTo-128,writeTo+127]
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ */
+void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
  
 
 #endif // ASM_INJECT_X64_HPP

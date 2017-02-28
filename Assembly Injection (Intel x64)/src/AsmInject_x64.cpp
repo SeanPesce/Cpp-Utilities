@@ -219,17 +219,13 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo)
 }
 
 
+
 // Helper function that writes bytecode for 2-byte JMP injections and the
 //  local trampoline functions they utilize.
 void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo)
 {
     // Write the injected JMP rel8 instruction:
-    *(uint8_t*)injectionAddr = JMP_REL8_INSTR_OPCODE; // JMP rel8 opcode
-    //
-    *((uint8_t*)injectionAddr+1) = (int8_t)calculateJmpOffset(injectionAddr, localTrampoline, JMP_REL8_INSTR_LENGTH); // JMP rel8 operand
-    
-    // Erase trailing garbage bytes from overwritten instruction(s) at injection point:
-    memset((void*)((uint8_t*)injectionAddr + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    writeJmpRel8(injectionAddr, localTrampoline, nopCount);
 
     // Create the local trampoline function:
     int retJmpOffset = writeBytecode_14B(localTrampoline, trampNopCount+JMP_REL8_INSTR_LENGTH, (void*)jmpTo); // Extra NOPs because some NOPs will be overwritten with the "JMP rel8" returning JMP
@@ -238,13 +234,21 @@ void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, 
     retJmpOffset += POP_RAX_INSTR_LENGTH;
 
     // Write the local trampoline's returning JMP rel8 instruction:
-    *((uint8_t*)localTrampoline + retJmpOffset) = JMP_REL8_INSTR_OPCODE; // JMP rel8 opcode
-    //
-    *((uint8_t*)localTrampoline + retJmpOffset+1) = (int8_t)calculateJmpOffset(
-                                                                (uint8_t*)localTrampoline+retJmpOffset,
-                                                                (uint8_t*)injectionAddr+JMP_REL8_INSTR_LENGTH,
-                                                                JMP_REL8_INSTR_LENGTH); // JMP rel8 operand
+    writeJmpRel8((uint8_t*)localTrampoline+retJmpOffset, (uint8_t*)injectionAddr+JMP_REL8_INSTR_LENGTH, trampNopCount);
 
+}
+
+
+
+// Writes a JMP rel8 instruction from writeTo to jmpTo, and inserts trailing NOPs if necessary
+void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount)
+{
+    *(uint8_t*)writeTo = JMP_REL8_INSTR_OPCODE; // Write opcode byte
+    
+    *((uint8_t*)writeTo+1) = (int8_t)calculateJmpOffset(writeTo, jmpTo, JMP_REL8_INSTR_LENGTH); // Write operand byte
+
+    // Erase trailing garbage bytes from overwritten instruction(s) at write address:
+    memset((void*)((uint8_t*)writeTo + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
 }
 
 
