@@ -44,11 +44,11 @@ const int   JMP_REL8_INSTR_LENGTH = 2,          // 'JMP short' (JMP rel8) instru
 // Important values from the intermediate trampoline function that is called when the user calls injectJmp_14B():
 #ifdef _MSC_VER
     // Visual Studio doesn't support in-line ASM on 64-bit projects; use an external .asm file
-    const int TRAMPOLINE_JMPBACK_INSTR_OFFSET = 12; // Offset of the trampoline function's returning JMP instruction from the beginning of the function
-    #define TRAMP_FUNC_SIZE 100 // @TODO: determine actual size of TRAMPOLINE_FUNC
+    const int TRAMPOLINE_JMPBACK_INSTR_OFFSET = 7; // Offset of the trampoline function's returning JMP instruction from the beginning of the function
+    #define TRAMP_FUNC_SIZE 40
 #else
     const int TRAMPOLINE_JMPBACK_INSTR_OFFSET = 12;
-    #define TRAMP_FUNC_SIZE 1
+    #define TRAMP_FUNC_SIZE 2
 #endif // _MSC_VER
 
 // Portable memory protection setting constants:
