@@ -1,0 +1,19 @@
+
+
+_DATA SEGMENT
+
+JUMPBACK_ADDRESS dq 0
+
+_DATA ENDS
+
+
+
+_CODE SEGMENT
+
+asmCodeExample proc
+	jmp [JUMPBACK_ADDRESS]
+asmCodeExample endp
+
+_CODE ENDS
+
+END
