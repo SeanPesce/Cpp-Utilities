@@ -42,6 +42,7 @@ To compile this program on Windows:
   * At the top of the screen, make sure the build configuration is set to "Release" (not "Debug") and "x64".  
   * Double-check that the necessary folders (same as before) are included under Project->Project Properties->C/C++->General->Additional Include Directories  
   * Turn off Incremental Linking under Project->Project Properties->Linker->General->Enable Incremental Linking (set it to "No")  
+  * Turn off Buffer Security Check under Project->Project Properties->C/C++->Code Generation->Security Check (set it to "Disable Security Check (/GS-)")  
   * In the Solution Explorer side bar (right side of the screen by default), right-click on your project and choose Build Dependencies->Build Customization, select the "masm" checkbox, and press OK.
   * Compile the program by going to Build->Build Solution  
   * The compiled program can be found in the /x64/Release/ folder in the project directory.  
