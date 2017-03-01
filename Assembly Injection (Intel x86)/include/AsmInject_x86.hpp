@@ -1,9 +1,7 @@
 // Made by Sean Pesce
 
-#ifdef _MSC_VER
-    // Using a Microsoft compiler
-    #pragma once
-#endif // _MSC_VER
+
+#pragma once
 
 
 #ifndef ASM_INJECT_X86_HPP
