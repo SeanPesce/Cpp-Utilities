@@ -13,7 +13,7 @@
 void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode)
 {
     // Write the injected bytecode and store the final write offset (relative to the injection point):
-    int popRaxOffset = writeBytecode_14B(injectionAddr, nopCount, asmCode); // The returned offset is also the offset of the POP %rax instruction
+    int popRaxOffset = writeJmpRax_14B(injectionAddr, asmCode, nopCount); // The returned offset is also the offset of the POP %rax instruction
 
     // Direct the user's return JMP to the POP %rax instruction:
     *(uint64_t*)returnJmpAddr = (uint64_t)((uint8_t*)injectionAddr + popRaxOffset);
@@ -95,42 +95,43 @@ void *getMemPage(void *memAddress)
 }
 
 
-// Helper function that writes the bytecode for 14-byte JMP injections and overwrites remaining
-//     garbage bytecode with the specified number of NOP instructions.      
-int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo)
+// Writes bytecode for the series of instructions to perform an abolute JMP r64 (using JMP %rax)
+//  and restore the register upon returning. Also overwrites remaining garbage bytecode with
+//  the specified number of NOP instructions.
+int writeJmpRax_14B(void *writeTo, void *jmpTo, int nopCount)
 {
     int writeOffset = 0; // Keep track of the offset to write to (relative to the injection point)
 
     // Begin writing at the injection point...
     //
     // PUSH %rax:
-    *(uint8_t*)injectionAddr = PUSH_RAX_INSTR;
+    *(uint8_t*)writeTo = PUSH_RAX_INSTR;
     writeOffset += PUSH_RAX_INSTR_LENGTH;
     //
     //
     // MOVABS %rax, imm64:
-    *(uint16_t*)((uint8_t*)injectionAddr + writeOffset) = *(uint16_t*)MOVABS_RAX_INSTR_OPCODE; // Opcode of MOVABS %rax, imm64
+    *(uint16_t*)((uint8_t*)writeTo + writeOffset) = *(uint16_t*)MOVABS_RAX_INSTR_OPCODE; // Opcode of MOVABS %rax, imm64
     writeOffset += MOVABS_OPCODE_LENGTH;
     #ifdef _MSC_VER
         // Using a Microsoft compiler; jump straight to the injected function:
-        *(uint64_t*)((uint8_t*)injectionAddr + writeOffset) = (uint64_t)jmpTo; // Operand of MOVABS %rax, imm64
+        *(uint64_t*)((uint8_t*)writeTo + writeOffset) = (uint64_t)jmpTo; // Operand of MOVABS %rax, imm64
     #else
         // Using non-MS compiler; GCC in-line ASM starts +4 bytes from asmCode:
-        *(uint64_t*)((uint8_t*)injectionAddr + writeOffset) = (uint64_t)((uint8_t*)jmpTo+4); // Operand of MOVABS %rax, imm64
+        *(uint64_t*)((uint8_t*)writeTo + writeOffset) = (uint64_t)((uint8_t*)jmpTo+4); // Operand of MOVABS %rax, imm64
     #endif // _MSC_VER
     writeOffset += MOVABS_OPERAND_LENGTH;
     //
     //
     // JMP %rax:
-    *(uint16_t*)((uint8_t*)injectionAddr + writeOffset) = *(uint16_t*)JMP_ABS_RAX_INSTR;
+    *(uint16_t*)((uint8_t*)writeTo + writeOffset) = *(uint16_t*)JMP_ABS_RAX_INSTR;
     writeOffset += JMP_ABS_RAX_INSTR_LENGTH;
     //
     //
     // POP %rax:
-    *(uint8_t*)((uint8_t*)injectionAddr + writeOffset) = POP_RAX_INSTR;
+    *(uint8_t*)((uint8_t*)writeTo + writeOffset) = POP_RAX_INSTR;
 
     // Erase trailing garbage bytes from overwritten instruction(s):
-    memset((void*)((uint8_t*)injectionAddr + writeOffset + POP_RAX_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)writeTo + writeOffset + POP_RAX_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
 
     return writeOffset;
 }
@@ -145,7 +146,7 @@ void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, 
     writeJmpRel8(injectionAddr, localTrampoline, nopCount);
 
     // Create the local trampoline function:
-    int retJmpOffset = writeBytecode_14B(localTrampoline, trampNopCount+JMP_REL8_INSTR_LENGTH, (void*)jmpTo); // Extra NOPs because some NOPs will be overwritten with the "JMP rel8" returning JMP
+    int retJmpOffset = writeJmpRax_14B(localTrampoline, (void*)jmpTo, trampNopCount+JMP_REL8_INSTR_LENGTH); // Extra NOPs because some NOPs will be overwritten with the "JMP rel8" returning JMP
     
     // Obtain the write offset of the local trampoline function's returning JMP rel8 instruction (relative to localTrampoline):
     retJmpOffset += POP_RAX_INSTR_LENGTH;

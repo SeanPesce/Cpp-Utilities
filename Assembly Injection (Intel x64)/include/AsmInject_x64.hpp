@@ -142,17 +142,18 @@ void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void 
 
 
 
- /* writeBytecode_14B
+ /* writeJmpRax_14B
   *
-  *  Helper function that writes the bytecode for 14-byte JMP injections and overwrites remaining
-  *     garbage bytecode with the specified number of NOP instructions.
+  *  Writes bytecode for the series of instructions to perform an abolute JMP r64 (using JMP %rax)
+  *     and restore the register upon returning. Also overwrites remaining garbage bytecode with
+  *     the specified number of NOP instructions.
   *  Bytecode:
   *     PUSH %rax
-  *     MOVABS %rax, imm64      // imm64 is the address of the injected code
+  *     MOVABS %rax, imm64      // imm64 is the address to jump to
   *     JMP %rax
-  *     POP %rax                // Injected code should return here
+  *     POP %rax                // %rax is restored upon returning here
   */
-int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo);
+int writeJmpRax_14B(void *injectionAddr, void *jmpTo, int nopCount);
 
 
 
