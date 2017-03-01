@@ -21,7 +21,7 @@
 //
 // Byte values of various opcodes and/or full instructions:
 const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (JMP rel8)
-                JMP_NEAR_INSTR_OPCODE = 0xE9,   // Near JMP opcode byte value (JMP rel32)
+                JMP_REL32_INSTR_OPCODE = 0xE9,  // Near JMP opcode byte value (JMP rel32)
                 JMP_ABS_RAX_INSTR[2] = { 0xFF,  // Absolute JMP byte value (JMP r/m64). NOTE: Can vary, but we will only use JMP %rax
                                         0xE0 },
                 NOP_INSTR_OPCODE = 0x90,        // NOP opcode byte value
@@ -32,7 +32,7 @@ const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (
 //
 // Length (in bytes) of various instruction opcodes:
 const int   JMP_REL8_INSTR_LENGTH = 2,          // 'JMP short' (JMP rel8) instruction
-            JMP_NEAR_INSTR_LENGTH = 5,          // 'JMP near' (JMP rel32) instruction
+            JMP_REL32_INSTR_LENGTH = 5,         // 'JMP near' (JMP rel32) instruction
             JMP_ABS_RAX_INSTR_LENGTH = 2,       // JMP r/m64 instruction. NOTE: JMP r/m64 instuction lengths can vary, but we will only use JMP %rax
             PUSH_RAX_INSTR_LENGTH = 1,          // PUSH %rax instruction. NOTE: PUSH r64 instuction lengths can vary, but we will only use PUSH %rax
             POP_RAX_INSTR_LENGTH = 1,           // POP %rax instruction. NOTE: POP r64 instuction lengths can vary, but we will only use POP %rax
@@ -229,6 +229,19 @@ void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, 
  *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
  */
 void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
+
+
+
+/* writeJmpRel32
+ *  Writes a JMP rel32 instruction at the specified writeTo address.
+ *
+ *  @param writeTo  The address where the JMP rel32 instruction will be written.
+ *  @param jmpTo    The address where the JMP rel32 instruction will jump to. After the JMP rel32
+ *                  instruction executes, %rip = jmpTo.
+ *                  NOTE: jmpTo must be in the range [writeTo-2³¹,writeTo+2³¹-1]
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ */
+void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount);
  
 
 #endif // ASM_INJECT_X64_HPP
