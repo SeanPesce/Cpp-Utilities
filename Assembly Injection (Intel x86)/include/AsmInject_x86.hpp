@@ -20,9 +20,12 @@
 
 
 //////////// Constants ////////////
-const uint8_t JMP_INSTR_OPCODE = 0xE9;   // JMP opcode byte value (JMP rel32)
-const uint8_t NOP_INSTR_OPCODE = 0x90;   // NOP opcode byte value
-const int JMP_INSTR_LENGTH = 5;   // The length of a 'JMP rel32' instruction (in bytes).
+const	uint8_t	NOP_INSTR_OPCODE = 0x90,   		// NOP instruction byte value
+				JMP_REL8_INSTR_OPCODE = 0xEB,	// JMP rel8 opcode byte value
+				JMP_REL32_INSTR_OPCODE = 0xE9;	// JMP rel32 opcode byte value
+//
+const	int		JMP_REL8_INSTR_LENGTH  = 2,		// The length of a 'JMP rel8' instruction (in bytes)
+				JMP_REL32_INSTR_LENGTH = 5;		// The length of a 'JMP rel32' instruction (in bytes)
 
 // Portable memory protection setting constants:
 #ifdef _WIN32
@@ -64,6 +67,7 @@ const int JMP_INSTR_LENGTH = 5;   // The length of a 'JMP rel32' instruction (in
  */
 int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
 
+
 /* injectASM
  *  Injects assembly code at the specified location in memory.
  *		NOTE:	Memory at the injection point must be writable before calling this function (use
@@ -87,20 +91,46 @@ int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint3
  */
 void injectASM(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, void *asmCode);
 
-/* calculateJmpOffset
- *  Calculates the offset between an injected 'JMP rel32' instruction and an ASM code cave.
- *      'JMP rel32' instructions are defined as follows:
- *          OPCODE:   MNEMONIC:   DESCRIPTION:
- *          E9 cd     JMP rel32   Jump near, relative, displacement relative to next instruction.
- *  @param fromAddress  The address of the JMP instruction.
- *  @param toAddress    The address of the assembly code cave.
+
+/* writeJmpRel8
+ *  Writes a JMP rel8 instruction at the specified writeTo address.
+ *
+ *  @param writeTo  The address where the JMP rel8 instruction will be written.
+ *  @param jmpTo    The address where the JMP rel8 instruction will jump to. After the JMP rel8
+ *                  instruction executes, %rip = jmpTo.
+ *                  NOTE: jmpTo must be in the range [writeTo-128,writeTo+127]
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
  */
-uint32_t calculateJmpOffset(void *fromAddress, void *toAddress);
+void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
+
+
+/* writeJmpRel32
+ *  Writes a JMP rel32 instruction at the specified writeTo address.
+ *
+ *  @param writeTo  The address where the JMP rel32 instruction will be written.
+ *  @param jmpTo    The address where the JMP rel32 instruction will jump to. After the JMP rel32
+ *                  instruction executes, %rip = jmpTo.
+ *                  NOTE: jmpTo must be in the range [writeTo-2³¹,writeTo+2³¹-1]
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ */
+void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount);
+
+
+/* calculateJmpOffset
+ *  Calculates the offset between a 'JMP rel' instruction and a target address.
+ *
+ *  @param fromAddress  	The address of the JMP instruction.
+ *  @param toAddress    	The address of the assembly code cave.
+ *	@param jmpInstrLength   The length (in bytes) of the variation of JMP instruction being used
+ */
+uint32_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLength);
+
 
 /* getMemPage
  *  Obtains the starting address of the page of memory that contains a given memory address.
  *  @param memAddress   The given memory address that resides within the page.
  */
 void *getMemPage(void *memAddress);
+
 
 #endif // ASM_INJECT_X86_HPP
