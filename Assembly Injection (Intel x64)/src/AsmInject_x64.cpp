@@ -176,7 +176,7 @@ void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount)
 {
     *(uint8_t*)writeTo = JMP_REL32_INSTR_OPCODE; // Write opcode byte
     
-    *((uint32_t*)writeTo+1) = (int32_t)calculateJmpOffset(writeTo, jmpTo, JMP_REL32_INSTR_LENGTH); // Write operand bytes
+    *(uint32_t*)((uint8_t*)writeTo+1) = (int32_t)calculateJmpOffset(writeTo, jmpTo, JMP_REL32_INSTR_LENGTH); // Write operand bytes
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
     memset((void*)((uint8_t*)writeTo + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
