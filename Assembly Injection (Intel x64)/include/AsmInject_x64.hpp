@@ -39,17 +39,7 @@ const int   JMP_REL8_INSTR_LENGTH = 2,          // 'JMP short' (JMP rel8) instru
             MOVABS_OPCODE_LENGTH = 2,           // MOVABS r64, imm64 instruction opcode
             MOVABS_OPERAND_LENGTH = 8,          // MOVABS r64, imm64 instruction operand
             MOVABS_INSTR_LENGTH = 10;           // MOVABS r64, imm64 instruction
-//
-//
-// Important values from the intermediate trampoline function that is called when the user calls injectJmp_14B():
-#ifdef _MSC_VER
-    // Visual Studio doesn't support in-line ASM on 64-bit projects; use an external .asm file
-    const int TRAMPOLINE_JMPBACK_INSTR_OFFSET = 7; // Offset of the trampoline function's returning JMP instruction from the beginning of the function
-    #define TRAMP_FUNC_SIZE 40
-#else
-    const int TRAMPOLINE_JMPBACK_INSTR_OFFSET = 12;
-    #define TRAMP_FUNC_SIZE 2
-#endif // _MSC_VER
+
 
 // Portable memory protection setting constants:
 #ifdef _WIN32
@@ -76,24 +66,6 @@ const int   JMP_REL8_INSTR_LENGTH = 2,          // 'JMP short' (JMP rel8) instru
 
 
 //////////// Function prototypes and descriptions ////////////
-
-/* TRAMPOLINE_FUNC
- *  ASM trampoline function that is called as a wrapping function for a user's 
- *      ASM code when that user calls injectJmp_14B or injectJmp_2B. The trampoline
- *      function is called first because we push %rax to the stack at the injection 
- *      point to free the register for the JMP r/m64 call. Injected code must pop %rax
- *      to edit or utilize its contents, and must push %rax back onto the stack before
- *      returning to avoid data corruption. The trampoline function does all of this
- *      and wraps the user's code for ease of use (and to avoid user error). To inject
- *      without a trampoline function, use the _Unsafe versions of these functions.
- */
-#ifdef _MSC_VER
-    // Visual Studio doesn't support in-line ASM on 64-bit projects; use an external .asm file
-    extern "C" void TRAMPOLINE_FUNC();
-#else
-    void TRAMPOLINE_FUNC();
-#endif // _MSC_VER
-
 
 
 /* SET_MEM_PROTECTION
@@ -127,33 +99,6 @@ int64_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLengt
  *  @param memAddress   The given memory address that resides within the page.
  */
 void *getMemPage(void *memAddress);
-
-
-
-/* injectJmp_14B
- *  Injects an absolute JMP instruction (JMP r/m64) at the given address.
- *
- * Notes:
- *  Space required: 14 bytes
- *  Trampoline function used?   Yes
- *  Registers preserved?        Yes
- *
- * Injected code:
- *      PUSH %rax
- *      MOVABS %rax, imm64      // imm64 is the address of the trampoline function
- *      JMP %rax
- *      POP %rax                // Trampoline function should return here
- *
- *  @param injectionAddr    The location in memory where the assembly code will be injected. A
- *                          JMP instruction will be written at this location.
- *  @param returnJmpAddr    The location in memory where the code cave should return to
- *                          after execution. This function writes to returnJmpAddr.
- *  @param nopCount         The number of NOP instructions to be written after the injected code.
- *                          These NOPs will erase any remaining garbage bytes resulting from
- *                          overwriting existing instructions at the injection location.
- *  @param asmCode  A pointer to an assembly function (to be used as a code cave).
- */
-void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode);
 
 
 
@@ -206,47 +151,6 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo);
 
 
 
-/* injectJmp_2B
- *  Injects an relative JMP instruction (JMP rel8) at the given address. The JMP rel8 instruction
- *      jumps to a local code cave with a injectJmp_14B instruction sequence, seen below.
- *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
- *      inserted into %rax. This is the smallest possible code injection, at only 2 bytes, but
- *      it requires at least 16 bytes of local storage.
- *
- * Notes:
- *  Injection space required: 2 bytes
- *  Local space required: 16 bytes (local code cave)
- *      PUSH %rax               // 1 byte
- *      MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the distant trampoline function
- *      JMP %rax                // 2 bytes
- *      POP %rax                // 1 byte
- *      JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
- *  Trampoline function used?   Yes, 2 (local and distant)
- *  Registers preserved?        Yes
- *
- * Injected code:
- *      JMP rel8        // rel8 is the relative offset of the local JMP r/m64 instruction
- *
- *  @param injectionAddr    The location in memory where the assembly code will be injected. A
- *                          JMP instruction will be written at this location.
- *  @param returnJmpAddr    The location in memory where the code cave should return to
- *                          after execution. This function writes to returnJmpAddr.
- *  @param nopCount         The number of NOP instructions to be written after the injected code.
- *                          These NOPs will erase any remaining garbage bytes resulting from
- *                          overwriting existing instructions at the injection location.
- *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
- *  @param localTrampoline  The address of the local trampoline function (structured the same as a
- *                          injectJmp_14B), which must start in the range:
- *                          [injectionAddr+129, injectionAddr-126]
- *  @param trampNopCount    The number of NOP instructions to be written after the local trampoline.
- *                          This could be necessary if the user wrote their trampoline function over
- *                          existing instructions.
- */
-void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount);
-
-
-
 /* injectJmp_2B_Unsafe
  *  Injects an relative JMP instruction (JMP rel8) at the given address. The JMP rel8 instruction
  *      jumps to a local code cave with a injectJmp_14B instruction sequence, seen below.
@@ -295,23 +199,6 @@ void injectJmp_2B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount,
  *          existing instructions.
  */
 void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
-
-
-
-/* setTrampolineJmpValues
- *  Helper function that writes the appropriate values to the JMP pointers for the trampoline
- *      function and the final returning JMP instruction in the user's injected code.
- *
- *  @param trampJmpTo   Starting address of the user's injected code, which the trampoline 
- *                      function jumps to in the first JMP instruction. 
- *  @param trampRetTo   Address after the injection point in the original code, which the 
- *                      trampoline function jumps to after executing the user's code.
- *                      Typically this should be the address of the injected "POP %rax"
- *                      instruction.
- *  @param userRetTo    Address of the PUSH %rax instruction in the trampoline function. The
- *                      user's code typically returns here after execution.
- */
-void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo);
 
 
 

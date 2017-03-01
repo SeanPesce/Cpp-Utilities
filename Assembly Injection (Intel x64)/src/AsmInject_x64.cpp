@@ -1,36 +1,6 @@
 // Made by Sean Pesce
 
-/* @TODO:   "Safe" functions have fundamental flaw: they're singletons and can't be used multiple
- *          times in the same instance without overwriting each other. Fix this (using heap/objects?)
- */
-
 #include "AsmInject_x64.hpp"
-
-
-// Pointers for the JMP values from ASM trampoline function:
-#ifdef _MSC_VER
-uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 20),  // To the user's code
-            *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 10);  // To the original code after the injection point
-#else
-uint64_t    *TRAMPOLINE_JMP_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 25),  // To the user's code
-            *TRAMPOLINE_RET_TO_PTR = (uint64_t*)((uint8_t*)&TRAMPOLINE_FUNC + 15);  // To the original code after the injection point
-#endif // _MSC_VER
-
-
-
-/* Injects a JMP r/m64 instruction at the given address.
- *  Notes:
- *      Space required: 14 bytes
- *      Trampoline function? Yes
- *      Registers preserved? Yes
- */
-void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode)
-{
-    // Write the injected bytecode and store the final write offset (relative to the injection point):
-    int popRaxOffset = writeBytecode_14B(injectionAddr, nopCount, (void*)TRAMPOLINE_FUNC); // The returned offset is also the offset of the POP %rax instruction
-
-    setTrampolineJmpValues(asmCode, ((uint8_t*)injectionAddr + popRaxOffset), returnJmpAddr);
-}
 
 
 
@@ -48,34 +18,6 @@ void injectJmp_14B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount
 
     // Direct the user's return JMP to the POP %rax instruction:
     *(uint64_t*)returnJmpAddr = (uint64_t)((uint8_t*)injectionAddr + popRaxOffset);
-}
-
-
-
-/* Injects a JMP rel8 instruction at the given address.
- *  Notes:
- *      Space required: 2 bytes
- *      Local space required: 16 bytes (local code cave)
- *          PUSH %rax               // 1 byte
- *          MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the distant trampoline function
- *          JMP %rax                // 2 bytes
- *          POP %rax                // 1 byte
- *          JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
- *      Trampoline function? Yes, 2 (local and distant)
- *      Registers preserved? Yes
- */
-void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                  void *localTrampoline, int trampNopCount)
-{
-    // Write the injected JMP rel8 instruction and local trampoline:
-    writeBytecode_2B(injectionAddr, nopCount, localTrampoline, trampNopCount, (void*)TRAMPOLINE_FUNC);
-
-    // Set the values of the pointers for the distant code cave and the user's final returning JMP:
-    setTrampolineJmpValues(asmCode,
-                           (uint8_t*)localTrampoline + PUSH_RAX_INSTR_LENGTH
-                                                     + MOVABS_INSTR_LENGTH
-                                                     + JMP_ABS_RAX_INSTR_LENGTH,
-                           returnJmpAddr);
 }
 
 
@@ -155,35 +97,6 @@ void *getMemPage(void *memAddress)
 }
 
 
-
-#ifndef _MSC_VER
-// Non-Microsoft compiler; use GCC in-line ASM:
-void TRAMPOLINE_FUNC()
-{
-    // The first ASM instruction is +4 from &asmCodeExample when using GCC/G++
-    __asm__ volatile
-    (
-        "pop %rax\n"
-        "jmp QWORD PTR [TRAMPOLINE_JMP_TO_LBL]\n"
-        "push %rax\n"
-        "movabs %rax, 0x1111111111111111\n" // This imm64 value will be overwritten with the return address
-        "jmp %rax\n"
-        /* The following 8 NOP instructions will create a buffer for *TRAMPOLINE_JMP_TO_PTR to
-         *  be stored locally, allowing for a known constant JMP operand size:       */
-        "TRAMPOLINE_JMP_TO_LBL:\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-        "nop\n"
-    );
-}
-#endif // _MSC_VER
-
-
 // Helper function that writes the bytecode for 14-byte JMP injections and overwrites remaining
 //     garbage bytecode with the specified number of NOP instructions.      
 int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo)
@@ -257,26 +170,3 @@ void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount)
     memset((void*)((uint8_t*)writeTo + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
 }
 
-
-
-// Helper function that writes the appropriate values to the JMP pointers for the trampoline
-//      function and user's final returning JMP instruction:
-void setTrampolineJmpValues(void *trampJmpTo, void *trampRetTo, void *userRetTo)
-{
-    // Write the address for the JMP pointer from the intermediate ASM trampoline function to 
-    //   the instruction after the injected JMP:                       
-    SET_MEM_PROTECTION((void*)&TRAMPOLINE_FUNC, TRAMP_FUNC_SIZE, MEM_PROTECT_RWX, NULL);
-    *TRAMPOLINE_RET_TO_PTR = (uint64_t)trampRetTo;
-    
-    // Write the address for the JMP pointer from the intermediate ASM trampoline function to the user's ASM function:
-    #ifdef _MSC_VER
-        // Using a Microsoft compiler; jump straight to the user's assembly code:
-        *TRAMPOLINE_JMP_TO_PTR = (uint64_t)trampJmpTo;
-    #else
-        // Using non-MS compiler; GCC ASM starts +4 bytes from asmCode:
-        *TRAMPOLINE_JMP_TO_PTR = (uint64_t)((uint8_t*)trampJmpTo+4);
-    #endif // _MSC_VER
-
-    // Direct the user's return JMP to the intermediate trampoline function's return JMP:
-    *(uint64_t*)userRetTo = (uint64_t)((uint8_t*)TRAMPOLINE_FUNC + TRAMPOLINE_JMPBACK_INSTR_OFFSET);
-}
