@@ -4,14 +4,13 @@
 
 
 
-/* Injects a JMP r/m64 instruction at the given address.
+/* Injects code using a JMP r/m64 instruction at the given address.
  *  Notes:
  *      Space required: 14 bytes
- *      Trampoline function? No
  *      Registers preserved? No
  *          User must start their code with POP %rax and end their code with PUSH %rax/MOVABS %rax, returnJmpAddr/JMP %rax
  */
-void injectJmp_14B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode)
+void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode)
 {
     // Write the injected bytecode and store the final write offset (relative to the injection point):
     int popRaxOffset = writeBytecode_14B(injectionAddr, nopCount, asmCode); // The returned offset is also the offset of the POP %rax instruction
@@ -22,20 +21,19 @@ void injectJmp_14B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount
 
 
 
-/* Injects a JMP rel8 instruction at the given address.
+/* Injects code using a JMP rel8 instruction at the given address.
  *  Notes:
- *      Space required: 2 bytes
+ *      Immediate space required: 2 bytes
  *      Local space required: 16 bytes (local code cave)
  *          PUSH %rax               // 1 byte
- *          MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the distant trampoline function
+ *          MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the injected code
  *          JMP %rax                // 2 bytes
  *          POP %rax                // 1 byte
  *          JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
- *      Trampoline function? Yes, 1 (local)
  *      Registers preserved? No
  *              User must start their code with POP %rax and end their code with PUSH %rax (before the final JMP instruction)
  */
-void injectJmp_2B_Unsafe(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
                   void *localTrampoline, int trampNopCount)
 {
     // Write the injected JMP rel8 instruction and local trampoline:
@@ -114,7 +112,7 @@ int writeBytecode_14B(void *injectionAddr, int nopCount, void *jmpTo)
     *(uint16_t*)((uint8_t*)injectionAddr + writeOffset) = *(uint16_t*)MOVABS_RAX_INSTR_OPCODE; // Opcode of MOVABS %rax, imm64
     writeOffset += MOVABS_OPCODE_LENGTH;
     #ifdef _MSC_VER
-        // Using a Microsoft compiler; jump straight to the intermediate trampoline code cave:
+        // Using a Microsoft compiler; jump straight to the injected function:
         *(uint64_t*)((uint8_t*)injectionAddr + writeOffset) = (uint64_t)jmpTo; // Operand of MOVABS %rax, imm64
     #else
         // Using non-MS compiler; GCC in-line ASM starts +4 bytes from asmCode:

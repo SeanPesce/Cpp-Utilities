@@ -14,7 +14,13 @@ _DATA ENDS
 _CODE SEGMENT
 
 asmCodeExample proc
-	jmp QWORD PTR [JUMPBACK_ADDRESS]
+	pop rax
+
+	;  User code would normally go here
+	
+	push rax
+	mov rax, QWORD PTR [JUMPBACK_ADDRESS]
+	jmp rax
 asmCodeExample endp
 
 _CODE ENDS

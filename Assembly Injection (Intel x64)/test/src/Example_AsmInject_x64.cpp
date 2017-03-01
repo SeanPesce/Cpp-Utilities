@@ -55,7 +55,13 @@ void asmCodeExample()
     // The first ASM instruction is +4 from a function's base address when using GCC/G++ 64-bit
     __asm__ volatile
     (
-        "JMP [JUMPBACK_ADDRESS]" // To reference an outside variable, might need to prefix it with "_"
+        "POP %rax\n"
+
+        // User code would normally go here
+        
+        "PUSH %rax\n"
+        "MOVABS %rax, [JUMPBACK_ADDRESS]\n" // To reference an outside variable, might need to prefix it with "_"
+        "JMP %rax\n"
     );
 }
 #endif // _MSC_VER
