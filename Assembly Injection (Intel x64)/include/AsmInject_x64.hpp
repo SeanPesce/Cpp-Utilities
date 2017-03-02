@@ -5,7 +5,7 @@
 #ifndef ASM_INJECT_X64_HPP
     #define ASM_INJECT_X64_HPP
 
-#include <cstdint>  // uint8_t, int8_t, uint16_t, uint32_t, uint64_t, int64_t
+#include <cstdint>  // uint8_t, int8_t, uint16_t, uint32_t, int32_t, uint64_t, int64_t
 #include <cstring>  // size_t, memset
 
 #ifdef _WIN32
@@ -24,6 +24,11 @@ const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (
                 JMP_REL32_INSTR_OPCODE = 0xE9,  // Near JMP opcode byte value (JMP rel32)
                 JMP_ABS_RAX_INSTR[2] = { 0xFF,  // Absolute JMP byte value (JMP r/m64). NOTE: Can vary, but we will only use JMP %rax
                                         0xE0 },
+                CALL_REL32_INSTR_OPCODE = 0xE8, // CALL rel32 opcode byte value
+                RET_INSTR_OPCODE = 0xC3,		// Near return (RET) instruction byte value
+				RET_FAR_INSTR_OPCODE = 0xCB,	// Far return (RET) instruction byte value
+				RET_IMM16_INSTR_OPCODE = 0xC2,		// Near return, pop imm16 bytes from stack (RET imm16) opcode value
+				RET_FAR_IMM16_INSTR_OPCODE = 0xCA,	// Far return, pop imm16 bytes from stack (RET imm16) opcode value
                 NOP_INSTR_OPCODE = 0x90,        // NOP opcode byte value
                 PUSH_RAX_INSTR = 0x50,          // PUSH %rax instruction byte value
                 POP_RAX_INSTR = 0x58,           // POP %rax instruction byte value
@@ -31,14 +36,17 @@ const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (
                                                 0xB8 };
 //
 // Length (in bytes) of various instruction opcodes:
-const int   JMP_REL8_INSTR_LENGTH = 2,          // 'JMP short' (JMP rel8) instruction
-            JMP_REL32_INSTR_LENGTH = 5,         // 'JMP near' (JMP rel32) instruction
-            JMP_ABS_RAX_INSTR_LENGTH = 2,       // JMP r/m64 instruction. NOTE: JMP r/m64 instuction lengths can vary, but we will only use JMP %rax
-            PUSH_RAX_INSTR_LENGTH = 1,          // PUSH %rax instruction. NOTE: PUSH r64 instuction lengths can vary, but we will only use PUSH %rax
-            POP_RAX_INSTR_LENGTH = 1,           // POP %rax instruction. NOTE: POP r64 instuction lengths can vary, but we will only use POP %rax
-            MOVABS_OPCODE_LENGTH = 2,           // MOVABS r64, imm64 instruction opcode
-            MOVABS_OPERAND_LENGTH = 8,          // MOVABS r64, imm64 instruction operand
-            MOVABS_INSTR_LENGTH = 10;           // MOVABS r64, imm64 instruction
+const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instruction
+            JMP_REL32_INSTR_LENGTH = 5,     // 'JMP near' (JMP rel32) instruction
+            JMP_ABS_RAX_INSTR_LENGTH = 2,   // JMP r/m64 instruction. NOTE: JMP r/m64 instuction lengths can vary, but we will only use JMP %rax
+            CALL_REL32_INSTR_LENGTH = 5,    // CALL rel32 instruction
+			RET_INSTR_LENGTH = 1,           // RET instruction
+			RET_IMM16_INSTR_LENGTH = 3,     // RET imm16 instruction
+            PUSH_RAX_INSTR_LENGTH = 1,      // PUSH %rax instruction. NOTE: PUSH r64 instuction lengths can vary, but we will only use PUSH %rax
+            POP_RAX_INSTR_LENGTH = 1,       // POP %rax instruction. NOTE: POP r64 instuction lengths can vary, but we will only use POP %rax
+            MOVABS_OPCODE_LENGTH = 2,       // MOVABS r64, imm64 instruction opcode
+            MOVABS_OPERAND_LENGTH = 8,      // MOVABS r64, imm64 instruction operand
+            MOVABS_INSTR_LENGTH = 10;       // MOVABS r64, imm64 instruction
 
 
 // Portable memory protection setting constants:
@@ -332,6 +340,78 @@ void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount);
  *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
  */
 void writeJmpRel32(void *writeTo, int32_t offset, int nopCount);
+
+
+
+/* writeCallRel32
+ *  Writes a CALL rel32 instruction at the specified writeTo address.
+ *
+ *  @param writeTo      The address where the CALL rel32 instruction will be written.
+ *  @param procedure    The address of the called procedure. After the CALL rel32
+ *                      instruction executes, %rip = procedure.
+ *                      NOTE: procedure must be in the range [writeTo-2³¹,writeTo+2³¹-1]
+ *  @param nopCount     The number of NOP instructions to be written after the CALL rel32 instruction.
+ */
+void writeCallRel32(void *writeTo, void *procedure, int nopCount);
+
+
+
+/* writeCallRel32
+ *  Writes a CALL rel32 instruction at the specified writeTo address using the given offset.
+ *
+ *  @param writeTo  The address where the CALL rel32 instruction will be written.
+ *  @param offset   The offset of the called procedure. After the CALL rel32
+ *                  instruction executes, %rip = writeTo+offset+5.
+ *                  NOTE: offset must be in the range [writeTo-2³¹,writeTo+2³¹-1]
+ *  @param nopCount The number of NOP instructions to be written after the CALL rel32 instruction.
+ */
+void writeCallRel32(void *writeTo, int32_t offset, int nopCount);
+
+
+
+/* writeRet
+ *  Writes a "near return" (RET) instruction at the specified writeTo address.
+ *
+ *  @param writeTo  The address where the RET instruction will be written.
+ *  @param nopCount The number of NOP instructions to be written after the RET instruction.
+ */
+void writeRet(void *writeTo, int nopCount);
+
+
+
+/* writeRetFar
+ *  Writes a "far return" (RET) instruction at the specified writeTo address.
+ *
+ *  @param writeTo  The address where the RET instruction will be written.
+ *  @param nopCount The number of NOP instructions to be written after the RET instruction.
+ */
+void writeRetFar(void *writeTo, int nopCount);
+
+
+
+/* writeRetImm16
+ *  Writes a "near return, pop imm16 bytes from stack" (RET imm16) instruction at the
+ *	 specified writeTo address.
+ *
+ *  @param writeTo  The address where the RET imm16 instruction will be written.
+ *  @param popBytes The number of bytes to pop from the stack before returning to the calling
+ *					procedure.
+ *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
+ */
+void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
+
+
+
+/* writeRetFarImm16
+ *  Writes a "far return, pop imm16 bytes from stack" (RET imm16) instruction at the
+ *	 specified writeTo address.
+ *
+ *  @param writeTo  The address where the RET imm16 instruction will be written.
+ *  @param popBytes The number of bytes to pop from the stack before returning to the calling
+ *					procedure.
+ *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
+ */
+void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
  
 
 #endif // ASM_INJECT_X64_HPP
