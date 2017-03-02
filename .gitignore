@@ -1,13 +1,13 @@
 .vscode
-Assembly Injection (Intel x86)/bin
-Assembly Injection (Intel x86)/build
-Assembly Injection (Intel x86)/asm
-Assembly Injection (Intel x86)/test/bin
-Assembly Injection (Intel x86)/test/build
-Assembly Injection (Intel x86)/test/asm
-Assembly Injection (Intel x64)/bin
-Assembly Injection (Intel x64)/build
-Assembly Injection (Intel x64)/asm
-Assembly Injection (Intel x64)/test/bin
-Assembly Injection (Intel x64)/test/build
-Assembly Injection (Intel x64)/test/asm
+Assembly Injection (x86)/bin
+Assembly Injection (x86)/build
+Assembly Injection (x86)/asm
+Assembly Injection (x86)/test/bin
+Assembly Injection (x86)/test/build
+Assembly Injection (x86)/test/asm
+Assembly Injection (x64)/bin
+Assembly Injection (x64)/build
+Assembly Injection (x64)/asm
+Assembly Injection (x64)/test/bin
+Assembly Injection (x64)/test/build
+Assembly Injection (x64)/test/asm
