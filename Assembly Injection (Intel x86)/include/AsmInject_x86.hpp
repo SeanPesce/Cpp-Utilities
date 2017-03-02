@@ -104,6 +104,18 @@ void injectASM(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, v
 void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
 
 
+/* writeJmpRel8
+ *  Writes a JMP rel8 instruction at the specified writeTo address using the given offset.
+ *
+ *  @param writeTo  The address where the JMP rel8 instruction will be written.
+ *  @param offset   The offset that the JMP rel8 instruction will jump to. After the JMP rel8
+ *                  instruction executes, %rip = writeTo+offset+2.
+ *                  NOTE: offset must be in the range [writeTo-128,writeTo+127]
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ */
+void writeJmpRel8(void *writeTo, int8_t offset, int nopCount);
+
+
 /* writeJmpRel32
  *  Writes a JMP rel32 instruction at the specified writeTo address.
  *
@@ -111,9 +123,21 @@ void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
  *  @param jmpTo    The address where the JMP rel32 instruction will jump to. After the JMP rel32
  *                  instruction executes, %rip = jmpTo.
  *                  NOTE: jmpTo must be in the range [writeTo-2³¹,writeTo+2³¹-1]
- *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
  */
 void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount);
+
+
+/* writeJmpRel32
+ *  Writes a JMP rel32 instruction at the specified writeTo address using the given offset.
+ *
+ *  @param writeTo  The address where the JMP rel32 instruction will be written.
+ *  @param offset   The offset that the JMP rel32 instruction will jump to. After the JMP rel32
+ *                  instruction executes, %rip = writeTo+offset+5.
+ *                  NOTE: offset must be in the range [writeTo-2³¹,writeTo+2³¹-1]
+ *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
+ */
+void writeJmpRel32(void *writeTo, int32_t offset, int nopCount);
 
 
 /* calculateJmpOffset
