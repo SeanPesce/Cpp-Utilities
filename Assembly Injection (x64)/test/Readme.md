@@ -2,7 +2,7 @@
 Created by Sean P  
   
 # Description:  
-This is an example program to demonstrate the use of my 64-bit Intel x64 Assembly code injection functions. The program iterates through a loop 10 times, printing a number each time. In the loop, there are statements that add to and subtract from the number, but the net sum of these changes is zero, so the number remains unchanged at the end of each iteration.  
+This is an example program to demonstrate the use of my x64 Assembly code injection functions. The program iterates through a loop 10 times, printing a number each time. In the loop, there are statements that add to and subtract from the number, but the net sum of these changes is zero, so the number remains unchanged at the end of each iteration.  
   
 Once the loop has executed 5 times, the program injects an empty assembly function into itself, overwriting one of the arithmetic statements that changes the number. With this statement removed, the sum of the arithmatic changes to the number is no longer zero (it becomes +1), and the number changes during each iteration for the remainder of execution.  
   
