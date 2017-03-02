@@ -2,6 +2,6 @@
 A compilation of useful and reusable C/C++ code that I've used (or probably will use) in different projects.  
   
 Utilities:  
-  * Assembly Injection (Intel x86)  
-  * Assembly Injection (Intel x64)  
+  * Assembly Injection (x64)  
+  * Assembly Injection (x86)  
 
