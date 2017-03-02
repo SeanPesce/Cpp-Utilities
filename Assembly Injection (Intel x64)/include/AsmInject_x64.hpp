@@ -209,6 +209,58 @@ void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
 
 
 
+/* injectJmp_5B
+ *  Injects an relative JMP instruction (JMP rel32) at the given address. The JMP rel32 instruction
+ *      jumps to a local code cave with an injectJmp_14B instruction sequence, seen below.
+ *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
+ *      inserted into %rax. This code injection technique requires only 5 immediate bytes, but
+ *      it requires at least 19 bytes of local storage.
+ *
+ *  WARNING: This injection functions is unsafe; it doesn't preserve %rax and requires the user
+ *        to format their injected function with specific instructions to avoid data corruption.
+ *
+ * Notes:
+ *  Injection space required: 5 bytes
+ *  Local space required: 19 bytes (local code cave)
+ *      PUSH %rax               // 1 byte
+ *      MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the injected code
+ *      JMP %rax                // 2 bytes
+ *      POP %rax                // 1 byte
+ *      JMP rel32                // 5 bytes; rel32 is the offset to the address of the first original instruction after the injection point
+ *  Registers preserved?        No
+ *                              User should start code with POP %rax
+ *                              User should call PUSH %rax before final returning JMP instruction
+ *  
+ *  Necessary inclusion(s) to user code:
+ *      POP %rax    // Beginning of user code
+ *      // User code body
+ *      PUSH %rax   // End of user code
+ *      MOVABS %rax, returnJmpAddr
+ *      JMP %rax
+ *
+ * Injected code:
+ *      JMP rel32        // rel32 is the relative offset of the local trampoline with a JMP r/m64 instruction
+ *
+ *  @param injectionAddr    The location in memory where the assembly code will be injected. A
+ *                          JMP instruction will be written at this location.
+ *  @param returnJmpAddr    The location in memory where the code cave should return to
+ *                          after execution. This function writes to returnJmpAddr.
+ *  @param nopCount         The number of NOP instructions to be written after the injected code.
+ *                          These NOPs will erase any remaining garbage bytes resulting from
+ *                          overwriting existing instructions at the injection location.
+ *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
+ *  @param localTrampoline  The address of the local trampoline function (structured the same as a
+ *                          injectJmp_14B), which must start in the range:
+ *                          [injectionAddr-2³¹+5,injectionAddr+2³¹+4]
+ *  @param trampNopCount    The number of NOP instructions to be written after the local trampoline.
+ *                          This could be necessary if the user wrote their trampoline function over
+ *                          existing instructions
+ */
+void injectJmp_5B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+                    void *localTrampoline, int trampNopCount);
+
+
+
 /* Helper function that does the following for 2-byte JMP injections:
  *      -Writes the bytecode for the JMP rel8 instruction.
  *      -Overwrites remaining garbage bytecode with the specified number of NOP instructions.
@@ -217,6 +269,17 @@ void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
  *          existing instructions.
  */
 void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+
+
+
+/* Helper function that does the following for 5-byte JMP injections:
+ *      -Writes the bytecode for the JMP rel32 instruction.
+ *      -Overwrites remaining garbage bytecode with the specified number of NOP instructions.
+ *      -Creates the local trampoline function at the specified location.
+ *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
+ *          existing instructions.
+ */
+void writeBytecode_5B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
 
 
 
