@@ -163,7 +163,19 @@ void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount)
 {
     *(uint8_t*)writeTo = JMP_REL8_INSTR_OPCODE; // Write opcode byte
     
-    *((uint8_t*)writeTo+1) = (int8_t)calculateJmpOffset(writeTo, jmpTo, JMP_REL8_INSTR_LENGTH); // Write operand byte
+    *((int8_t*)writeTo+1) = (int8_t)calculateJmpOffset(writeTo, jmpTo, JMP_REL8_INSTR_LENGTH); // Write operand byte
+
+    // Erase trailing garbage bytes from overwritten instruction(s) at write address:
+    memset((void*)((uint8_t*)writeTo + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+}
+
+
+// Writes a JMP rel8 instruction from writeTo using the given offset, and inserts trailing NOPs if necessary
+void writeJmpRel8(void *writeTo, int8_t offset, int nopCount)
+{
+    *(uint8_t*)writeTo = JMP_REL8_INSTR_OPCODE; // Write opcode byte
+    
+    *((int8_t*)writeTo+1) = offset; // Write operand byte
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
     memset((void*)((uint8_t*)writeTo + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
@@ -177,6 +189,19 @@ void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount)
     *(uint8_t*)writeTo = JMP_REL32_INSTR_OPCODE; // Write opcode byte
     
     *(uint32_t*)((uint8_t*)writeTo+1) = (int32_t)calculateJmpOffset(writeTo, jmpTo, JMP_REL32_INSTR_LENGTH); // Write operand bytes
+
+    // Erase trailing garbage bytes from overwritten instruction(s) at write address:
+    memset((void*)((uint8_t*)writeTo + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+}
+
+
+
+// Writes a JMP rel32 instruction from writeTo using the given offset, and inserts trailing NOPs if necessary
+void writeJmpRel32(void *writeTo, int32_t offset, int nopCount)
+{
+    *(uint8_t*)writeTo = JMP_REL32_INSTR_OPCODE; // Write opcode byte
+    
+    *(int32_t*)((uint8_t*)writeTo+1) = offset; // Write operand bytes
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
     memset((void*)((uint8_t*)writeTo + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
