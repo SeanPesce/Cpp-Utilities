@@ -211,7 +211,7 @@ void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
  *					procedure.
  *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
  */
-void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
+void writeRetFarImm16(void *writeTo, uint16_t popBytes, int nopCount);
 
 
 /* calculateJmpOffset
