@@ -76,39 +76,6 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
 //////////// Function prototypes and descriptions ////////////
 
 
-/* SET_MEM_PROTECTION
- *  Cross-platform wrapper function for changing memory protection settings.
- *      On Windows, VirtualProtect is called. On Unix, mprotect is called.
- *  @param address  The location in memory where the memory protection will be changed.
- *  @param size The size of the section of memory whose protection will be changed.
- *              In Windows, the size is measured in bytes.
- *              In Unix, the size is measured in pages.
- *  @param newProtection    The new memory protection setting for the section of memory.
- *  @param oldProtection    Saves the original memory protection settings on Windows.
-                            NOTE: The oldProtection parameter is not used in Unix.
- *  @return 0 if successful; non-zero value on failure.
- */
-int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
-
-
-
-/* calculateJmpOffset
- *  Calculates the offset between a JMP rel instruction and toAddress.
- *  @param fromAddress      The address of the JMP instruction.
- *  @param toAddress        The address to jump to.
- *  @param jmpInstrLength   The length of the variation of JMP instruction being used
- */
-int64_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLength);
-
-
-
-/* getMemPage
- *  Obtains the starting address of the page of memory that contains a given memory address.
- *  @param memAddress   The given memory address that resides within the page.
- */
-void *getMemPage(void *memAddress);
-
-
 
 /* injectJmp_14B
  *  Injects code using an absolute JMP instruction (JMP r/m64) at the given address. Users
@@ -147,73 +114,6 @@ void *getMemPage(void *memAddress);
  *  @param asmCode  A pointer to an assembly function (to be used as a code cave).
  */
 void injectJmp_14B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode);
-
-
-
- /* writeJmpRax_14B
-  *
-  *  Writes bytecode for the series of instructions to perform an abolute JMP r64 (using JMP %rax)
-  *     and restore the register upon returning. Also overwrites remaining garbage bytecode with
-  *     the specified number of NOP instructions.
-  *  Bytecode:
-  *     PUSH %rax
-  *     MOVABS %rax, imm64      // imm64 is the address to jump to
-  *     JMP %rax
-  *     POP %rax                // %rax is restored upon returning here
-  */
-int writeJmpRax_14B(void *injectionAddr, void *jmpTo, int nopCount);
-
-
-
-/* injectJmp_2B
- *  Injects an relative JMP instruction (JMP rel8) at the given address. The JMP rel8 instruction
- *      jumps to a local code cave with an injectJmp_14B instruction sequence, seen below.
- *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
- *      inserted into %rax. This is the smallest possible code injection, at only 2 bytes, but
- *      it requires at least 16 bytes of local storage.
- *
- *  WARNING: This injection functions is unsafe; it doesn't preserve %rax and requires the user
- *        to format their injected function with specific instructions to avoid data corruption.
- *
- * Notes:
- *  Injection space required: 2 bytes
- *  Local space required: 16 bytes (local code cave)
- *      PUSH %rax               // 1 byte
- *      MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the injected code
- *      JMP %rax                // 2 bytes
- *      POP %rax                // 1 byte
- *      JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
- *  Registers preserved?        No
- *                              User should start code with POP %rax
- *                              User should call PUSH %rax before final returning JMP instruction
- *  
- *  Necessary inclusion(s) to user code:
- *      POP %rax    // Beginning of user code
- *      // User code body
- *      PUSH %rax   // End of user code
- *      MOVABS %rax, returnJmpAddr
- *      JMP %rax
- *
- * Injected code:
- *      JMP rel8        // rel8 is the relative offset of the local trampoline with a JMP r/m64 instruction
- *
- *  @param injectionAddr    The location in memory where the assembly code will be injected. A
- *                          JMP instruction will be written at this location.
- *  @param returnJmpAddr    The location in memory where the code cave should return to
- *                          after execution. This function writes to returnJmpAddr.
- *  @param nopCount         The number of NOP instructions to be written after the injected code.
- *                          These NOPs will erase any remaining garbage bytes resulting from
- *                          overwriting existing instructions at the injection location.
- *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
- *  @param localTrampoline  The address of the local trampoline function (structured the same as a
- *                          injectJmp_14B), which must start in the range:
- *                          [injectionAddr+129, injectionAddr-126]
- *  @param trampNopCount    The number of NOP instructions to be written after the local trampoline.
- *                          This could be necessary if the user wrote their trampoline function over
- *                          existing instructions
- */
-void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount);
 
 
 
@@ -269,14 +169,55 @@ void injectJmp_5B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *
 
 
 
-/* Helper function that does the following for 2-byte JMP injections:
- *      -Writes the bytecode for the JMP rel8 instruction.
- *      -Overwrites remaining garbage bytecode with the specified number of NOP instructions.
- *      -Creates the local trampoline function at the specified location.
- *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
- *          existing instructions.
+/* injectJmp_2B
+ *  Injects an relative JMP instruction (JMP rel8) at the given address. The JMP rel8 instruction
+ *      jumps to a local code cave with an injectJmp_14B instruction sequence, seen below.
+ *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
+ *      inserted into %rax. This is the smallest possible code injection, at only 2 bytes, but
+ *      it requires at least 16 bytes of local storage.
+ *
+ *  WARNING: This injection functions is unsafe; it doesn't preserve %rax and requires the user
+ *        to format their injected function with specific instructions to avoid data corruption.
+ *
+ * Notes:
+ *  Injection space required: 2 bytes
+ *  Local space required: 16 bytes (local code cave)
+ *      PUSH %rax               // 1 byte
+ *      MOVABS %rax, imm64      // 10 bytes; imm64 is the address of the injected code
+ *      JMP %rax                // 2 bytes
+ *      POP %rax                // 1 byte
+ *      JMP rel8                // 2 bytes; rel8 is the offset to the address of the first original instruction after the injection point
+ *  Registers preserved?        No
+ *                              User should start code with POP %rax
+ *                              User should call PUSH %rax before final returning JMP instruction
+ *  
+ *  Necessary inclusion(s) to user code:
+ *      POP %rax    // Beginning of user code
+ *      // User code body
+ *      PUSH %rax   // End of user code
+ *      MOVABS %rax, returnJmpAddr
+ *      JMP %rax
+ *
+ * Injected code:
+ *      JMP rel8        // rel8 is the relative offset of the local trampoline with a JMP r/m64 instruction
+ *
+ *  @param injectionAddr    The location in memory where the assembly code will be injected. A
+ *                          JMP instruction will be written at this location.
+ *  @param returnJmpAddr    The location in memory where the code cave should return to
+ *                          after execution. This function writes to returnJmpAddr.
+ *  @param nopCount         The number of NOP instructions to be written after the injected code.
+ *                          These NOPs will erase any remaining garbage bytes resulting from
+ *                          overwriting existing instructions at the injection location.
+ *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
+ *  @param localTrampoline  The address of the local trampoline function (structured the same as a
+ *                          injectJmp_14B), which must start in the range:
+ *                          [injectionAddr+129, injectionAddr-126]
+ *  @param trampNopCount    The number of NOP instructions to be written after the local trampoline.
+ *                          This could be necessary if the user wrote their trampoline function over
+ *                          existing instructions
  */
-void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+void injectJmp_2B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+                    void *localTrampoline, int trampNopCount);
 
 
 
@@ -288,6 +229,32 @@ void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, 
  *          existing instructions.
  */
 void writeBytecode_5B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+
+
+
+/* Helper function that does the following for 2-byte JMP injections:
+ *      -Writes the bytecode for the JMP rel8 instruction.
+ *      -Overwrites remaining garbage bytecode with the specified number of NOP instructions.
+ *      -Creates the local trampoline function at the specified location.
+ *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
+ *          existing instructions.
+ */
+void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+
+
+
+ /* writeJmpRax_14B
+  *
+  *  Writes bytecode for the series of instructions to perform an abolute JMP r64 (using JMP %rax)
+  *     and restore the register upon returning. Also overwrites remaining garbage bytecode with
+  *     the specified number of NOP instructions.
+  *  Bytecode:
+  *     PUSH %rax
+  *     MOVABS %rax, imm64      // imm64 is the address to jump to
+  *     JMP %rax
+  *     POP %rax                // %rax is restored upon returning here
+  */
+int writeJmpRax_14B(void *injectionAddr, void *jmpTo, int nopCount);
 
 
 
@@ -411,7 +378,41 @@ void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
  *					procedure.
  *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
  */
-void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
+void writeRetFarImm16(void *writeTo, uint16_t popBytes, int nopCount);
+
+
+
+/* SET_MEM_PROTECTION
+ *  Cross-platform wrapper function for changing memory protection settings.
+ *      On Windows, VirtualProtect is called. On Unix, mprotect is called.
+ *  @param address  The location in memory where the memory protection will be changed.
+ *  @param size The size of the section of memory whose protection will be changed.
+ *              In Windows, the size is measured in bytes.
+ *              In Unix, the size is measured in pages.
+ *  @param newProtection    The new memory protection setting for the section of memory.
+ *  @param oldProtection    Saves the original memory protection settings on Windows.
+                            NOTE: The oldProtection parameter is not used in Unix.
+ *  @return 0 if successful; non-zero value on failure.
+ */
+int SET_MEM_PROTECTION(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
+
+
+
+/* calculateJmpOffset
+ *  Calculates the offset between a JMP rel instruction and toAddress.
+ *  @param fromAddress      The address of the JMP instruction.
+ *  @param toAddress        The address to jump to.
+ *  @param jmpInstrLength   The length of the variation of JMP instruction being used
+ */
+int64_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLength);
+
+
+
+/* getMemPage
+ *  Obtains the starting address of the page of memory that contains a given memory address.
+ *  @param memAddress   The given memory address that resides within the page.
+ */
+void *getMemPage(void *memAddress);
  
 
 #endif // ASM_INJECT_X64_HPP
