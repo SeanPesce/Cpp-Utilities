@@ -10,13 +10,13 @@
 #include <cstring> // size_t, strcmp(), memcpy()
 
 #ifdef _WIN32
-	#include <Windows.h> // GetSystemInfo(), GetNativeSystemInfo(), GetProcAddress(), GetCurrentProcess(), IsWow64Process(), VirtualProtect()
+	#include <Windows.h> // GetSystemInfo(), GetNativeSystemInfo(), GetProcAddress(), GetCurrentProcess(), IsWow64Process(), VirtualProtect(), SetLastError()
 #else
 	#include <stdio.h>      // sprintf(), sscanf()
 	#include <unistd.h>     // sysconf(_SC_PAGESIZE), getpid()
 	#include <sys/mman.h>   // mprotect()
     #include <fstream>      // ifstream
-    #include <errno.h>      // EINVAL
+    #include <errno.h>      // errno, EINVAL
 #endif // _WIN32
 
 
@@ -33,7 +33,6 @@
     #define MEM_PROTECT_RX PAGE_EXECUTE_READ
     #define MEM_PROTECT_WX PAGE_EXECUTE_WRITECOPY
     #define MEM_PROTECT_RWX PAGE_EXECUTE_READWRITE
-    #define SP_VQ_ERROR_INVALID_PARAMETER ERROR_INVALID_PARAMETER
 #else
     /* Linux memory protection settings:
      *
@@ -51,7 +50,6 @@
     #define MEM_PROTECT_RX (PROT_READ|PROT_EXEC)
     #define MEM_PROTECT_WX (PROT_WRITE|PROT_EXEC)
     #define MEM_PROTECT_RWX (PROT_READ|PROT_WRITE|PROT_EXEC)
-    #define SP_VQ_ERROR_INVALID_PARAMETER EINVAL
     /*MEM_IMAGE
      * MS documentation:
      *  "Indicates that the memory pages within the region are mapped into the view of an image section."
@@ -64,6 +62,26 @@
     #define MEM_MAPPED 0x40000      // MS documentation: "Indicates that the memory pages within the region are mapped into the view of a section."
     #define MEM_PRIVATE 0x20000     // MS documentation: "Indicates that the memory pages within the region are private (that is, not shared by other processes)."
 #endif // _WIN32
+
+
+// Portable error constants:
+// @TODO: Populate this list using these resources:
+//          Linux:      http://www.virtsync.com/c-error-codes-include-errno
+//          Windows:    https://msdn.microsoft.com/en-us/library/windows/desktop/ms681381(v=vs.85).aspx
+#ifdef _WIN32
+    #define SP_NO_ERROR ERROR_SUCCESS
+    #define SP_ERROR_INVALID_PARAMETER ERROR_INVALID_PARAMETER
+    #define SP_ERROR_FILE_NOT_FOUND ERROR_FILE_NOT_FOUND
+    #define SP_ERROR_PATH_NOT_FOUND ERROR_PATH_NOT_FOUND
+    #define SP_ERROR_ACCESS_DENIED ERROR_ACCESS_DENIED
+#else
+    #define SP_NO_ERROR 0
+    #define SP_ERROR_INVALID_PARAMETER EINVAL
+    #define SP_ERROR_FILE_NOT_FOUND ENOENT
+    #define SP_ERROR_PATH_NOT_FOUND ENOENT
+    #define SP_ERROR_ACCESS_DENIED EACCES
+#endif // _WIN32
+
 
 
 //Other constants & typedefs:
@@ -130,6 +148,21 @@ bool is32Bit();
  *  @return true if the current process is running in 64-bit mode; false otherwise.
  */
 bool is64Bit();
+
+
+/*SP_setError(uint32_t)
+ * Sets the system error number.
+ */
+void SP_setError(uint32_t newError);
+
+
+/*SP_getError()
+ * Gets the current system error number.
+ *
+ *  @return The current system error number.
+ */
+uint32_t SP_getError();
+
 
 
 /* setMemProtection(void *, size_t, uint32_t, uint32_t *)

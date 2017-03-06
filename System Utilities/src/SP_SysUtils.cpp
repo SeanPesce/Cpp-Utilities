@@ -75,6 +75,27 @@ bool is64Bit()
 }
 
 
+// Set the error number:
+void SP_setError(uint32_t newError)
+{
+    #ifdef _WIN32
+        SetLastError(newError);
+    #else
+        errno = (int)newError;
+    #endif // _WIN32
+}
+
+
+// Get the error number:
+uint32_t SP_getError()
+{
+    #ifdef _WIN32
+        return GetLastError();
+    #else
+        return (uint32_t)errno;
+    #endif // _WIN32
+}
+
 
 ///////////// MEMORY UTILITIES /////////////
 
@@ -149,14 +170,14 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
             else if(address > prevRegionEnd && address < region.BaseAddress)
             {
                 // Requested address does not lie within a region for this process; set error number
-                errno = SP_VQ_ERROR_INVALID_PARAMETER;
+                SP_setError(SP_ERROR_INVALID_PARAMETER);
                 return count * sizeof(MEMORY_BASIC_INFORMATION);
             }
             prevRegionEnd = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region end point
         }
         if(count == 0) // Starting region was not valid; set error number
         {
-            errno = SP_VQ_ERROR_INVALID_PARAMETER;
+            SP_setError(SP_ERROR_INVALID_PARAMETER);
         }
         // If buffer room still exists, get info for subsequent regions:
         while(std::getline(inFile, line) && count != total)
@@ -250,7 +271,7 @@ void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION 
     { // If next is null, use temporary buffer but still return the next region's base address
         next = buf;
     }
-    if(current == NULL)
+    if(current == NULL || current->BaseAddress == NULL)
     { // No "current" memory region specified; get the first memory region in the process  
         if(SP_VirtualQuery(getProcessBase(), next, sizeof(MEMORY_BASIC_INFORMATION)) < sizeof(MEMORY_BASIC_INFORMATION))
         {
