@@ -30,6 +30,9 @@ int main()
 		}
 	#endif // _WIN32
 	std::cout << "Process base: " << getProcessBase() << std::endl;
+	MEMORY_BASIC_INFORMATION memInfo;
+	SP_VirtualQuery(getProcessBase(), &memInfo, sizeof(memInfo));
+	std::cout << "2nd memory region starts at: " << nextMemRegion(&memInfo, &memInfo) << std::endl;
 	std::cout << "Page size: " << getPageSize() << " bytes" << std::endl;
 	std::cout << "Starting address of main() function: " << (void *)&main << std::endl;
 	std::cout << "Base address of page containing main(): " << getPageBase((void *)&main) << std::endl;
