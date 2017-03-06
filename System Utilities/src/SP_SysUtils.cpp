@@ -33,6 +33,46 @@ bool SP_IsWow64Process()
 #endif // _WIN32
 
 
+// Get the base adress of the currrent process:
+void *getProcessBase()
+{
+    #ifdef _WIN32
+        return GetModuleHandle(NULL); // From MS documentation, HANDLE == void *
+    #else
+        // Resolve /proc/self/maps path (/proc/$PID/maps):
+        char memMapFilePath[32];
+		sprintf(memMapFilePath, MEM_MAP_FILE_DIR_FORMAT, (int)getpid());
+        std::ifstream inFile(memMapFilePath); // Open file input stream
+        void *processBase = NULL; // Will hold the base address of the process
+        std::string line; // Will hold the first line of /proc/self/maps, which contains the base address
+
+        if(std::getline(inFile, line))
+        {
+            sscanf(line.c_str(), "%p-", &processBase);
+            return processBase;
+        }
+        else
+        {
+            // getline() failed
+            return NULL;
+        }
+
+    #endif // _WIN32
+}
+
+
+// Determine whether the current process is running in 32-bit mode or 64-bit mode:
+bool is32Bit()
+{
+    return !(sizeof(void *) == sizeof(long long));
+}
+
+
+// Determine whether the current process is running in 32-bit mode or 64-bit mode:
+bool is64Bit()
+{
+    return (sizeof(void *) == sizeof(long long));
+}
 
 
 
@@ -186,15 +226,15 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
 void *getPageBase(void *address)
 {
 	
-    if(sizeof(long) >= sizeof(void *))
+    if(is32Bit())
     { // 32-bit process
         // Calculate and return the base address of the page:
-	    return (void*)((long)address - ((long)address % getPageSize()));
+        return (void*)((long)address - ((long)address % getPageSize()));
     }
     else
     { // 64-bit process
         // Calculate and return the base address of the page:
-        return (void*)((long long)address - ((long long)address % getPageSize()));
+        return (void*)((uint64_t)address - ((uint64_t)address % getPageSize()));
     }
 }
 

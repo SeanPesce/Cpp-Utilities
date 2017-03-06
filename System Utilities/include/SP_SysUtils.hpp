@@ -94,6 +94,28 @@
 bool SP_IsWow64Process();
 
 
+/*getProcessBase
+ * Obtains the base address of the current process.
+ */
+void *getProcessBase();
+
+
+/*is32Bit()
+ * Determines whether the current process is running in 32-bit mode or 64-bit mode.
+ *
+ *  @return true if the current process is running in 32-bit mode; false otherwise.
+ */
+bool is32Bit();
+
+
+/*is64Bit()
+ * Determines whether the current process is running in 32-bit mode or 64-bit mode.
+ *
+ *  @return true if the current process is running in 64-bit mode; false otherwise.
+ */
+bool is64Bit();
+
+
 /* setMemProtection(void *, size_t, uint32_t, uint32_t *)
  *  Cross-platform wrapper function for changing memory protection settings.
  *      On Windows, VirtualProtect is called. On Unix, mprotect is called.
