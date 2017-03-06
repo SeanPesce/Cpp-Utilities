@@ -33,6 +33,7 @@ int main()
 	MEMORY_BASIC_INFORMATION memInfo;
 	SP_VirtualQuery(getProcessBase(), &memInfo, sizeof(memInfo));
 	std::cout << "2nd memory region starts at: " << nextMemRegion(&memInfo, &memInfo) << std::endl;
+	std::cout << "3rd memory region starts at: " << nextMemRegion(memInfo.BaseAddress) << std::endl;
 	std::cout << "Page size: " << getPageSize() << " bytes" << std::endl;
 	std::cout << "Starting address of main() function: " << (void *)&main << std::endl;
 	std::cout << "Base address of page containing main(): " << getPageBase((void *)&main) << std::endl;
