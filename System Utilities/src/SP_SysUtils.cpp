@@ -134,7 +134,7 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
         std::string line; // Holds each line of data from /proc/self/maps file as they are parsed
         size_t total = length / sizeof(MEMORY_BASIC_INFORMATION); // Get the number of regions to parse
         size_t count = 0; // Number of regions that have been parsed thus far
-        
+        void *prevRegionEnd = 0; // Last address inide the previous region (used to determine if an address lies between process regions)
         // Parse each memory region to find the requested starting region:
         while(std::getline(inFile, line) && count != total)
         {
@@ -146,10 +146,22 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
                 count++;
                 break;
             }
+            else if(address > prevRegionEnd && address < region.BaseAddress)
+            {
+                // Requested address does not lie within a region for this process; set error number
+                errno = SP_VQ_ERROR_INVALID_PARAMETER;
+                return count * sizeof(MEMORY_BASIC_INFORMATION);
+            }
+            prevRegionEnd = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region end point
+        }
+        if(count == 0) // Starting region was not valid; set error number
+        {
+            errno = SP_VQ_ERROR_INVALID_PARAMETER;
         }
         // If buffer room still exists, get info for subsequent regions:
         while(std::getline(inFile, line) && count != total)
         {
+            parseMemMapRegion(line.c_str(), &region);
             memcpy(buff+count, &region, sizeof(MEMORY_BASIC_INFORMATION));
             count++;
         }
@@ -220,9 +232,45 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
     {
         memInfo->Type = MEM_MAPPED;
     }
-    // @TODO: determine if regions are MEM_IMAGE using /proc/$PID/exe simlink
+    // @TODO: determine if regions are MEM_IMAGE using /proc/$PID/exe simlink ?
 }
 #endif // !_WIN32
+
+
+// Obtain the MEMORY_BASIC_INFORMATION struct for the first region in memory whose
+//  base address is higher than the last address in the current region:
+void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next)
+{
+    MEMORY_BASIC_INFORMATION buf[2]; // Temporary buffer (serves a few purposes)
+    if(next == NULL)
+    { // If next is null, use temporary buffer but still return the next region's base address
+        next = buf;
+    }
+    if(current == NULL)
+    { // No "current" memory region specified; get the first memory region in the process  
+        if(SP_VirtualQuery(getProcessBase(), next, sizeof(MEMORY_BASIC_INFORMATION)) < sizeof(MEMORY_BASIC_INFORMATION))
+        {
+            // SP_VirtualQuery failed; return NULL
+            return NULL;
+        }
+        else
+        {
+            return next->BaseAddress;
+        }
+    }
+    else
+    {
+        if(SP_VirtualQuery(current->BaseAddress, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
+        {   // SP_VirtualQuery failed
+            return NULL;
+        }
+        else
+        {
+            memcpy(next, &buf[1], sizeof(MEMORY_BASIC_INFORMATION));
+            return next->BaseAddress;
+        }
+    }
+}
 
 
 // Obtain the starting address of the page of memory that contains the given memory address:
