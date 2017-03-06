@@ -223,13 +223,16 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
 
 
 // Obtain the starting address of the page of memory that contains the given memory address:
+#ifdef _MSC_VER
+void* __vectorcall getPageBase(void *address) // This function must use __vectorcall to avoid crashes in 32-bit mode
+#else
 void *getPageBase(void *address)
+#endif // _MSC_VER
 {
-	
     if(is32Bit())
     { // 32-bit process
         // Calculate and return the base address of the page:
-        return (void*)((long)address - ((long)address % getPageSize()));
+        return (void*)((uint32_t)(uint64_t)address - ((uint32_t)(uint64_t)address % getPageSize())); // Double cast to subdue compiler warnings
     }
     else
     { // 64-bit process

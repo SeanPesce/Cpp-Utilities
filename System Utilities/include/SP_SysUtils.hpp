@@ -164,7 +164,11 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
  *
  * @param address	The memory address that resides within the page.
  */
+#ifdef _MSC_VER
+void* __vectorcall getPageBase(void *address); // This function must use __vectorcall to avoid crashes in 32-bit mode
+#else
 void *getPageBase(void *address);
+#endif // _MSC_VER;
 
 
 /*getPageSize()
