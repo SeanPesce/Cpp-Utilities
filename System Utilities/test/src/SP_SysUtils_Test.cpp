@@ -3,7 +3,7 @@
 #include "SP_SysUtils_Test.hpp"
 
 #ifdef _MSC_VER
-int __cdecl main()  // Compile with the "/Gv" (__vectorcall) flag on Visual Studio
+int __cdecl main()
 #else
 int main()
 #endif // _MSC_VER
