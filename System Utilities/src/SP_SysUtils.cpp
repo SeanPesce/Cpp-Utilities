@@ -92,7 +92,7 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection, uint32_
     
     #else
         // Unix (use mprotect)
-        oldProtection = NULL; // This line is to avoid compiler errors; oldProtection is not used on Unix systems @TODO: implement oldProtection for Unix
+        *oldProtection = getMemProtection(address); // Create backup of old memory permissions
         return mprotect(getPageBase(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
