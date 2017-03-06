@@ -89,9 +89,14 @@
  *		 Use GetModuleHandle to get a handle to the DLL that contains the function
  *		 and GetProcAddress to get a pointer to the function if available."
  *
+ *  NOTE: This function is Windows-only, due to the way 32-bit processes are handled on 64-bit
+ *        versions of Windows.
+ *
  *	If GetProcAddress returns NULL, we know that the current system does not support IsWow64Process().
  */
+ #ifdef _WIN32
 bool SP_IsWow64Process();
+#endif // _WIN32
 
 
 /*getProcessBase
@@ -141,23 +146,41 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection);
 
 
 /*SP_VirtualQuery(void *, MEMORY_BASIC_INFORMATION *, size_t)
- * @TODO: Documentation
+ * A portable function for querying properties of memory regions.
+ *  On Windows, this is merely a wrapper function for VirtualQuery (no extra
+ *      functionality).
+ *  On Unix, this function aims to emulate VirtualQuery by parsing /proc/self/maps.
+ *
+ *  @param address  An address that resides within the first memory region to be
+ *                  parsed.
+ *  @param buff     The buffer for storing memory information for each region.
+ *  @param length   The size of the buffer (in bytes). Optimally this should be
+ *                  a multiple of sizeof(MEMORY_BASIC_INFORMATION).
  */
 size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t length);
 
 /*getMemProtection(void *)
  * Obtains the current memory protection permissions at a given address in memory (for this process).
- *
+ *  
  *  @param address the address for which this function obtains the permissions
  */
 uint32_t getMemProtection(void *address);
 
 
 /*parseMemMapRegion(const char *, MEMORY_BASIC_INFORMATION *)
- * @TODO: Documentation
+ * Parses a line of text from /proc/self/maps which describes a region of memory
+ *  and the properties that apply to it (address range, access protection, etc).
+ *  NOTE: This function is for Unix systems only; the memInfo struct aims to
+ *        emulate the MEMORY_BASIC_INFORMATION struct returned by VirtualQuery on
+ *        Windows operating systems.
+ *
+ *  @param mapsEntry The line of text from /proc/self/maps file.
+ *  @param memInfo The memory information struct where the region's properties will
+ *         be stored.
  */
+ #ifndef _WIN32
 void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo);
-
+#endif // !_WIN32
 
 /*getPageBase(void *)
  * Obtains the base address of a process page that contains the given memory adress.
