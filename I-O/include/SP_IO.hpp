@@ -8,36 +8,35 @@
 
 
 #include <iostream> // cout, endl
-#include <string> 	// string
 #include <limits>	// numeric_limits
 
 /////////////////////// Shell I/O ///////////////////////
 
 
-/*SP_printIntro(std::string)
+/*SP_printIntro(const char*)
  * Prints the program name and author information.
  *
  *	@param programName	The name of the program.
  */
-void SP_printIntro(std::string programName);
+void SP_printIntro(const char* programName);
 
 
-/*enterToContinue(std::string)
+/*enterToContinue(const char*)
  * Prints a prompt message and waits for the user to press the Enter (Return) key.
  *
  *	@param prompt	The prompt message to print before the user presses Enter.
  */
-void enterToContinue(std::string prompt);
+void enterToContinue(const char* prompt);
 
 
-/*enterToContinue(std::string, std::string)
+/*enterToContinue(const char*, const char*)
  * Prints a prompt message, waits for the user to press Enter (Return) key, and
  *	prints a second message before continuing.
  *
  *	@param prompt	The prompt message to print before the user presses Enter.
  *	@param continueMessage	The message to print after the user presses Enter.
  */
-void enterToContinue(std::string prompt, std::string continueMessage);
+void enterToContinue(const char* prompt, const char* continueMessage);
 
 
 #endif // SP_IO_HPP
