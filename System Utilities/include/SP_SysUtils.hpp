@@ -207,6 +207,15 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
 void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next);
 
 
+/*nextMemRegion(void *)
+ * Obtains the base address for the first region in memory whose base address is higher than
+ *  the given address.
+ *
+ *  @param current  An address that exists within the "current" region in memory.
+ */
+void *nextMemRegion(void *current);
+
+
 /*getPageBase(void *)
  * Obtains the base address of a process page that contains the given memory adress.
  *

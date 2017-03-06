@@ -232,7 +232,11 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
     {
         memInfo->Type = MEM_MAPPED;
     }
-    // @TODO: determine if regions are MEM_IMAGE using /proc/$PID/exe simlink ?
+    /* @TODO:   -Determine if regions are MEM_IMAGE using /proc/$PID/exe simlink ?
+     *          -More research on meanings of MEM_IMAGE, MEM_MAPPED etc.
+     *          -Read "Understanding the Linux Kernel" Chapter 9.3: Memory Regions; Section 16.2: Memory Mapping
+     *          -Read "Understanding the Linux Virtual Memory Manager" Section 4.4 Memory Regions
+     */
 }
 #endif // !_WIN32
 
@@ -268,6 +272,29 @@ void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION 
         {
             memcpy(next, &buf[1], sizeof(MEMORY_BASIC_INFORMATION));
             return next->BaseAddress;
+        }
+    }
+}
+
+
+// Obtain the base address for the first region in memory whose
+//  base address is higher than the given address:
+void *nextMemRegion(void *current)
+{
+    MEMORY_BASIC_INFORMATION buf[2]; // Temporary buffer
+    if(current == NULL)
+    { // No "current" memory region specified; get the first memory region in the process  
+        return getProcessBase();
+    }
+    else
+    {
+        if(SP_VirtualQuery(current, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
+        {   // SP_VirtualQuery failed
+            return NULL;
+        }
+        else
+        {
+            return buf[1].BaseAddress;
         }
     }
 }
