@@ -162,7 +162,7 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
 /*getMemProtection(void *)
  * Obtains the current memory protection permissions at a given address in memory (for this process).
  *  
- *  @param address the address for which this function obtains the permissions
+ *  @param address The address for which this function obtains access the current access permissions
  */
 uint32_t getMemProtection(void *address);
 
