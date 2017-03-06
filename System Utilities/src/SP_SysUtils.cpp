@@ -64,14 +64,14 @@ void *getProcessBase()
 // Determine whether the current process is running in 32-bit mode or 64-bit mode:
 bool is32Bit()
 {
-    return !(sizeof(void *) == sizeof(long long));
+    return (sizeof(void *) == sizeof(uint32_t));
 }
 
 
 // Determine whether the current process is running in 32-bit mode or 64-bit mode:
 bool is64Bit()
 {
-    return (sizeof(void *) == sizeof(long long));
+    return (sizeof(void *) == sizeof(uint64_t));
 }
 
 
