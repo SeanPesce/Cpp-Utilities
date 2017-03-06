@@ -9,6 +9,7 @@
 #include <iostream> // cout, cin, getline
 #include <string> // string
 #include "AsmInject_x64.hpp" // Assembly Injection functions to be demonstrated with this program
+#include "SP_SysUtils.hpp" // setMemProtection()
 
 int NUMBER = 12; // Will be printed as feedback to show when the injection occurs
 

@@ -34,7 +34,7 @@ int main()
         {
             // Unprotect the memory:
             uint32_t oldProtection; // oldProtection is not utilized in Unix (might add this functionality later) @todo
-            SET_MEM_PROTECTION((uint8_t*)&main + MAIN_OFFSET, MEM_PROTECT_SIZE, MEM_PROTECT_RWX, &oldProtection);
+            setMemProtection((uint8_t*)&main + MAIN_OFFSET, MEM_PROTECT_SIZE, MEM_PROTECT_RWX, &oldProtection);
             
             // Write the jump to the assembly function:
             injectASM(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
