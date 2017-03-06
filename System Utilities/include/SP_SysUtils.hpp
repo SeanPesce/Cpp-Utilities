@@ -12,16 +12,16 @@
 #ifdef _WIN32
 	#include <Windows.h> // GetSystemInfo(), GetNativeSystemInfo(), GetProcAddress(), GetCurrentProcess(), IsWow64Process(), VirtualProtect()
 #else
-	#include <stdio.h>      // sprintf()
+	#include <stdio.h>      // sprintf(), sscanf()
 	#include <unistd.h>     // sysconf(_SC_PAGESIZE), getpid()
 	#include <sys/mman.h>   // mprotect()
     #include <fstream>      // ifstream
-    #include <iostream>     // cout, endl //@TODO: Delete this line
 #endif // _WIN32
 
 
 // Portable memory protection/info setting constants:
 #ifdef _WIN32
+    // Windows memory protection settings:
 	// NOTE: Not all Windows protection settings are included. See Microsoft documentation for more info:
     // https://msdn.microsoft.com/en-us/library/windows/desktop/aa366786(v=vs.85).aspx
     #define MEM_PROTECT_NONE PAGE_NOACCESS
@@ -33,10 +33,18 @@
     #define MEM_PROTECT_WX PAGE_EXECUTE_WRITECOPY
     #define MEM_PROTECT_RWX PAGE_EXECUTE_READWRITE
 #else
+    /* Linux memory protection settings:
+     *
+     * Extra info:
+     *  "-The Execute access right always implies the Read access right.
+     *   -The Write access right always implies the Read access right."
+     *      Source: Understanding the Linux Kernel (3rd Edition) by Daniel Bovet; Section 9.3.2 - Memory Region Access Rights
+     *
+     */
 	#define MEM_PROTECT_NONE PROT_NONE
-    #define MEM_PROTECT_R PROT_READ
-    #define MEM_PROTECT_W PROT_WRITE
-    #define MEM_PROTECT_X PROT_EXEC
+    #define MEM_PROTECT_R PROT_READ		// PROT_READ == VM_READ
+    #define MEM_PROTECT_W PROT_WRITE	// PROT_WRITE == VM_WRITE
+    #define MEM_PROTECT_X PROT_EXEC		// PROT_EXEC == VM_EXEC
     #define MEM_PROTECT_RW (PROT_READ|PROT_WRITE)
     #define MEM_PROTECT_RX (PROT_READ|PROT_EXEC)
     #define MEM_PROTECT_WX (PROT_WRITE|PROT_EXEC)
