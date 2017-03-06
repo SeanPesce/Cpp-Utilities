@@ -92,7 +92,10 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection, uint32_
     
     #else
         // Unix (use mprotect)
-        *oldProtection = getMemProtection(address); // Create backup of old memory permissions
+        if(oldProtection != NULL)
+        {
+            *oldProtection = getMemProtection(address); // Create backup of old memory permissions
+        }
         return mprotect(getPageBase(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
