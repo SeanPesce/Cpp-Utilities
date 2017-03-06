@@ -16,6 +16,7 @@
 	#include <unistd.h>     // sysconf(_SC_PAGESIZE), getpid()
 	#include <sys/mman.h>   // mprotect()
     #include <fstream>      // ifstream
+    #include <errno.h>      // EINVAL
 #endif // _WIN32
 
 
@@ -32,6 +33,7 @@
     #define MEM_PROTECT_RX PAGE_EXECUTE_READ
     #define MEM_PROTECT_WX PAGE_EXECUTE_WRITECOPY
     #define MEM_PROTECT_RWX PAGE_EXECUTE_READWRITE
+    #define SP_VQ_ERROR_INVALID_PARAMETER ERROR_INVALID_PARAMETER
 #else
     /* Linux memory protection settings:
      *
@@ -49,6 +51,7 @@
     #define MEM_PROTECT_RX (PROT_READ|PROT_EXEC)
     #define MEM_PROTECT_WX (PROT_WRITE|PROT_EXEC)
     #define MEM_PROTECT_RWX (PROT_READ|PROT_WRITE|PROT_EXEC)
+    #define SP_VQ_ERROR_INVALID_PARAMETER EINVAL
     /*MEM_IMAGE
      * MS documentation:
      *  "Indicates that the memory pages within the region are mapped into the view of an image section."
@@ -189,6 +192,20 @@ uint32_t getMemProtection(void *address);
  #ifndef _WIN32
 void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo);
 #endif // !_WIN32
+
+
+/*nextMemRegion(MEMORY_BASIC_INFORMATION *, MEMORY_BASIC_INFORMATION *)
+ * Obtains the memory information for the first memory region following the region specified
+ *  by the "current" argument. If "current" is NULL, this function obtains the first
+ *  memory region for the process.
+ *
+ *  @param current  The current region of memory.
+ *  @param next     Buffer to hold the MEMORY_BASIC_INFORMATION struct for the next region.
+ *
+ *  @return The base address of the next region, or NULL if the function fails.
+ */
+void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next);
+
 
 /*getPageBase(void *)
  * Obtains the base address of a process page that contains the given memory adress.
