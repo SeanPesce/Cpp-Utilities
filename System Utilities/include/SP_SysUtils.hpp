@@ -16,7 +16,7 @@
 	#include <unistd.h>     // sysconf(_SC_PAGESIZE), getpid()
 	#include <sys/mman.h>   // mprotect()
     #include <fstream>      // ifstream
-    #include <errno.h>      // errno, EINVAL
+    #include <errno.h>      // errno, error constants
 #endif // _WIN32
 
 
@@ -74,12 +74,16 @@
     #define SP_ERROR_FILE_NOT_FOUND ERROR_FILE_NOT_FOUND
     #define SP_ERROR_PATH_NOT_FOUND ERROR_PATH_NOT_FOUND
     #define SP_ERROR_ACCESS_DENIED ERROR_ACCESS_DENIED
+    #define SP_ERROR_INVALID_ADDRESS ERROR_INVALID_ADDRESS
+    #define SP_ERROR_INSUFFICIENT_BUFFER ERROR_INSUFFICIENT_BUFFER
 #else
     #define SP_NO_ERROR 0
     #define SP_ERROR_INVALID_PARAMETER EINVAL
     #define SP_ERROR_FILE_NOT_FOUND ENOENT
     #define SP_ERROR_PATH_NOT_FOUND ENOENT
     #define SP_ERROR_ACCESS_DENIED EACCES
+    #define SP_ERROR_INVALID_ADDRESS EFAULT
+    #define SP_ERROR_INSUFFICIENT_BUFFER ENOBUFS
 #endif // _WIN32
 
 
