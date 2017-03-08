@@ -26,13 +26,13 @@ int NUMBER = 12; // Will be printed as feedback to show when the injection occur
     // Depending on the compiler, many things can vary:
     #define MAIN_OFFSET 205     // The injection point
     #define NOP_COUNT 45         // The type of instructions used (more importantly here, the number of leftover bytes from those overwritten instructions)
-    extern "C" void asmCodeExample();
+    extern "C" void asm_code_example();
     extern "C" uint64_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code cave to resume normal program logic
 #else
     // Non-Microsoft compiler
     #define MAIN_OFFSET 190
     #define NOP_COUNT 41
-    void asmCodeExample();
+    void asm_code_example();
     uint64_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code cave to resume normal program logic
 #endif // _MSC_VER
 

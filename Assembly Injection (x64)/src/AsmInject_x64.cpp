@@ -64,7 +64,7 @@ void inject_jmp_2b(void *injectionAddr, void *returnJmpAddr, int nopCount, void 
                   void *localTrampoline, int trampNopCount)
 {
     // Write the injected JMP rel8 instruction and local trampoline:
-    writeBytecode_2B(injectionAddr, nopCount, localTrampoline, trampNopCount, asmCode);
+    write_bytecode_2b(injectionAddr, nopCount, localTrampoline, trampNopCount, asmCode);
 
     // Obtain the offset of the POP %rax instruction in the local trampoline function:
     int popRaxOffset = PUSH_RAX_INSTR_LENGTH + MOVABS_INSTR_LENGTH + JMP_ABS_RAX_INSTR_LENGTH;
@@ -96,7 +96,7 @@ void write_bytecode_5b(void *injectionAddr, int nopCount, void *localTrampoline,
 
 // Helper function that writes bytecode for 2-byte JMP injections and the
 //  local trampoline functions they utilize.
-void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo)
+void write_bytecode_2b(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo)
 {
     // Write the injected JMP rel8 instruction:
     write_jmp_rel8(injectionAddr, localTrampoline, nopCount);

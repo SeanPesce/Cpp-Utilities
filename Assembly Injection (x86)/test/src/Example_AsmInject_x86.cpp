@@ -37,7 +37,7 @@ int main()
             set_mem_protection((uint8_t*)&main + MAIN_OFFSET, MEM_PROTECT_SIZE, MEM_PROTECT_RWX, &oldProtection);
             
             // Write the jump to the assembly function:
-            inject_jmp_5b(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
+            inject_jmp_5b(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asm_code_example);
             
             std::cout << "Injecting assembly at " << (int*)((uint8_t*)&main + MAIN_OFFSET) <<
                         " with return address " << (int*)JUMPBACK_ADDRESS << "..." << std::endl;
@@ -49,7 +49,7 @@ int main()
 
 #ifdef _MSC_VER
 // Microsoft compiler; use Visual Studio in-line ASM:
-void __declspec(naked) __stdcall asmCodeExample()
+void __declspec(naked) __stdcall asm_code_example()
 {
 	__asm
 	{
@@ -58,9 +58,9 @@ void __declspec(naked) __stdcall asmCodeExample()
 }
 #else
 // Non-Microsoft compiler; use GCC in-line ASM:
-void asmCodeExample()
+void asm_code_example()
 {
-    // The first ASM instruction is +3 from &asmCodeExample when using GCC/G++
+    // The first ASM instruction is +3 from &asm_code_example when using GCC/G++
     __asm__ volatile
     (
         "JMP [JUMPBACK_ADDRESS]" // To reference an outside variable, might need to prefix it with "_"

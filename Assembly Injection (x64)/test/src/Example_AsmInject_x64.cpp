@@ -37,7 +37,7 @@ int main()
             set_mem_protection((void*)((uint8_t*)&main + MAIN_OFFSET), (size_t)MEM_PROTECT_SIZE, (uint32_t)MEM_PROTECT_RWX, (uint32_t*)&oldProtection);
             
             // Write the jump to the assembly function:
-            inject_jmp_14b(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
+            inject_jmp_14b(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asm_code_example);
             
             std::cout << "Injecting assembly at " << (int*)((uint8_t*)&main + MAIN_OFFSET) <<
                         " with return address " << (uint64_t*)JUMPBACK_ADDRESS << "..." << std::endl;
@@ -50,7 +50,7 @@ int main()
 
 #ifndef _MSC_VER
 // Non-Microsoft compiler; use GCC in-line ASM:
-void asmCodeExample()
+void asm_code_example()
 {
     // The first ASM instruction is +4 from a function's base address when using GCC/G++ 64-bit
     __asm__ volatile

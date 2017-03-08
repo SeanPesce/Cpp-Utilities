@@ -208,7 +208,7 @@ void write_bytecode_5b(void *injectionAddr, int nopCount, void *localTrampoline,
  *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
  *          existing instructions.
  */
-void writeBytecode_2B(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+void write_bytecode_2b(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
 
 
 

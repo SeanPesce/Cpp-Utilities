@@ -29,12 +29,12 @@ uint32_t JUMPBACK_ADDRESS; // The address used to jump out of the assembly code 
     // Depending on the compiler, many things can vary:
     #define MAIN_OFFSET 278     // The injection point
     #define NOP_COUNT 6         // The type of instructions used (more importantly here, the number of leftover bytes from those overwritten instructions)
-    void __stdcall asmCodeExample(); // Calling conventions for ASM code
+    void __stdcall asm_code_example(); // Calling conventions for ASM code
 #else
     // Non-Microsoft compiler
     #define MAIN_OFFSET 278
     #define NOP_COUNT 3
-    void asmCodeExample();
+    void asm_code_example();
 #endif // _MSC_VER
 
 
