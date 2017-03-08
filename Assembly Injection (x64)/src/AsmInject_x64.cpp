@@ -33,7 +33,7 @@ void inject_jmp_14b(void *injectionAddr, void *returnJmpAddr, int nopCount, void
  *      Registers preserved? No
  *              User must start their code with POP %rax and end their code with PUSH %rax (before the final JMP instruction)
  */
-void injectJmp_5B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+void inject_jmp_5b(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
                   void *localTrampoline, int trampNopCount)
 {
     // Write the injected JMP rel32 instruction and local trampoline:

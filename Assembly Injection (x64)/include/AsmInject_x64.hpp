@@ -86,7 +86,7 @@ void inject_jmp_14b(void *injectionAddr, void *returnJmpAddr, int nopCount, void
 
 
 
-/* injectJmp_5B
+/* inject_jmp_5b
  *  Injects an relative JMP instruction (JMP rel32) at the given address. The JMP rel32 instruction
  *      jumps to a local code cave with an inject_jmp_14b instruction sequence, seen below.
  *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
@@ -133,7 +133,7 @@ void inject_jmp_14b(void *injectionAddr, void *returnJmpAddr, int nopCount, void
  *                          This could be necessary if the user wrote their trampoline function over
  *                          existing instructions
  */
-void injectJmp_5B(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
+void inject_jmp_5b(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
                     void *localTrampoline, int trampNopCount);
 
 
