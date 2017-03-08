@@ -8,7 +8,7 @@
 void sp_print_intro(const char* program_name)
 {
     std::cout << program_name << std::endl; // Print the name of the program
-    std::cout << "Creator: \tSean Pesce" << std::endl << std::endl;
+    std::cout << "Creator:  Sean Pesce" << std::endl << std::endl;
 }
 
 
