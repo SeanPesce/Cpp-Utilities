@@ -34,10 +34,10 @@ int main()
         {
             // Unprotect the memory:
             uint32_t oldProtection; // oldProtection is not utilized in Unix (might add this functionality later)
-            setMemProtection((void*)((uint8_t*)&main + MAIN_OFFSET), (size_t)MEM_PROTECT_SIZE, (uint32_t)MEM_PROTECT_RWX, (uint32_t*)&oldProtection);
+            set_mem_protection((void*)((uint8_t*)&main + MAIN_OFFSET), (size_t)MEM_PROTECT_SIZE, (uint32_t)MEM_PROTECT_RWX, (uint32_t*)&oldProtection);
             
             // Write the jump to the assembly function:
-            injectJmp_14B(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
+            inject_jmp_14b(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asmCodeExample);
             
             std::cout << "Injecting assembly at " << (int*)((uint8_t*)&main + MAIN_OFFSET) <<
                         " with return address " << (uint64_t*)JUMPBACK_ADDRESS << "..." << std::endl;

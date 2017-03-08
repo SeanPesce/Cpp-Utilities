@@ -7,8 +7,8 @@
 
 
 #include <iostream> // cout, endl
-#include "SP_SysUtils.hpp" // SP_IsWow64Process(), getPageSize(), getPageBase(), setMemProtection(), getMemProtection()
-#include "SP_IO.hpp" // enterToContinue()
+#include "SP_SysUtils.hpp" // is_wow64_process(), get_page_size(), get_page_base(), set_mem_protection(), get_mem_protection()
+#include "SP_IO.hpp" // enter_to_continue()
 
 
 

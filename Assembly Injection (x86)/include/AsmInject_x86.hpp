@@ -31,7 +31,7 @@ const	int		JMP_REL8_INSTR_LENGTH  = 2,		// The length of a 'JMP rel8' instructio
 //////////// Function prototypes and descriptions ////////////
 
 
-/* injectASM
+/* inject_jmp_5b
  *  Injects assembly code at the specified location in memory.
  *		NOTE:	Memory at the injection point must be writable before calling this function (use
  *				SET_MEM_PROTECTION).
@@ -52,10 +52,10 @@ const	int		JMP_REL8_INSTR_LENGTH  = 2,		// The length of a 'JMP rel8' instructio
  *                          location.
  *  @param asmCode  A pointer to an in-line assembly function (to be used as a code cave).
  */
-void injectASM(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, void *asmCode);
+void inject_jmp_5b(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, void *asmCode);
 
 
-/* writeJmpRel8
+/* write_jmp_rel8
  *  Writes a JMP rel8 instruction at the specified writeTo address.
  *
  *  @param writeTo  The address where the JMP rel8 instruction will be written.
@@ -64,10 +64,10 @@ void injectASM(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, v
  *                  NOTE: jmpTo must be in the range [writeTo-128,writeTo+127]
  *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
  */
-void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
+void write_jmp_rel8(void *writeTo, void *jmpTo, int nopCount);
 
 
-/* writeJmpRel8
+/* write_jmp_rel8
  *  Writes a JMP rel8 instruction at the specified writeTo address using the given offset.
  *
  *  @param writeTo  The address where the JMP rel8 instruction will be written.
@@ -76,10 +76,10 @@ void writeJmpRel8(void *writeTo, void *jmpTo, int nopCount);
  *                  NOTE: offset must be in the range [writeTo-128,writeTo+127]
  *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
  */
-void writeJmpRel8(void *writeTo, int8_t offset, int nopCount);
+void write_jmp_rel8(void *writeTo, int8_t offset, int nopCount);
 
 
-/* writeJmpRel32
+/* write_jmp_rel32
  *  Writes a JMP rel32 instruction at the specified writeTo address.
  *
  *  @param writeTo  The address where the JMP rel32 instruction will be written.
@@ -88,10 +88,10 @@ void writeJmpRel8(void *writeTo, int8_t offset, int nopCount);
  *                  NOTE: jmpTo must be in the range [writeTo-2³¹,writeTo+2³¹-1]
  *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
  */
-void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount);
+void write_jmp_rel32(void *writeTo, void *jmpTo, int nopCount);
 
 
-/* writeJmpRel32
+/* write_jmp_rel32
  *  Writes a JMP rel32 instruction at the specified writeTo address using the given offset.
  *
  *  @param writeTo  The address where the JMP rel32 instruction will be written.
@@ -100,10 +100,10 @@ void writeJmpRel32(void *writeTo, void *jmpTo, int nopCount);
  *                  NOTE: offset must be in the range [writeTo-2³¹,writeTo+2³¹-1]
  *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
  */
-void writeJmpRel32(void *writeTo, int32_t offset, int nopCount);
+void write_jmp_rel32(void *writeTo, int32_t offset, int nopCount);
 
 
-/* writeCallRel32
+/* write_call_rel32
  *  Writes a CALL rel32 instruction at the specified writeTo address.
  *
  *  @param writeTo      The address where the CALL rel32 instruction will be written.
@@ -112,10 +112,10 @@ void writeJmpRel32(void *writeTo, int32_t offset, int nopCount);
  *                      NOTE: procedure must be in the range [writeTo-2³¹,writeTo+2³¹-1]
  *  @param nopCount     The number of NOP instructions to be written after the CALL rel32 instruction.
  */
-void writeCallRel32(void *writeTo, void *procedure, int nopCount);
+void write_call_rel32(void *writeTo, void *procedure, int nopCount);
 
 
-/* writeCallRel32
+/* write_call_rel32
  *  Writes a CALL rel32 instruction at the specified writeTo address using the given offset.
  *
  *  @param writeTo  The address where the CALL rel32 instruction will be written.
@@ -124,28 +124,28 @@ void writeCallRel32(void *writeTo, void *procedure, int nopCount);
  *                  NOTE: offset must be in the range [writeTo-2³¹,writeTo+2³¹-1]
  *  @param nopCount The number of NOP instructions to be written after the CALL rel32 instruction.
  */
-void writeCallRel32(void *writeTo, int32_t offset, int nopCount);
+void write_call_rel32(void *writeTo, int32_t offset, int nopCount);
 
 
-/* writeRet
+/* write_ret
  *  Writes a "near return" (RET) instruction at the specified writeTo address.
  *
  *  @param writeTo  The address where the RET instruction will be written.
  *  @param nopCount The number of NOP instructions to be written after the RET instruction.
  */
-void writeRet(void *writeTo, int nopCount);
+void write_ret(void *writeTo, int nopCount);
 
 
-/* writeRetFar
+/* write_ret_far
  *  Writes a "far return" (RET) instruction at the specified writeTo address.
  *
  *  @param writeTo  The address where the RET instruction will be written.
  *  @param nopCount The number of NOP instructions to be written after the RET instruction.
  */
-void writeRetFar(void *writeTo, int nopCount);
+void write_ret_far(void *writeTo, int nopCount);
 
 
-/* writeRetImm16
+/* write_ret_imm16
  *  Writes a "near return, pop imm16 bytes from stack" (RET imm16) instruction at the
  *	 specified writeTo address.
  *
@@ -154,10 +154,10 @@ void writeRetFar(void *writeTo, int nopCount);
  *					procedure.
  *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
  */
-void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
+void write_ret_imm16(void *writeTo, uint16_t popBytes, int nopCount);
 
 
-/* writeRetFarImm16
+/* write_ret_far_imm16
  *  Writes a "far return, pop imm16 bytes from stack" (RET imm16) instruction at the
  *	 specified writeTo address.
  *
@@ -166,17 +166,17 @@ void writeRetImm16(void *writeTo, uint16_t popBytes, int nopCount);
  *					procedure.
  *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
  */
-void writeRetFarImm16(void *writeTo, uint16_t popBytes, int nopCount);
+void write_ret_far_imm16(void *writeTo, uint16_t popBytes, int nopCount);
 
 
-/* calculateJmpOffset
+/* calculate_jmp_offset
  *  Calculates the offset between a 'JMP rel' instruction and a target address.
  *
  *  @param fromAddress  	The address of the JMP instruction.
  *  @param toAddress    	The address of the assembly code cave.
  *	@param jmpInstrLength   The length (in bytes) of the variation of JMP instruction being used
  */
-uint32_t calculateJmpOffset(void *fromAddress, void *toAddress, int jmpInstrLength);
+uint32_t calculate_jmp_offset(void *fromAddress, void *toAddress, int jmpInstrLength);
 
 
 #endif // ASM_INJECT_X86_HPP

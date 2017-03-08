@@ -11,7 +11,7 @@
 #ifdef _WIN32
 // Wrapper function for IsWow64Process that provides compatibility on a wider range
 //	of systems:
-bool SP_IsWow64Process()
+bool is_wow64_process()
 {
 	bool isWow64Proc = false;
 
@@ -34,7 +34,7 @@ bool SP_IsWow64Process()
 
 
 // Get the base adress of the currrent process:
-void *getProcessBase()
+void *get_process_base()
 {
     #ifdef _WIN32
         return GetModuleHandle(NULL); // From MS documentation, HANDLE == void *
@@ -62,21 +62,21 @@ void *getProcessBase()
 
 
 // Determine whether the current process is running in 32-bit mode or 64-bit mode:
-bool is32Bit()
+bool is_32bit()
 {
     return (sizeof(void *) == sizeof(uint32_t));
 }
 
 
 // Determine whether the current process is running in 32-bit mode or 64-bit mode:
-bool is64Bit()
+bool is_64bit()
 {
     return (sizeof(void *) == sizeof(uint64_t));
 }
 
 
 // Set the error number:
-void SP_setError(uint32_t newError)
+void set_error(uint32_t newError)
 {
     #ifdef _WIN32
         SetLastError(newError);
@@ -87,7 +87,7 @@ void SP_setError(uint32_t newError)
 
 
 // Get the error number:
-uint32_t SP_getError()
+uint32_t get_error()
 {
     #ifdef _WIN32
         return GetLastError();
@@ -101,7 +101,7 @@ uint32_t SP_getError()
 
 
 // Set the memory protection permissions for a given section of memory:
-int setMemProtection(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection)
+int set_mem_protection(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection)
 {
     #ifdef _WIN32
         // Windows (use VirtualProtect)
@@ -115,16 +115,16 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection, uint32_
         // Unix (use mprotect)
         if(oldProtection != NULL)
         {
-            *oldProtection = getMemProtection(address); // Create backup of old memory permissions
+            *oldProtection = get_mem_protection(address); // Create backup of old memory permissions
         }
-        return mprotect(getPageBase(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
+        return mprotect(get_page_base(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
 }
 
 
 // Set the memory protection permissions for a given section of memory:
-int setMemProtection(void *address, size_t size, uint32_t newProtection)
+int set_mem_protection(void *address, size_t size, uint32_t newProtection)
 {
     #ifdef _WIN32
         uint32_t oldProt; // Must use &oldProt, otherwise VirtualProtect fails
@@ -132,7 +132,7 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection)
     
     #else
         // Unix (use mprotect)
-        return mprotect(getPageBase(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
+        return mprotect(get_page_base(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
 }
@@ -140,7 +140,7 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection)
 
 // On Windows, this a wrapper function for VirtualQuery (no functional changes).
 // On Linux, this function attempts to emulate the usage of the VirtualQuery function from the Windows API.
-size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t length)
+size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t length)
 {
     #ifdef _WIN32
         return VirtualQuery((LPCVOID)address, buff, length);
@@ -159,7 +159,7 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
         // Parse each memory region to find the requested starting region:
         while(std::getline(inFile, line) && count != total)
         {
-            parseMemMapRegion(line.c_str(), &region);
+            parse_mem_map_region(line.c_str(), &region);
             if(region.BaseAddress <= address && (uint8_t *)region.BaseAddress+region.RegionSize > address)
             {
                 // Starting region has been found
@@ -170,19 +170,19 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
             else if(address > prevRegionEnd && address < region.BaseAddress)
             {
                 // Requested address does not lie within a region for this process; set error number
-                SP_setError(SP_ERROR_INVALID_PARAMETER);
+                set_error(SP_ERROR_INVALID_PARAMETER);
                 return count * sizeof(MEMORY_BASIC_INFORMATION);
             }
             prevRegionEnd = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region end point
         }
         if(count == 0) // Starting region was not valid; set error number
         {
-            SP_setError(SP_ERROR_INVALID_PARAMETER);
+            set_error(SP_ERROR_INVALID_PARAMETER);
         }
         // If buffer room still exists, get info for subsequent regions:
         while(std::getline(inFile, line) && count != total)
         {
-            parseMemMapRegion(line.c_str(), &region);
+            parse_mem_map_region(line.c_str(), &region);
             memcpy(buff+count, &region, sizeof(MEMORY_BASIC_INFORMATION));
             count++;
         }
@@ -193,12 +193,12 @@ size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t len
 
 
 // Get the current memory protection permissions at a given address in memory (for THIS process):
-uint32_t getMemProtection(void *address)
+uint32_t get_mem_protection(void *address)
 {
     MEMORY_BASIC_INFORMATION memInfo;
-    if(SP_VirtualQuery(address, &memInfo, sizeof(memInfo)) < sizeof(memInfo))
+    if(virtual_query(address, &memInfo, sizeof(memInfo)) < sizeof(memInfo))
     {
-        // SP_VirtualQuery failed
+        // virtual_query failed
         return -1;
     }
     return (uint32_t)memInfo.Protect;
@@ -207,7 +207,7 @@ uint32_t getMemProtection(void *address)
 
 // Parses a line from /proc/self/maps and stores the info in a MEMORY_BASIC_INFORMATION struct:
 #ifndef _WIN32
-void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
+void parse_mem_map_region(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
 {
     void *start, *end; // Starting and ending addresses of the current region being parsed
     char permissionFlags[4] = { '\0', '\0', '\0', '\0' }, // Read/Write/Execute flags
@@ -264,7 +264,7 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
 
 // Obtain the MEMORY_BASIC_INFORMATION struct for the first region in memory whose
 //  base address is higher than the last address in the current region:
-void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next)
+void *next_mem_region(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next)
 {
     MEMORY_BASIC_INFORMATION buf[2]; // Temporary buffer (serves a few purposes)
     if(next == NULL)
@@ -273,9 +273,9 @@ void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION 
     }
     if(current == NULL || current->BaseAddress == NULL)
     { // No "current" memory region specified; get the first memory region in the process  
-        if(SP_VirtualQuery(getProcessBase(), next, sizeof(MEMORY_BASIC_INFORMATION)) < sizeof(MEMORY_BASIC_INFORMATION))
+        if(virtual_query(get_process_base(), next, sizeof(MEMORY_BASIC_INFORMATION)) < sizeof(MEMORY_BASIC_INFORMATION))
         {
-            // SP_VirtualQuery failed; return NULL
+            // virtual_query failed; return NULL
             return NULL;
         }
         else
@@ -285,8 +285,8 @@ void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION 
     }
     else
     {
-        if(SP_VirtualQuery(current->BaseAddress, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
-        {   // SP_VirtualQuery failed
+        if(virtual_query(current->BaseAddress, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
+        {   // virtual_query failed
             return NULL;
         }
         else
@@ -300,17 +300,17 @@ void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION 
 
 // Obtain the base address for the first region in memory whose
 //  base address is higher than the given address:
-void *nextMemRegion(void *current)
+void *next_mem_region(void *current)
 {
     MEMORY_BASIC_INFORMATION buf[2]; // Temporary buffer
     if(current == NULL)
     { // No "current" memory region specified; get the first memory region in the process  
-        return getProcessBase();
+        return get_process_base();
     }
     else
     {
-        if(SP_VirtualQuery(current, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
-        {   // SP_VirtualQuery failed
+        if(virtual_query(current, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
+        {   // virtual_query failed
             return NULL;
         }
         else
@@ -323,31 +323,31 @@ void *nextMemRegion(void *current)
 
 // Obtain the starting address of the page of memory that contains the given memory address:
 #ifdef _MSC_VER
-void* __vectorcall getPageBase(void *address) // This function must use __vectorcall to avoid crashes in 32-bit mode
+void* __vectorcall get_page_base(void *address) // This function must use __vectorcall to avoid crashes in 32-bit mode
 #else
-void *getPageBase(void *address)
+void *get_page_base(void *address)
 #endif // _MSC_VER
 {
-    if(is32Bit())
+    if(is_32bit())
     { // 32-bit process
         // Calculate and return the base address of the page:
-        return (void*)((uint32_t)(uint64_t)address - ((uint32_t)(uint64_t)address % getPageSize())); // Double cast to subdue compiler warnings
+        return (void*)((uint32_t)(uint64_t)address - ((uint32_t)(uint64_t)address % get_page_size())); // Double cast to subdue compiler warnings
     }
     else
     { // 64-bit process
         // Calculate and return the base address of the page:
-        return (void*)((uint64_t)address - ((uint64_t)address % getPageSize()));
+        return (void*)((uint64_t)address - ((uint64_t)address % get_page_size()));
     }
 }
 
 
 // Obtain the system page size:
-size_t getPageSize()
+size_t get_page_size()
 {
 	// Determine the OS:
     #ifdef _WIN32 // Windows:
         SYSTEM_INFO sysInfo;
-		if(SP_IsWow64Process())
+		if(is_wow64_process())
 		{
 			GetNativeSystemInfo(&sysInfo);
 		}

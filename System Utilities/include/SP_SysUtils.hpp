@@ -113,7 +113,7 @@
 ///////////// Function prototypes /////////////
 
 
-/*SP_IsWow64Process()
+/*is_wow64_process()
  * A wrapper function for the Windows API function IsWow64Process(). This wrapper function
  *	calls IsWow64Process() using GetProcAddress() to provide compatibility on a wider range
  *	of systems. This method is described in the Windows API documentation for IsWow64Process():
@@ -128,48 +128,48 @@
  *	If GetProcAddress returns NULL, we know that the current system does not support IsWow64Process().
  */
  #ifdef _WIN32
-bool SP_IsWow64Process();
+bool is_wow64_process();
 #endif // _WIN32
 
 
-/*getProcessBase
+/*get_process_base
  * Obtains the base address of the current process.
  */
-void *getProcessBase();
+void *get_process_base();
 
 
-/*is32Bit()
+/*is_32bit()
  * Determines whether the current process is running in 32-bit mode or 64-bit mode.
  *
  *  @return true if the current process is running in 32-bit mode; false otherwise.
  */
-bool is32Bit();
+bool is_32bit();
 
 
-/*is64Bit()
+/*is_64bit()
  * Determines whether the current process is running in 32-bit mode or 64-bit mode.
  *
  *  @return true if the current process is running in 64-bit mode; false otherwise.
  */
-bool is64Bit();
+bool is_64bit();
 
 
-/*SP_setError(uint32_t)
+/*set_error(uint32_t)
  * Sets the system error number.
  */
-void SP_setError(uint32_t newError);
+void set_error(uint32_t newError);
 
 
-/*SP_getError()
+/*get_error()
  * Gets the current system error number.
  *
  *  @return The current system error number.
  */
-uint32_t SP_getError();
+uint32_t get_error();
 
 
 
-/* setMemProtection(void *, size_t, uint32_t, uint32_t *)
+/* set_mem_protection(void *, size_t, uint32_t, uint32_t *)
  *  Cross-platform wrapper function for changing memory protection settings.
  *      On Windows, VirtualProtect is called. On Unix, mprotect is called.
  *  @param address  The location in memory where the memory protection will be changed.
@@ -181,19 +181,19 @@ uint32_t SP_getError();
  *                          NOTE: The oldProtection parameter is not used in Unix.
  *  @return 0 if successful; non-zero value on failure.
  */
-int setMemProtection(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
+int set_mem_protection(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
 
 
-/* setMemProtection(void *, size_t, uint32_t)
- *	Overloaded version of setMemProtection(void *, size_t, uint32_t, uint32_t *). This is the same
+/* set_mem_protection(void *, size_t, uint32_t)
+ *	Overloaded version of set_mem_protection(void *, size_t, uint32_t, uint32_t *). This is the same
  *		as calling the original function with a NULL oldProtection argument.
- *  @params See @setMemProtection(void *, size_t, uint32_t, uint32_t *) documentation.
+ *  @params See @set_mem_protection(void *, size_t, uint32_t, uint32_t *) documentation.
  *  @return 0 if successful; non-zero value on failure.
  */
-int setMemProtection(void *address, size_t size, uint32_t newProtection);
+int set_mem_protection(void *address, size_t size, uint32_t newProtection);
 
 
-/*SP_VirtualQuery(void *, MEMORY_BASIC_INFORMATION *, size_t)
+/*virtual_query(void *, MEMORY_BASIC_INFORMATION *, size_t)
  * A portable function for querying properties of memory regions.
  *  On Windows, this is merely a wrapper function for VirtualQuery (no extra
  *      functionality).
@@ -205,17 +205,17 @@ int setMemProtection(void *address, size_t size, uint32_t newProtection);
  *  @param length   The size of the buffer (in bytes). Optimally this should be
  *                  a multiple of sizeof(MEMORY_BASIC_INFORMATION).
  */
-size_t SP_VirtualQuery(void *address, MEMORY_BASIC_INFORMATION *buff, size_t length);
+size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t length);
 
-/*getMemProtection(void *)
+/*get_mem_protection(void *)
  * Obtains the current memory protection permissions at a given address in memory (for this process).
  *  
  *  @param address The address for which this function obtains access the current access permissions
  */
-uint32_t getMemProtection(void *address);
+uint32_t get_mem_protection(void *address);
 
 
-/*parseMemMapRegion(const char *, MEMORY_BASIC_INFORMATION *)
+/*parse_mem_map_region(const char *, MEMORY_BASIC_INFORMATION *)
  * Parses a line of text from /proc/self/maps which describes a region of memory
  *  and the properties that apply to it (address range, access protection, etc).
  *  NOTE: This function is for Unix systems only; the memInfo struct aims to
@@ -227,11 +227,11 @@ uint32_t getMemProtection(void *address);
  *         be stored.
  */
  #ifndef _WIN32
-void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo);
+void parse_mem_map_region(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo);
 #endif // !_WIN32
 
 
-/*nextMemRegion(MEMORY_BASIC_INFORMATION *, MEMORY_BASIC_INFORMATION *)
+/*next_mem_region(MEMORY_BASIC_INFORMATION *, MEMORY_BASIC_INFORMATION *)
  * Obtains the memory information for the first memory region following the region specified
  *  by the "current" argument. If "current" is NULL, this function obtains the first
  *  memory region for the process.
@@ -241,34 +241,34 @@ void parseMemMapRegion(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
  *
  *  @return The base address of the next region, or NULL if the function fails.
  */
-void *nextMemRegion(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next);
+void *next_mem_region(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next);
 
 
-/*nextMemRegion(void *)
+/*next_mem_region(void *)
  * Obtains the base address for the first region in memory whose base address is higher than
  *  the given address.
  *
  *  @param current  An address that exists within the "current" region in memory.
  */
-void *nextMemRegion(void *current);
+void *next_mem_region(void *current);
 
 
-/*getPageBase(void *)
+/*get_page_base(void *)
  * Obtains the base address of a process page that contains the given memory adress.
  *
  * @param address	The memory address that resides within the page.
  */
 #ifdef _MSC_VER
-void* __vectorcall getPageBase(void *address); // This function must use __vectorcall to avoid crashes in 32-bit mode
+void* __vectorcall get_page_base(void *address); // This function must use __vectorcall to avoid crashes in 32-bit mode
 #else
-void *getPageBase(void *address);
+void *get_page_base(void *address);
 #endif // _MSC_VER;
 
 
-/*getPageSize()
+/*get_page_size()
  * Obtains the system page size.
  */
-size_t getPageSize();
+size_t get_page_size();
 
 
 #endif // SP_SYSUTILS_HPP
