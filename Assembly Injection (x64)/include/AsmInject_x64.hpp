@@ -64,7 +64,7 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
  *      POP %rax    // Beginning of user code
  *      // User code body
  *      PUSH %rax   // End of user code
- *      MOVABS %rax, returnJmpAddr
+ *      MOVABS %rax, ret_to
  *      JMP %rax
  *  
  * Injected code:
@@ -73,16 +73,16 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
  *      JMP %rax
  *      POP %rax                // User code should return here
  *
- *  @param injectionAddr    The location in memory where the assembly code will be injected. A
+ *  @param inject_at    The location in memory where the assembly code will be injected. A
  *                          JMP instruction will be written at this location.
- *  @param returnJmpAddr    The location in memory where the code cave should return to
- *                          after execution. This function writes to returnJmpAddr.
- *  @param nopCount         The number of NOP instructions to be written after the injected code.
+ *  @param ret_to    The location in memory where the code cave should return to
+ *                          after execution. This function writes to ret_to.
+ *  @param nops         The number of NOP instructions to be written after the injected code.
  *                          These NOPs will erase any remaining garbage bytes resulting from
  *                          overwriting existing instructions at the injection location.
- *  @param asmCode  A pointer to an assembly function (to be used as a code cave).
+ *  @param asm_code  A pointer to an assembly function (to be used as a code cave).
  */
-void inject_jmp_14b(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode);
+void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code);
 
 
 
@@ -112,29 +112,29 @@ void inject_jmp_14b(void *injectionAddr, void *returnJmpAddr, int nopCount, void
  *      POP %rax    // Beginning of user code
  *      // User code body
  *      PUSH %rax   // End of user code
- *      MOVABS %rax, returnJmpAddr
+ *      MOVABS %rax, ret_to
  *      JMP %rax
  *
  * Injected code:
  *      JMP rel32        // rel32 is the relative offset of the local trampoline with a JMP r/m64 instruction
  *
- *  @param injectionAddr    The location in memory where the assembly code will be injected. A
+ *  @param inject_at    The location in memory where the assembly code will be injected. A
  *                          JMP instruction will be written at this location.
- *  @param returnJmpAddr    The location in memory where the code cave should return to
- *                          after execution. This function writes to returnJmpAddr.
- *  @param nopCount         The number of NOP instructions to be written after the injected code.
+ *  @param ret_to    The location in memory where the code cave should return to
+ *                          after execution. This function writes to ret_to.
+ *  @param nops         The number of NOP instructions to be written after the injected code.
  *                          These NOPs will erase any remaining garbage bytes resulting from
  *                          overwriting existing instructions at the injection location.
- *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
- *  @param localTrampoline  The address of the local trampoline function (structured the same as a
+ *  @param asm_code          A pointer to an assembly function (to be used as a code cave).
+ *  @param local_trampoline  The address of the local trampoline function (structured the same as a
  *                          inject_jmp_14b), which must start in the range:
- *                          [injectionAddr-2³¹+5,injectionAddr+2³¹+4]
- *  @param trampNopCount    The number of NOP instructions to be written after the local trampoline.
+ *                          [inject_at-2³¹+5,inject_at+2³¹+4]
+ *  @param tramp_nops    The number of NOP instructions to be written after the local trampoline.
  *                          This could be necessary if the user wrote their trampoline function over
  *                          existing instructions
  */
-void inject_jmp_5b(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount);
+void inject_jmp_5b(void *inject_at, void *ret_to, int nops, void *asm_code,
+                    void *local_trampoline, int tramp_nops);
 
 
 
@@ -164,29 +164,29 @@ void inject_jmp_5b(void *injectionAddr, void *returnJmpAddr, int nopCount, void 
  *      POP %rax    // Beginning of user code
  *      // User code body
  *      PUSH %rax   // End of user code
- *      MOVABS %rax, returnJmpAddr
+ *      MOVABS %rax, ret_to
  *      JMP %rax
  *
  * Injected code:
  *      JMP rel8        // rel8 is the relative offset of the local trampoline with a JMP r/m64 instruction
  *
- *  @param injectionAddr    The location in memory where the assembly code will be injected. A
+ *  @param inject_at    The location in memory where the assembly code will be injected. A
  *                          JMP instruction will be written at this location.
- *  @param returnJmpAddr    The location in memory where the code cave should return to
- *                          after execution. This function writes to returnJmpAddr.
- *  @param nopCount         The number of NOP instructions to be written after the injected code.
+ *  @param ret_to    The location in memory where the code cave should return to
+ *                          after execution. This function writes to ret_to.
+ *  @param nops         The number of NOP instructions to be written after the injected code.
  *                          These NOPs will erase any remaining garbage bytes resulting from
  *                          overwriting existing instructions at the injection location.
- *  @param asmCode          A pointer to an assembly function (to be used as a code cave).
- *  @param localTrampoline  The address of the local trampoline function (structured the same as a
+ *  @param asm_code          A pointer to an assembly function (to be used as a code cave).
+ *  @param local_trampoline  The address of the local trampoline function (structured the same as a
  *                          inject_jmp_14b), which must start in the range:
- *                          [injectionAddr+129, injectionAddr-126]
- *  @param trampNopCount    The number of NOP instructions to be written after the local trampoline.
+ *                          [inject_at+129, inject_at-126]
+ *  @param tramp_nops    The number of NOP instructions to be written after the local trampoline.
  *                          This could be necessary if the user wrote their trampoline function over
  *                          existing instructions
  */
-void inject_jmp_2b(void *injectionAddr, void *returnJmpAddr, int nopCount, void *asmCode,
-                    void *localTrampoline, int trampNopCount);
+void inject_jmp_2b(void *inject_at, void *ret_to, int nops, void *asm_code,
+                    void *local_trampoline, int tramp_nops);
 
 
 
@@ -197,7 +197,7 @@ void inject_jmp_2b(void *injectionAddr, void *returnJmpAddr, int nopCount, void 
  *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
  *          existing instructions.
  */
-void write_bytecode_5b(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+void write_bytecode_5b(void *inject_at, int nops, void *local_trampoline, int tramp_nops, void *jmp_to);
 
 
 
@@ -208,7 +208,7 @@ void write_bytecode_5b(void *injectionAddr, int nopCount, void *localTrampoline,
  *      -Overwrites remaining garbage bytecode with NOPs if local trampoline was written over
  *          existing instructions.
  */
-void write_bytecode_2b(void *injectionAddr, int nopCount, void *localTrampoline, int trampNopCount, void *jmpTo);
+void write_bytecode_2b(void *inject_at, int nops, void *local_trampoline, int tramp_nops, void *jmp_to);
 
 
 
@@ -223,141 +223,141 @@ void write_bytecode_2b(void *injectionAddr, int nopCount, void *localTrampoline,
   *     JMP %rax
   *     POP %rax                // %rax is restored upon returning here
   */
-int write_jmp_rax_14b(void *injectionAddr, void *jmpTo, int nopCount);
+int write_jmp_rax_14b(void *inject_at, void *jmp_to, int nops);
 
 
 
 /* write_jmp_rel8
- *  Writes a JMP rel8 instruction from the specified writeTo address to the given jmpTo address.
+ *  Writes a JMP rel8 instruction from the specified write_to address to the given jmp_to address.
  *
- *  @param writeTo  The address where the JMP rel8 instruction will be written.
- *  @param jmpTo    The address where the JMP rel8 instruction will jump to. After the JMP rel8
- *                  instruction executes, %rip = jmpTo.
- *                  NOTE: jmpTo must be in the range [writeTo-128,writeTo+127]
- *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ *  @param write_to  The address where the JMP rel8 instruction will be written.
+ *  @param jmp_to    The address where the JMP rel8 instruction will jump to. After the JMP rel8
+ *                  instruction executes, %rip = jmp_to.
+ *                  NOTE: jmp_to must be in the range [write_to-128,write_to+127]
+ *  @param nops The number of NOP instructions to be written after the JMP rel8 instruction.
  */
-void write_jmp_rel8(void *writeTo, void *jmpTo, int nopCount);
+void write_jmp_rel8(void *write_to, void *jmp_to, int nops);
 
 
 
 /* write_jmp_rel8
- *  Writes a JMP rel8 instruction at the specified writeTo address using the given offset.
+ *  Writes a JMP rel8 instruction at the specified write_to address using the given offset.
  *
- *  @param writeTo  The address where the JMP rel8 instruction will be written.
+ *  @param write_to  The address where the JMP rel8 instruction will be written.
  *  @param offset   The offset that the JMP rel8 instruction will jump to. After the JMP rel8
- *                  instruction executes, %rip = writeTo+offset+2.
- *                  NOTE: offset must be in the range [writeTo-128,writeTo+127]
- *  @param nopCount The number of NOP instructions to be written after the JMP rel8 instruction.
+ *                  instruction executes, %rip = write_to+offset+2.
+ *                  NOTE: offset must be in the range [write_to-128,write_to+127]
+ *  @param nops The number of NOP instructions to be written after the JMP rel8 instruction.
  */
-void write_jmp_rel8(void *writeTo, int8_t offset, int nopCount);
+void write_jmp_rel8(void *write_to, int8_t offset, int nops);
 
 
 
 /* write_jmp_rel32
- *  Writes a JMP rel32 instruction at the specified writeTo address.
+ *  Writes a JMP rel32 instruction at the specified write_to address.
  *
- *  @param writeTo  The address where the JMP rel32 instruction will be written.
- *  @param jmpTo    The address where the JMP rel32 instruction will jump to. After the JMP rel32
- *                  instruction executes, %rip = jmpTo.
- *                  NOTE: jmpTo must be in the range [writeTo-2³¹,writeTo+2³¹-1]
- *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
+ *  @param write_to  The address where the JMP rel32 instruction will be written.
+ *  @param jmp_to    The address where the JMP rel32 instruction will jump to. After the JMP rel32
+ *                  instruction executes, %rip = jmp_to.
+ *                  NOTE: jmp_to must be in the range [write_to-2³¹,write_to+2³¹-1]
+ *  @param nops The number of NOP instructions to be written after the JMP rel32 instruction.
  */
-void write_jmp_rel32(void *writeTo, void *jmpTo, int nopCount);
+void write_jmp_rel32(void *write_to, void *jmp_to, int nops);
 
 
 
 /* write_jmp_rel32
- *  Writes a JMP rel32 instruction at the specified writeTo address using the given offset.
+ *  Writes a JMP rel32 instruction at the specified write_to address using the given offset.
  *
- *  @param writeTo  The address where the JMP rel32 instruction will be written.
+ *  @param write_to  The address where the JMP rel32 instruction will be written.
  *  @param offset   The offset that the JMP rel32 instruction will jump to. After the JMP rel32
- *                  instruction executes, %rip = writeTo+offset+5.
- *                  NOTE: offset must be in the range [writeTo-2³¹,writeTo+2³¹-1]
- *  @param nopCount The number of NOP instructions to be written after the JMP rel32 instruction.
+ *                  instruction executes, %rip = write_to+offset+5.
+ *                  NOTE: offset must be in the range [write_to-2³¹,write_to+2³¹-1]
+ *  @param nops The number of NOP instructions to be written after the JMP rel32 instruction.
  */
-void write_jmp_rel32(void *writeTo, int32_t offset, int nopCount);
+void write_jmp_rel32(void *write_to, int32_t offset, int nops);
 
 
 
 /* write_call_rel32
- *  Writes a CALL rel32 instruction at the specified writeTo address.
+ *  Writes a CALL rel32 instruction at the specified write_to address.
  *
- *  @param writeTo      The address where the CALL rel32 instruction will be written.
+ *  @param write_to      The address where the CALL rel32 instruction will be written.
  *  @param procedure    The address of the called procedure. After the CALL rel32
  *                      instruction executes, %rip = procedure.
- *                      NOTE: procedure must be in the range [writeTo-2³¹,writeTo+2³¹-1]
- *  @param nopCount     The number of NOP instructions to be written after the CALL rel32 instruction.
+ *                      NOTE: procedure must be in the range [write_to-2³¹,write_to+2³¹-1]
+ *  @param nops     The number of NOP instructions to be written after the CALL rel32 instruction.
  */
-void write_call_rel32(void *writeTo, void *procedure, int nopCount);
+void write_call_rel32(void *write_to, void *procedure, int nops);
 
 
 
 /* write_call_rel32
- *  Writes a CALL rel32 instruction at the specified writeTo address using the given offset.
+ *  Writes a CALL rel32 instruction at the specified write_to address using the given offset.
  *
- *  @param writeTo  The address where the CALL rel32 instruction will be written.
+ *  @param write_to  The address where the CALL rel32 instruction will be written.
  *  @param offset   The offset of the called procedure. After the CALL rel32
- *                  instruction executes, %rip = writeTo+offset+5.
- *                  NOTE: offset must be in the range [writeTo-2³¹,writeTo+2³¹-1]
- *  @param nopCount The number of NOP instructions to be written after the CALL rel32 instruction.
+ *                  instruction executes, %rip = write_to+offset+5.
+ *                  NOTE: offset must be in the range [write_to-2³¹,write_to+2³¹-1]
+ *  @param nops The number of NOP instructions to be written after the CALL rel32 instruction.
  */
-void write_call_rel32(void *writeTo, int32_t offset, int nopCount);
+void write_call_rel32(void *write_to, int32_t offset, int nops);
 
 
 
 /* write_ret
- *  Writes a "near return" (RET) instruction at the specified writeTo address.
+ *  Writes a "near return" (RET) instruction at the specified write_to address.
  *
- *  @param writeTo  The address where the RET instruction will be written.
- *  @param nopCount The number of NOP instructions to be written after the RET instruction.
+ *  @param write_to  The address where the RET instruction will be written.
+ *  @param nops The number of NOP instructions to be written after the RET instruction.
  */
-void write_ret(void *writeTo, int nopCount);
+void write_ret(void *write_to, int nops);
 
 
 
 /* write_ret_far
- *  Writes a "far return" (RET) instruction at the specified writeTo address.
+ *  Writes a "far return" (RET) instruction at the specified write_to address.
  *
- *  @param writeTo  The address where the RET instruction will be written.
- *  @param nopCount The number of NOP instructions to be written after the RET instruction.
+ *  @param write_to  The address where the RET instruction will be written.
+ *  @param nops The number of NOP instructions to be written after the RET instruction.
  */
-void write_ret_far(void *writeTo, int nopCount);
+void write_ret_far(void *write_to, int nops);
 
 
 
 /* write_ret_imm16
  *  Writes a "near return, pop imm16 bytes from stack" (RET imm16) instruction at the
- *	 specified writeTo address.
+ *	 specified write_to address.
  *
- *  @param writeTo  The address where the RET imm16 instruction will be written.
- *  @param popBytes The number of bytes to pop from the stack before returning to the calling
+ *  @param write_to  The address where the RET imm16 instruction will be written.
+ *  @param pop_bytes The number of bytes to pop from the stack before returning to the calling
  *					procedure.
- *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
+ *  @param nops The number of NOP instructions to be written after the RET imm16 instruction.
  */
-void write_ret_imm16(void *writeTo, uint16_t popBytes, int nopCount);
+void write_ret_imm16(void *write_to, uint16_t pop_bytes, int nops);
 
 
 
 /* write_ret_far_imm16
  *  Writes a "far return, pop imm16 bytes from stack" (RET imm16) instruction at the
- *	 specified writeTo address.
+ *	 specified write_to address.
  *
- *  @param writeTo  The address where the RET imm16 instruction will be written.
- *  @param popBytes The number of bytes to pop from the stack before returning to the calling
+ *  @param write_to  The address where the RET imm16 instruction will be written.
+ *  @param pop_bytes The number of bytes to pop from the stack before returning to the calling
  *					procedure.
- *  @param nopCount The number of NOP instructions to be written after the RET imm16 instruction.
+ *  @param nops The number of NOP instructions to be written after the RET imm16 instruction.
  */
-void write_ret_far_imm16(void *writeTo, uint16_t popBytes, int nopCount);
+void write_ret_far_imm16(void *write_to, uint16_t pop_bytes, int nops);
 
 
 
 /* calculate_jmp_offset
- *  Calculates the offset between a JMP rel instruction and toAddress.
- *  @param fromAddress      The address of the JMP instruction.
- *  @param toAddress        The address to jump to.
- *  @param jmpInstrLength   The length of the variation of JMP instruction being used
+ *  Calculates the offset between a JMP rel instruction and to.
+ *  @param from      The address of the JMP instruction.
+ *  @param to        The address to jump to.
+ *  @param instr_length   The length of the variation of JMP instruction being used
  */
-int64_t calculate_jmp_offset(void *fromAddress, void *toAddress, int jmpInstrLength);
+int64_t calculate_jmp_offset(void *from, void *to, int instr_length);
 
  
 

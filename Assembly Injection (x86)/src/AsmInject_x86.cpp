@@ -11,156 +11,156 @@
 
 
 
-void inject_jmp_5b(uint8_t *injectionAddr, uint32_t *returnJumpAddr, int nopCount, void *asmCode)
+void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void *asm_code)
 {
 
     // The remaining 4 bytes of the instruction are the operand, specifying the offset from this address to the code cave:
     #ifdef _MSC_VER
         // Using a Microsoft compiler; jump straight to the code cave:
-		write_jmp_rel32(injectionAddr, asmCode, nopCount);
+		write_jmp_rel32(inject_at, asm_code, nops);
     #else
-        // Using non-MS compiler; GCC ASM starts +3 bytes from &asmCode:
-        write_jmp_rel32(injectionAddr, (uint8_t*)asmCode+3, nopCount);
+        // Using non-MS compiler; GCC ASM starts +3 bytes from &asm_code:
+        write_jmp_rel32(inject_at, (uint8_t*)asm_code+3, nops);
     #endif // _MSC_VER
 
     // Calculate the address of the next instruction after the injected JMP and write it to the in-line ASM function's return JMP:
-    *returnJumpAddr = ((uint32_t)injectionAddr + JMP_REL32_INSTR_LENGTH);
+    *returnJumpAddr = ((uint32_t)inject_at + JMP_REL32_INSTR_LENGTH);
 }
 
 
 
-// Writes a JMP rel8 instruction from writeTo to jmpTo, and inserts trailing NOPs (if necessary):
-void write_jmp_rel8(void *writeTo, void *jmpTo, int nopCount)
+// Writes a JMP rel8 instruction from write_to to jmp_to, and inserts trailing NOPs (if necessary):
+void write_jmp_rel8(void *write_to, void *jmp_to, int nops)
 {
-    *(uint8_t*)writeTo = JMP_REL8_INSTR_OPCODE; // Write opcode byte
+    *(uint8_t*)write_to = JMP_REL8_INSTR_OPCODE; // Write opcode byte
     
-    *((uint8_t*)writeTo+1) = (int8_t)calculate_jmp_offset(writeTo, jmpTo, JMP_REL8_INSTR_LENGTH); // Write operand byte
+    *((uint8_t*)write_to+1) = (int8_t)calculate_jmp_offset(write_to, jmp_to, JMP_REL8_INSTR_LENGTH); // Write operand byte
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
-    memset((void*)((uint8_t*)writeTo + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a JMP rel8 instruction from writeTo using the given offset, and inserts trailing NOPs if necessary
-void write_jmp_rel8(void *writeTo, int8_t offset, int nopCount)
+// Writes a JMP rel8 instruction from write_to using the given offset, and inserts trailing NOPs if necessary
+void write_jmp_rel8(void *write_to, int8_t offset, int nops)
 {
-    *(uint8_t*)writeTo = JMP_REL8_INSTR_OPCODE; // Write opcode byte
+    *(uint8_t*)write_to = JMP_REL8_INSTR_OPCODE; // Write opcode byte
     
-    *((int8_t*)writeTo+1) = offset; // Write operand byte
+    *((int8_t*)write_to+1) = offset; // Write operand byte
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
-    memset((void*)((uint8_t*)writeTo + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + JMP_REL8_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a JMP rel32 instruction from writeTo to jmpTo, and inserts trailing NOPs (if necessary):
-void write_jmp_rel32(void *writeTo, void *jmpTo, int nopCount)
+// Writes a JMP rel32 instruction from write_to to jmp_to, and inserts trailing NOPs (if necessary):
+void write_jmp_rel32(void *write_to, void *jmp_to, int nops)
 {
-    *(uint8_t*)writeTo = JMP_REL32_INSTR_OPCODE; // Write opcode byte
+    *(uint8_t*)write_to = JMP_REL32_INSTR_OPCODE; // Write opcode byte
     
-    *(uint32_t*)((uint8_t*)writeTo+1) = (int32_t)calculate_jmp_offset(writeTo, jmpTo, JMP_REL32_INSTR_LENGTH); // Write operand bytes
+    *(uint32_t*)((uint8_t*)write_to+1) = (int32_t)calculate_jmp_offset(write_to, jmp_to, JMP_REL32_INSTR_LENGTH); // Write operand bytes
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
-    memset((void*)((uint8_t*)writeTo + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a JMP rel32 instruction from writeTo using the given offset, and inserts trailing NOPs if necessary
-void write_jmp_rel32(void *writeTo, int32_t offset, int nopCount)
+// Writes a JMP rel32 instruction from write_to using the given offset, and inserts trailing NOPs if necessary
+void write_jmp_rel32(void *write_to, int32_t offset, int nops)
 {
-    *(uint8_t*)writeTo = JMP_REL32_INSTR_OPCODE; // Write opcode byte
+    *(uint8_t*)write_to = JMP_REL32_INSTR_OPCODE; // Write opcode byte
     
-    *(int32_t*)((uint8_t*)writeTo+1) = offset; // Write operand bytes
+    *(int32_t*)((uint8_t*)write_to+1) = offset; // Write operand bytes
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
-    memset((void*)((uint8_t*)writeTo + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + JMP_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a CALL rel32 instruction from writeTo to procedure, and inserts trailing NOPs if necessary
-void write_call_rel32(void *writeTo, void *procedure, int nopCount)
+// Writes a CALL rel32 instruction from write_to to procedure, and inserts trailing NOPs if necessary
+void write_call_rel32(void *write_to, void *procedure, int nops)
 {
-    *(uint8_t*)writeTo = CALL_REL32_INSTR_OPCODE; // Write opcode byte
+    *(uint8_t*)write_to = CALL_REL32_INSTR_OPCODE; // Write opcode byte
     
-    *(uint32_t*)((uint8_t*)writeTo+1) = (int32_t)calculate_jmp_offset(writeTo, procedure, CALL_REL32_INSTR_LENGTH); // Write operand bytes
+    *(uint32_t*)((uint8_t*)write_to+1) = (int32_t)calculate_jmp_offset(write_to, procedure, CALL_REL32_INSTR_LENGTH); // Write operand bytes
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
-    memset((void*)((uint8_t*)writeTo + CALL_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + CALL_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a CALL rel32 instruction from writeTo using the given offset, and inserts trailing NOPs if necessary
-void write_call_rel32(void *writeTo, int32_t offset, int nopCount)
+// Writes a CALL rel32 instruction from write_to using the given offset, and inserts trailing NOPs if necessary
+void write_call_rel32(void *write_to, int32_t offset, int nops)
 {
-    *(uint8_t*)writeTo = CALL_REL32_INSTR_OPCODE; // Write opcode byte
+    *(uint8_t*)write_to = CALL_REL32_INSTR_OPCODE; // Write opcode byte
     
-    *(int32_t*)((uint8_t*)writeTo+1) = offset; // Write operand bytes
+    *(int32_t*)((uint8_t*)write_to+1) = offset; // Write operand bytes
 
     // Erase trailing garbage bytes from overwritten instruction(s) at write address:
-    memset((void*)((uint8_t*)writeTo + CALL_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + CALL_REL32_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a "near return" (RET) instruction to writeTo and inserts trailing NOPs if necessary
-void write_ret(void *writeTo, int nopCount)
+// Writes a "near return" (RET) instruction to write_to and inserts trailing NOPs if necessary
+void write_ret(void *write_to, int nops)
 {
-	*(uint8_t*)writeTo = RET_INSTR_OPCODE; // Write instruction
+	*(uint8_t*)write_to = RET_INSTR_OPCODE; // Write instruction
 	
 	// Erase trailing garbage bytes from overwritten instruction at write address:
-    memset((void*)((uint8_t*)writeTo + RET_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + RET_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a "far return" (RET) instruction to writeTo and inserts trailing NOPs if necessary
-void write_ret_far(void *writeTo, int nopCount)
+// Writes a "far return" (RET) instruction to write_to and inserts trailing NOPs if necessary
+void write_ret_far(void *write_to, int nops)
 {
-	*(uint8_t*)writeTo = RET_FAR_INSTR_OPCODE; // Write instruction
+	*(uint8_t*)write_to = RET_FAR_INSTR_OPCODE; // Write instruction
 	
 	// Erase trailing garbage bytes from overwritten instruction at write address:
-    memset((void*)((uint8_t*)writeTo + RET_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + RET_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a "near return, pop imm16 bytes from stack" (RET imm16) instruction to writeTo and
+// Writes a "near return, pop imm16 bytes from stack" (RET imm16) instruction to write_to and
 //  inserts trailing NOPs if necessary
-void write_ret_imm16(void *writeTo, uint16_t popBytes, int nopCount)
+void write_ret_imm16(void *write_to, uint16_t pop_bytes, int nops)
 {
-	*(uint8_t*)writeTo = RET_IMM16_INSTR_OPCODE; // Write opcode byte
+	*(uint8_t*)write_to = RET_IMM16_INSTR_OPCODE; // Write opcode byte
 
-	*(uint16_t*)((uint8_t*)writeTo+1) = popBytes; // Write operand bytes
+	*(uint16_t*)((uint8_t*)write_to+1) = pop_bytes; // Write operand bytes
 	
 	// Erase trailing garbage bytes from overwritten instruction at write address:
-    memset((void*)((uint8_t*)writeTo + RET_IMM16_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + RET_IMM16_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
-// Writes a "far return, pop imm16 bytes from stack" (RET imm16) instruction to writeTo and
+// Writes a "far return, pop imm16 bytes from stack" (RET imm16) instruction to write_to and
 //  inserts trailing NOPs if necessary
-void write_ret_far_imm16(void *writeTo, uint16_t popBytes, int nopCount)
+void write_ret_far_imm16(void *write_to, uint16_t pop_bytes, int nops)
 {
-	*(uint8_t*)writeTo = RET_FAR_IMM16_INSTR_OPCODE; // Write opcode byte
+	*(uint8_t*)write_to = RET_FAR_IMM16_INSTR_OPCODE; // Write opcode byte
 
-	*(uint16_t*)((uint8_t*)writeTo+1) = popBytes; // Write operand bytes
+	*(uint16_t*)((uint8_t*)write_to+1) = pop_bytes; // Write operand bytes
 	
 	// Erase trailing garbage bytes from overwritten instruction at write address:
-    memset((void*)((uint8_t*)writeTo + RET_IMM16_INSTR_LENGTH), NOP_INSTR_OPCODE, nopCount);
+    memset((void*)((uint8_t*)write_to + RET_IMM16_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 }
 
 
 
 // Calculates the offset between a JMP instruction and target address:
-uint32_t calculate_jmp_offset(void *fromAddress, void *toAddress, int jmpInstrLength)
+uint32_t calculate_jmp_offset(void *from, void *to, int instr_length)
 {
-    return ((uint32_t)toAddress - (uint32_t)fromAddress - jmpInstrLength);
+    return ((uint32_t)to - (uint32_t)from - instr_length);
 }
 
 

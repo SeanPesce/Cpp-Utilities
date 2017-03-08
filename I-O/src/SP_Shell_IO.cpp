@@ -5,9 +5,9 @@
 
 
 // Prints the program name and author information:
-void sp_print_intro(const char* programName)
+void sp_print_intro(const char* program_name)
 {
-    std::cout << programName << std::endl; // Print the name of the program
+    std::cout << program_name << std::endl; // Print the name of the program
     std::cout << "Creator: \tSean Pesce" << std::endl << std::endl;
 }
 
@@ -22,11 +22,11 @@ void enter_to_continue(const char* prompt)
 
 // Prints a prompt message, waits for the user to press Enter (Return) key,
 //  and prints a final message before continuing:
-void enter_to_continue(const char* prompt, const char* continueMessage)
+void enter_to_continue(const char* prompt, const char* continue_msg)
 {
     std::cin.clear(); // Clear the input buffer
     std::cout << prompt; // Print the prompt message
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Wait for user input
-    std::cout << continueMessage; // Print the continuing message
+    std::cout << continue_msg; // Print the continuing message
 }
 

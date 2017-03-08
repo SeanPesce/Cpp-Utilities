@@ -13,22 +13,24 @@
 //	of systems:
 bool is_wow64_process()
 {
-	bool isWow64Proc = false;
+	bool is_wow64_proc_bool = false;
 
-	// From Microsoft documentation:
-	//	"IsWow64Process is not available on all supported versions of Windows.
-	//	 Use GetModuleHandle to get a handle to the DLL that contains the function
-	//	 and GetProcAddress to get a pointer to the function if available."
-	LPFN_ISWOW64PROCESS funcIsWow64Process = (LPFN_ISWOW64PROCESS)GetProcAddress(GetModuleHandle(TEXT("kernel32")), "IsWow64Process");
-	if(NULL != funcIsWow64Process)
+	/*
+		From Microsoft documentation:
+		"IsWow64Process is not available on all supported versions of Windows.
+		 Use GetModuleHandle to get a handle to the DLL that contains the function
+		 and GetProcAddress to get a pointer to the function if available."
+	*/
+	LPFN_ISWOW64PROCESS is_wow64_proc_func = (LPFN_ISWOW64PROCESS)GetProcAddress(GetModuleHandle(TEXT("kernel32")), "IsWow64Process");
+	if(NULL != is_wow64_proc_func)
     {
-        if (!funcIsWow64Process(GetCurrentProcess(), (PBOOL)&isWow64Proc))
+        if (!is_wow64_proc_func(GetCurrentProcess(), (PBOOL)&is_wow64_proc_bool))
         {
             // IsWow64Proccess() call failed; assume the process isn't running under WOW64? @TODO: handle this better?
         }
     }
 
-    return isWow64Proc;
+    return is_wow64_proc_bool;
 }
 #endif // _WIN32
 
@@ -40,16 +42,16 @@ void *get_process_base()
         return GetModuleHandle(NULL); // From MS documentation, HANDLE == void *
     #else
         // Resolve /proc/self/maps path (/proc/$PID/maps):
-        char memMapFilePath[32];
-		sprintf(memMapFilePath, MEM_MAP_FILE_DIR_FORMAT, (int)getpid());
-        std::ifstream inFile(memMapFilePath); // Open file input stream
-        void *processBase = NULL; // Will hold the base address of the process
+        char self_maps_file_path[32];
+		sprintf(self_maps_file_path, MEM_MAP_FILE_DIR_FORMAT, (int)getpid());
+        std::ifstream in_fs(self_maps_file_path); // Open file input stream
+        void *process_base = NULL; // Will hold the base address of the process
         std::string line; // Will hold the first line of /proc/self/maps, which contains the base address
 
-        if(std::getline(inFile, line))
+        if(std::getline(in_fs, line))
         {
-            sscanf(line.c_str(), "%p-", &processBase);
-            return processBase;
+            sscanf(line.c_str(), "%p-", &process_base);
+            return process_base;
         }
         else
         {
@@ -101,38 +103,38 @@ uint32_t get_error()
 
 
 // Set the memory protection permissions for a given section of memory:
-int set_mem_protection(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection)
+int set_mem_protection(void *address, size_t size, uint32_t new_protect, uint32_t *old_protect)
 {
     #ifdef _WIN32
         // Windows (use VirtualProtect)
-        if(oldProtection == NULL){
-            uint32_t oldProt; // If the user passes NULL for oldProtection, use &oldProt (otherwise VirtualProtect fails)
-            return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)&oldProt);
+        if(old_protect == NULL){
+            uint32_t tmp_protect; // If the user passes NULL for old_protect, use &tmp_protect (otherwise VirtualProtect fails)
+            return !VirtualProtect(address, size, (DWORD)new_protect, (DWORD*)&tmp_protect);
         } // Else...
-        return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)oldProtection);
+        return !VirtualProtect(address, size, (DWORD)new_protect, (DWORD*)old_protect);
     
     #else
         // Unix (use mprotect)
-        if(oldProtection != NULL)
+        if(old_protect != NULL)
         {
-            *oldProtection = get_mem_protection(address); // Create backup of old memory permissions
+            *old_protect = get_mem_protection(address); // Create backup of old memory permissions
         }
-        return mprotect(get_page_base(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
+        return mprotect(get_page_base(address), size, (int)new_protect); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
 }
 
 
 // Set the memory protection permissions for a given section of memory:
-int set_mem_protection(void *address, size_t size, uint32_t newProtection)
+int set_mem_protection(void *address, size_t size, uint32_t new_protect)
 {
     #ifdef _WIN32
-        uint32_t oldProt; // Must use &oldProt, otherwise VirtualProtect fails
-        return !VirtualProtect(address, size, (DWORD)newProtection, (DWORD*)&oldProt);
+        uint32_t tmp_protect; // Must use &tmp_protect, otherwise VirtualProtect fails
+        return !VirtualProtect(address, size, (DWORD)new_protect, (DWORD*)&tmp_protect);
     
     #else
         // Unix (use mprotect)
-        return mprotect(get_page_base(address), size, (int)newProtection); // getMemPage is called to obtain a page-aligned address
+        return mprotect(get_page_base(address), size, (int)new_protect); // getMemPage is called to obtain a page-aligned address
 
     #endif // _WIN32
 }
@@ -146,18 +148,18 @@ size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t lengt
         return VirtualQuery((LPCVOID)address, buff, length);
     #else
         // Resolve /proc/self/maps path (/proc/$PID/maps):
-        char memMapFilePath[32];
-		sprintf(memMapFilePath, MEM_MAP_FILE_DIR_FORMAT, (int)getpid());
+        char self_maps_file_path[32];
+		sprintf(self_maps_file_path, MEM_MAP_FILE_DIR_FORMAT, (int)getpid());
 
-        std::ifstream inFile(memMapFilePath); // Open file input stream
+        std::ifstream in_fs(self_maps_file_path); // Open file input stream
 
         MEMORY_BASIC_INFORMATION region; // Memory info struct
         std::string line; // Holds each line of data from /proc/self/maps file as they are parsed
         size_t total = length / sizeof(MEMORY_BASIC_INFORMATION); // Get the number of regions to parse
         size_t count = 0; // Number of regions that have been parsed thus far
-        void *prevRegionEnd = 0; // Last address inide the previous region (used to determine if an address lies between process regions)
+        void *prev_region_end = 0; // Last address inide the previous region (used to determine if an address lies between process regions)
         // Parse each memory region to find the requested starting region:
-        while(std::getline(inFile, line) && count != total)
+        while(std::getline(in_fs, line) && count != total)
         {
             parse_mem_map_region(line.c_str(), &region);
             if(region.BaseAddress <= address && (uint8_t *)region.BaseAddress+region.RegionSize > address)
@@ -167,26 +169,26 @@ size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t lengt
                 count++;
                 break;
             }
-            else if(address > prevRegionEnd && address < region.BaseAddress)
+            else if(address > prev_region_end && address < region.BaseAddress)
             {
                 // Requested address does not lie within a region for this process; set error number
                 set_error(SP_ERROR_INVALID_PARAMETER);
                 return count * sizeof(MEMORY_BASIC_INFORMATION);
             }
-            prevRegionEnd = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region end point
+            prev_region_end = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region end point
         }
         if(count == 0) // Starting region was not valid; set error number
         {
             set_error(SP_ERROR_INVALID_PARAMETER);
         }
         // If buffer room still exists, get info for subsequent regions:
-        while(std::getline(inFile, line) && count != total)
+        while(std::getline(in_fs, line) && count != total)
         {
             parse_mem_map_region(line.c_str(), &region);
             memcpy(buff+count, &region, sizeof(MEMORY_BASIC_INFORMATION));
             count++;
         }
-        inFile.close();
+        in_fs.close();
         return count * sizeof(MEMORY_BASIC_INFORMATION);
     #endif // _WIN32
 }
@@ -195,63 +197,63 @@ size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t lengt
 // Get the current memory protection permissions at a given address in memory (for THIS process):
 uint32_t get_mem_protection(void *address)
 {
-    MEMORY_BASIC_INFORMATION memInfo;
-    if(virtual_query(address, &memInfo, sizeof(memInfo)) < sizeof(memInfo))
+    MEMORY_BASIC_INFORMATION mem_info;
+    if(virtual_query(address, &mem_info, sizeof(mem_info)) < sizeof(mem_info))
     {
         // virtual_query failed
         return -1;
     }
-    return (uint32_t)memInfo.Protect;
+    return (uint32_t)mem_info.Protect;
 }
 
 
 // Parses a line from /proc/self/maps and stores the info in a MEMORY_BASIC_INFORMATION struct:
 #ifndef _WIN32
-void parse_mem_map_region(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo)
+void parse_mem_map_region(const char *maps_entry, MEMORY_BASIC_INFORMATION *mem_info)
 {
     void *start, *end; // Starting and ending addresses of the current region being parsed
-    char permissionFlags[4] = { '\0', '\0', '\0', '\0' }, // Read/Write/Execute flags
-         sharedFlag,    // "Shared" or "Private" flag character
-         mappedDev[6] = { '\0', '\0', '\0', '\0', '\0', '\0' }; // If region is mapped to a file, this is the device number where the file resides
+    char flag_permissions[4] = { '\0', '\0', '\0', '\0' }, // Read/Write/Execute flags
+         flag_shared,    // "Shared" or "Private" flag character
+         mapped_dev[6] = { '\0', '\0', '\0', '\0', '\0', '\0' }; // If region is mapped to a file, this is the device number where the file resides
 
     // Parse the entry text:
-    sscanf(mapsEntry, "%p-%p %3c%c %*x %5c", &start, &end, permissionFlags, &sharedFlag, mappedDev);
+    sscanf(maps_entry, "%p-%p %3c%c %*x %5c", &start, &end, flag_permissions, &flag_shared, mapped_dev);
 
     // Set the region base address and size:
-    memInfo->BaseAddress = (void*)start;
-    memInfo->RegionSize = (size_t)((uint8_t*)end-(uint8_t*)start);
+    mem_info->BaseAddress = (void*)start;
+    mem_info->RegionSize = (size_t)((uint8_t*)end-(uint8_t*)start);
 
     // Set the permissions flags:
-    memInfo->Protect = 0;
-    if(strcmp(permissionFlags, "---") == 0)
+    mem_info->Protect = 0;
+    if(strcmp(flag_permissions, "---") == 0)
     {
-        memInfo->Protect = MEM_PROTECT_NONE;
+        mem_info->Protect = MEM_PROTECT_NONE;
     }
     else
     {
-        if(permissionFlags[0] == 'r')
+        if(flag_permissions[0] == 'r')
         {
-            memInfo->Protect |= MEM_PROTECT_R;
+            mem_info->Protect |= MEM_PROTECT_R;
         }
-        if(permissionFlags[1] == 'w')
+        if(flag_permissions[1] == 'w')
         {
-            memInfo->Protect |= MEM_PROTECT_W;
+            mem_info->Protect |= MEM_PROTECT_W;
         }
-        if(permissionFlags[2] == 'x')
+        if(flag_permissions[2] == 'x')
         {
-            memInfo->Protect |= MEM_PROTECT_X;
+            mem_info->Protect |= MEM_PROTECT_X;
         }
     }
     
     // Set the region type (Private/Mapped/Image):
-    memInfo->Type = 0;
-    if(sharedFlag == 'p')
+    mem_info->Type = 0;
+    if(flag_shared == 'p')
     {
-        memInfo->Type = MEM_PRIVATE;
+        mem_info->Type = MEM_PRIVATE;
     }
-    else if(strcmp(mappedDev, "00:00") != 0)
+    else if(strcmp(mapped_dev, "00:00") != 0)
     {
-        memInfo->Type = MEM_MAPPED;
+        mem_info->Type = MEM_MAPPED;
     }
     /* @TODO:   -Determine if regions are MEM_IMAGE using /proc/$PID/exe simlink ?
      *          -More research on meanings of MEM_IMAGE, MEM_MAPPED etc.

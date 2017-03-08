@@ -16,9 +16,9 @@
 /*sp_print_intro(const char*)
  * Prints the program name and author information.
  *
- *	@param programName	The name of the program.
+ *	@param program_name	The name of the program.
  */
-void sp_print_intro(const char* programName);
+void sp_print_intro(const char* program_name);
 
 
 /*enter_to_continue(const char*)
@@ -34,9 +34,9 @@ void enter_to_continue(const char* prompt);
  *	prints a second message before continuing.
  *
  *	@param prompt	The prompt message to print before the user presses Enter.
- *	@param continueMessage	The message to print after the user presses Enter.
+ *	@param continue_msg	The message to print after the user presses Enter.
  */
-void enter_to_continue(const char* prompt, const char* continueMessage);
+void enter_to_continue(const char* prompt, const char* continue_msg);
 
 
 #endif // SP_IO_HPP

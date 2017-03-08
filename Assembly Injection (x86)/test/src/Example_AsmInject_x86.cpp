@@ -5,11 +5,11 @@
 int main()
 {
     std::cout << "Press enter to begin.";
-    std::string garbageString;
+    std::string garbage;
     // Wait for user input, allowing time to use a disassembler to determine injection information:
-    getline(std::cin, garbageString);
+    getline(std::cin, garbage);
     // Doesn't matter what the user inputs, we aren't using it.
-    garbageString[0] = '\0'; // This statement helps avoid compiler errors
+    garbage[0] = '\0'; // This statement helps avoid compiler errors
 
     for(int i = 0; i < 10; i++)
     {
@@ -33,8 +33,8 @@ int main()
         if(i == 4)
         {
             // Unprotect the memory:
-            uint32_t oldProtection; // oldProtection is not utilized in Unix (might add this functionality later) @todo
-            set_mem_protection((uint8_t*)&main + MAIN_OFFSET, MEM_PROTECT_SIZE, MEM_PROTECT_RWX, &oldProtection);
+            uint32_t old_protect; // old_protect is not utilized in Unix (might add this functionality later) @todo
+            set_mem_protection((uint8_t*)&main + MAIN_OFFSET, MEM_PROTECT_SIZE, MEM_PROTECT_RWX, &old_protect);
             
             // Write the jump to the assembly function:
             inject_jmp_5b(((uint8_t*)&main + MAIN_OFFSET), &JUMPBACK_ADDRESS, NOP_COUNT, (void*)&asm_code_example);

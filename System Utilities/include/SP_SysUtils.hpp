@@ -176,21 +176,21 @@ uint32_t get_error();
  *  @param size The size of the section of memory whose protection will be changed.
  *              In Windows, the size is measured in bytes.
  *              In Unix, the size is measured in pages.
- *  @param newProtection    The new memory protection setting for the section of memory.
- *  @param oldProtection    Saves the original memory protection settings on Windows.
- *                          NOTE: The oldProtection parameter is not used in Unix.
+ *  @param new_protect    The new memory protection setting for the section of memory.
+ *  @param old_protect    Saves the original memory protection settings on Windows.
+ *                          NOTE: The old_protect parameter is not used in Unix.
  *  @return 0 if successful; non-zero value on failure.
  */
-int set_mem_protection(void *address, size_t size, uint32_t newProtection, uint32_t *oldProtection);
+int set_mem_protection(void *address, size_t size, uint32_t new_protect, uint32_t *old_protect);
 
 
 /* set_mem_protection(void *, size_t, uint32_t)
  *	Overloaded version of set_mem_protection(void *, size_t, uint32_t, uint32_t *). This is the same
- *		as calling the original function with a NULL oldProtection argument.
+ *		as calling the original function with a NULL old_protect argument.
  *  @params See @set_mem_protection(void *, size_t, uint32_t, uint32_t *) documentation.
  *  @return 0 if successful; non-zero value on failure.
  */
-int set_mem_protection(void *address, size_t size, uint32_t newProtection);
+int set_mem_protection(void *address, size_t size, uint32_t new_protect);
 
 
 /*virtual_query(void *, MEMORY_BASIC_INFORMATION *, size_t)
@@ -218,16 +218,16 @@ uint32_t get_mem_protection(void *address);
 /*parse_mem_map_region(const char *, MEMORY_BASIC_INFORMATION *)
  * Parses a line of text from /proc/self/maps which describes a region of memory
  *  and the properties that apply to it (address range, access protection, etc).
- *  NOTE: This function is for Unix systems only; the memInfo struct aims to
+ *  NOTE: This function is for Unix systems only; the mem_info struct aims to
  *        emulate the MEMORY_BASIC_INFORMATION struct returned by VirtualQuery on
  *        Windows operating systems.
  *
- *  @param mapsEntry The line of text from /proc/self/maps file.
- *  @param memInfo The memory information struct where the region's properties will
+ *  @param maps_entry The line of text from /proc/self/maps file.
+ *  @param mem_info The memory information struct where the region's properties will
  *         be stored.
  */
  #ifndef _WIN32
-void parse_mem_map_region(const char *mapsEntry, MEMORY_BASIC_INFORMATION *memInfo);
+void parse_mem_map_region(const char *maps_entry, MEMORY_BASIC_INFORMATION *mem_info);
 #endif // !_WIN32
 
 

@@ -30,10 +30,10 @@ int main()
 		}
 	#endif // _WIN32
 	std::cout << "Process base: " << get_process_base() << std::endl;
-	MEMORY_BASIC_INFORMATION memInfo;
-	virtual_query(get_process_base(), &memInfo, sizeof(memInfo));
-	std::cout << "2nd memory region starts at: " << next_mem_region(&memInfo, &memInfo) << std::endl;
-	std::cout << "3rd memory region starts at: " << next_mem_region(memInfo.BaseAddress) << std::endl;
+	MEMORY_BASIC_INFORMATION mem_info;
+	virtual_query(get_process_base(), &mem_info, sizeof(mem_info));
+	std::cout << "2nd memory region starts at: " << next_mem_region(&mem_info, &mem_info) << std::endl;
+	std::cout << "3rd memory region starts at: " << next_mem_region(mem_info.BaseAddress) << std::endl;
 	std::cout << "Page size: " << get_page_size() << " bytes" << std::endl;
 	std::cout << "Starting address of main() function: " << (void *)&main << std::endl;
 	std::cout << "Base address of page containing main(): " << get_page_base((void *)&main) << std::endl;
