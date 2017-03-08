@@ -23,3 +23,9 @@ System Utilities/asm
 System Utilities/test/bin
 System Utilities/test/build
 System Utilities/test/asm
+AoB Scan/bin
+AoB Scan/build
+AoB Scan/asm
+AoB Scan/test/bin
+AoB Scan/test/build
+AoB Scan/test/asm
