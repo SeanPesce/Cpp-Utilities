@@ -11,12 +11,12 @@ Assembly Injection (x64)/asm
 Assembly Injection (x64)/test/bin
 Assembly Injection (x64)/test/build
 Assembly Injection (x64)/test/asm
-I-O/bin
-I-O/build
-I-O/asm
-I-O/test/bin
-I-O/test/build
-I-O/test/asm
+IO/bin
+IO/build
+IO/asm
+IO/test/bin
+IO/test/build
+IO/test/asm
 System Utilities/bin
 System Utilities/build
 System Utilities/asm
