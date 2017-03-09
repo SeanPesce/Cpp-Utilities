@@ -90,7 +90,7 @@
 
 //Other constants & typedefs:
 #ifdef _WIN32
-    typedef bool (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);  // For compatibility with non-supporting Windows systems when calling IsWow64Process()
+    typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);  // For compatibility with non-supporting Windows systems when calling IsWow64Process()
 #else
     // Formatter string for resolving the memory map file of a process:
     #define MEM_MAP_FILE_DIR_FORMAT "/proc/%d/maps"	// The %d will be filled in with the process ID
@@ -127,8 +127,8 @@
  *
  *	If GetProcAddress returns NULL, we know that the current system does not support IsWow64Process().
  */
- #ifdef _WIN32
-bool is_wow64_process();
+#ifdef _WIN32
+BOOL is_wow64_process();
 #endif // _WIN32
 
 

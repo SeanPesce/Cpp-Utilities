@@ -11,9 +11,9 @@
 #ifdef _WIN32
 // Wrapper function for IsWow64Process that provides compatibility on a wider range
 //	of systems:
-bool is_wow64_process()
+BOOL is_wow64_process()
 {
-	bool is_wow64_proc_bool = false;
+	BOOL is_wow64_proc_bool = false;
 
 	/*
 		From Microsoft documentation:
