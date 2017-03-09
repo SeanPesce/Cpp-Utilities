@@ -14,15 +14,21 @@ int main()
 
     reset_aob_scan_settings();
 
+	#ifdef _WIN32
+	// This is just a way to stop the compiler from removing dummy_function (as an optimization)
+	std::cout << "Address of dummy_function:  " << &dummy_function << std::endl;
+	#endif
+
     if(is_64bit()) // this is a 64-bit process
     {
         // Define array to search for based on architecture and OS:
         #ifdef _WIN32
             bool m[10] = { true, true, true, true, true, true, true, true, true, true };  // Mask array
-            uint8_t aob[10] = { 0xbf, 0x60, 0x52, 0x60, 0x00, 0xe8, 0x99, 0xda, 0xff, 0xff }; // starts at &dummy_function() + 104
-            const char *str_aob = "bf 60 52 60 00 e8 99 da ff ff";
-            char str_aob2[30] = { 'b', 'f', ' ', '6', '0', ' ', '5', '2', ' ', '6', '0', ' ', '0', '0', ' ', 'e', '8', ' ', '9', '9', ' ', 'd', 'a', ' ', 'f', 'f', ' ', 'f', 'f', '\0' };
-            std::string str_aob3("bf 60 52 60 00 e8 99 da ff ff");
+			uint8_t aob[10] = { 0xbb, 0x01, 0x00, 0x00, 0x00, 0x66, 0x90, 0x48, 0x8b, 0x0d }; // starts at &dummy_function() + 29
+			std::cout << "Address of byte array in main:  " << (void*)aob << std::endl;
+			const char *str_aob = "bb 01 00 00 00 66 90 48 8b 0d";
+			char str_aob2[30] = { 'b', 'b', ' ', '0', '1', ' ', '0', '0', ' ', '0', '0', ' ', '0', '0', ' ', '6', '6', ' ', '9', '0', ' ', '4', '8', ' ', '8', 'b', ' ', '0', 'd', '\0' };
+			std::string str_aob3("bb 01 00 00 00 66 90 48 8b 0d");
         #else
             bool m[10] = { true, true, true, true, true, true, true, true, true, true };  // Mask array
             uint8_t aob[10] = { 0xbf, 0xa0, 0x62, 0x60, 0x00, 0xe8, 0x7c, 0xcc, 0xff, 0xff }; // starts at &dummy_function() + 104
@@ -46,13 +52,14 @@ int main()
         // Define array to search for based on architecture and OS:
         #ifdef _WIN32
             bool m[10] = { true, true, true, true, true, true, true, true, true, true };  // Mask array
-            uint8_t aob[10] = { 0xe8, 0x39, 0xe0, 0xff, 0xff, 0x83, 0xc4, 0x10, 0x83, 0x45 }; // starts at &dummy_function() + 104
-            const char *str_aob = "e8 39 e0 ff ff 83 c4 10 83 45";
-            char str_aob2[30] = { 'e', '8', ' ', '3', '9', ' ', 'e', '0', ' ', 'f', 'f', ' ', 'f', 'f', ' ', '8', '3', ' ', 'c', '4', ' ', '1', '0', ' ', '8', '3', ' ', '4', '5', '\0' };
-            std::string str_aob3("e8 39 e0 ff ff 83 c4 10 83 45");
+            uint8_t aob[10] = { 0xbe, 0x01, 0x00, 0x00, 0x00, 0x66, 0x66, 0x0f, 0x1f, 0x84 }; // starts at &dummy_function() + 26
+			std::cout << "Address of byte array in main:  " << (void*)aob << std::endl;
+            const char *str_aob = "BE 01 00 00 00 66 66 0F 1F 84";
+            char str_aob2[30] = { 'b', 'e', ' ', '0', '1', ' ', '0', '0', ' ', '0', '0', ' ', '0', '0', ' ', '6', '6', ' ', '6', '6', ' ', '0', 'f', ' ', '1', 'f', ' ', '8', '4', '\0' };
+            std::string str_aob3("BE 01 00 00 00 66 66 0F 1F 84");
         #else
             bool m[10] = { true, true, true, true, true, true, true, true, true, true };  // Mask array
-            uint8_t aob[10] = { 0xe8, 0xd9, 0xd1, 0xff, 0xff, 0x83, 0xc4, 0x10, 0x83, 0x45 }; // starts at &dummy_function() + 104
+            uint8_t aob[10] = { 0xe8, 0xd9, 0xd1, 0xff, 0xff, 0x83, 0xc4, 0x10, 0x83, 0x45 }; // starts at &dummy_function() + 102
             const char *str_aob = "e8 d9 d1 ff ff 83 c4 10 83 45";
             char str_aob2[30] = { 'e', '8', ' ', 'd', '9', ' ', 'd', '1', ' ', 'f', 'f', ' ', 'f', 'f', ' ', '8', '3', ' ', 'c', '4', ' ', '1', '0', ' ', '8', '3', ' ', '4', '5', '\0' };
             std::string str_aob3("e8 d9 d1 ff ff 83 c4 10 83 45");
