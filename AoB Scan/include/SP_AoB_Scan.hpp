@@ -10,6 +10,7 @@
 #include <stdio.h>  // sscanf()
 #include <string>   // string
 #include <sstream>  // stringstream
+#include <vector>   // vector
 
 #include "SP_SysUtils.hpp" // get_page_size(), get_process_base(), virtual_query(), memory protection constants
 

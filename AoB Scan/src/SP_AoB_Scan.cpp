@@ -84,7 +84,14 @@ void *aob_scan(uint8_t *aob, bool *mask, size_t length, void *start)
 
             if(result != NULL)
             {
-                return result;
+                if(result == aob) // Found our own search AoB in the stack
+                {
+                    result = NULL; // Don't let the scan return the address of the search array
+                }
+                else
+                {
+                    return result;
+                }
             }
             
         }
@@ -115,55 +122,55 @@ void *aob_scan(uint8_t *aob, size_t length)
 void *aob_scan(const char *str_aob, void *start)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    uint8_t aob[str_aob_len];
-    bool mask[str_aob_len];
-    size_t length = string_to_aob(str_aob, aob, mask);
-    return aob_scan(aob, mask, length, start);
+    std::vector<uint8_t> aob(str_aob_len);
+    std::vector<char> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob, aob.data(), (bool*)mask.data());
+    return aob_scan(aob.data(), (bool*)mask.data(), length, start);
 }
 
 void *aob_scan(char *str_aob, void *start)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    uint8_t aob[str_aob_len];
-    bool mask[str_aob_len];
-    size_t length = string_to_aob((const char *)str_aob, aob, mask);
-    return aob_scan(aob, mask, length, start);
+    std::vector<uint8_t> aob(str_aob_len);
+    std::vector<char> mask(str_aob_len);
+    size_t length = string_to_aob((const char *)str_aob, aob.data(), (bool*)mask.data());
+    return aob_scan(aob.data(), (bool*)mask.data(), length, start);
 }
 
 void *aob_scan(std::string *str_aob, void *start)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob->c_str()); // Length of str_aob != length of final byte array
-    uint8_t aob[str_aob_len];
-    bool mask[str_aob_len];
-    size_t length = string_to_aob(str_aob->c_str(), aob, mask);
-    return aob_scan(aob, mask, length, start);
+    std::vector<uint8_t> aob(str_aob_len);
+    std::vector<char> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob->c_str(), aob.data(), (bool*)mask.data());
+    return aob_scan(aob.data(), (bool*)mask.data(), length, start);
 }
 
 void *aob_scan(const char *str_aob)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    uint8_t aob[str_aob_len];
-    bool mask[str_aob_len];
-    size_t length = string_to_aob(str_aob, aob, mask);
-    return aob_scan(aob, mask, length, NULL);
+    std::vector<uint8_t> aob(str_aob_len);
+    std::vector<char> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob, aob.data(), (bool*)mask.data());
+    return aob_scan(aob.data(), (bool*)mask.data(), length, NULL);
 }
 
 void *aob_scan(char *str_aob)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    uint8_t aob[str_aob_len];
-    bool mask[str_aob_len];
-    size_t length = string_to_aob((const char *)str_aob, aob, mask);
-    return aob_scan(aob, mask, length, NULL);
+    std::vector<uint8_t> aob(str_aob_len);
+    std::vector<char> mask(str_aob_len);
+    size_t length = string_to_aob((const char *)str_aob, aob.data(), (bool*)mask.data());
+    return aob_scan(aob.data(), (bool*)mask.data(), length, NULL);
 }
 
 void *aob_scan(std::string *str_aob)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob->c_str()); // Length of str_aob != length of final byte array
-    uint8_t aob[str_aob_len];
-    bool mask[str_aob_len];
-    size_t length = string_to_aob(str_aob->c_str(), aob, mask);
-    return aob_scan(aob, mask, length, NULL);
+    std::vector<uint8_t> aob(str_aob_len);
+    std::vector<char> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob->c_str(), aob.data(), (bool*)mask.data());
+    return aob_scan(aob.data(), (bool*)mask.data(), length, NULL);
 }
 
 
@@ -176,11 +183,17 @@ void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, bool *mask, size
     {
         if(mask != NULL && compare_byte_arrays(base, aob, mask, length))
         {
-            return base;
+            if(base != aob)
+            {
+                return base; // Make sure the matching AoB isn't just our search array in the stack
+            }
         }
         else if(compare_byte_arrays(base, aob, length)) // No mask
         {
-            return base;
+            if(base != aob)
+            {
+                return base; // Make sure the matching AoB isn't just our search array in the stack
+            }
         }
     }
     return NULL;
