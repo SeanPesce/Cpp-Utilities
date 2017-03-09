@@ -25,10 +25,10 @@ int main()
             std::string str_aob3("bf 60 52 60 00 e8 99 da ff ff");
         #else
             bool m[10] = { true, true, true, true, true, true, true, true, true, true };  // Mask array
-            uint8_t aob[10] = { 0xbf, 0x60, 0x52, 0x60, 0x00, 0xe8, 0x86, 0xd9, 0xff, 0xff }; // starts at &dummy_function() + 104
-            const char *str_aob = "bf 60 52 60 00 e8 86 d9 ff ff";
-            char str_aob2[30] = { 'b', 'f', ' ', '6', '0', ' ', '5', '2', ' ', '6', '0', ' ', '0', '0', ' ', 'e', '8', ' ', '8', '6', ' ', 'd', '9', ' ', 'f', 'f', ' ', 'f', 'f', '\0' };
-            std::string str_aob3("bf 60 52 60 00 e8 86 d9 ff ff");
+            uint8_t aob[10] = { 0xbf, 0xa0, 0x62, 0x60, 0x00, 0xe8, 0x7c, 0xcc, 0xff, 0xff }; // starts at &dummy_function() + 104
+            const char *str_aob = "bf a0 62 60 00 e8 7c cc ff ff";
+            char str_aob2[30] = { 'b', 'f', ' ', 'a', '0', ' ', '6', '2', ' ', '6', '0', ' ', '0', '0', ' ', 'e', '8', ' ', '7', 'c', ' ', 'c', 'c', ' ', 'f', 'f', ' ', 'f', 'f', '\0' };
+            std::string str_aob3("bf a0 62 60 00 e8 7c cc ff ff");
         #endif // _WIN32
 
 
@@ -52,10 +52,10 @@ int main()
             std::string str_aob3("e8 39 e0 ff ff 83 c4 10 83 45");
         #else
             bool m[10] = { true, true, true, true, true, true, true, true, true, true };  // Mask array
-            uint8_t aob[10] = { 0xe8, 0x50, 0xdf, 0xff, 0xff, 0x83, 0xc4, 0x10, 0x83, 0x45 }; // starts at &dummy_function() + 104
-            const char *str_aob = "e8 50 df ff ff 83 c4 10 83 45";
-            char str_aob2[30] = { 'e', '8', ' ', '5', '0', ' ', 'd', 'f', ' ', 'f', 'f', ' ', 'f', 'f', ' ', '8', '3', ' ', 'c', '4', ' ', '1', '0', ' ', '8', '3', ' ', '4', '5', '\0' };
-            std::string str_aob3("e8 50 df ff ff 83 c4 10 83 45");
+            uint8_t aob[10] = { 0xe8, 0xd9, 0xd1, 0xff, 0xff, 0x83, 0xc4, 0x10, 0x83, 0x45 }; // starts at &dummy_function() + 104
+            const char *str_aob = "e8 d9 d1 ff ff 83 c4 10 83 45";
+            char str_aob2[30] = { 'e', '8', ' ', 'd', '9', ' ', 'd', '1', ' ', 'f', 'f', ' ', 'f', 'f', ' ', '8', '3', ' ', 'c', '4', ' ', '1', '0', ' ', '8', '3', ' ', '4', '5', '\0' };
+            std::string str_aob3("e8 d9 d1 ff ff 83 c4 10 83 45");
         #endif // _WIN32
 
 
