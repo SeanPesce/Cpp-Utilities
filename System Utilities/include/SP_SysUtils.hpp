@@ -258,11 +258,7 @@ void *next_mem_region(void *current);
  *
  * @param address	The memory address that resides within the page.
  */
-#ifdef _MSC_VER
-void* __vectorcall get_page_base(void *address); // This function must use __vectorcall to avoid crashes in 32-bit mode
-#else
 void *get_page_base(void *address);
-#endif // _MSC_VER;
 
 
 /*get_page_size()

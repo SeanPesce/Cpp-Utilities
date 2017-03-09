@@ -348,11 +348,7 @@ void *next_mem_region(void *current)
 
 
 // Obtain the starting address of the page of memory that contains the given memory address:
-#ifdef _MSC_VER
-void* __vectorcall get_page_base(void *address) // This function must use __vectorcall to avoid crashes in 32-bit mode
-#else
 void *get_page_base(void *address)
-#endif // _MSC_VER
 {
     if(is_32bit())
     { // 32-bit process
