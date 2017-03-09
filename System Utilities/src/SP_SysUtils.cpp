@@ -166,6 +166,12 @@ size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t lengt
             {
                 // Starting region has been found
                 memcpy(buff+count, &region, sizeof(MEMORY_BASIC_INFORMATION)); // Copy first region's info to buffer
+                
+                // Adjust region base and size to account for not always starting at the region's true base address:
+                void *page = get_page_base(address); // Round down to the nearest page boundary (like the real VirtualQuery function)
+                (buff + count)->RegionSize -= (size_t)((uint8_t*)page - (uint8_t*)((buff + count)->BaseAddress));
+                (buff + count)->BaseAddress = page;
+
                 count++;
                 break;
             }
