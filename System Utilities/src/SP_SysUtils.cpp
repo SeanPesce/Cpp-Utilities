@@ -175,13 +175,17 @@ size_t virtual_query(void *address, MEMORY_BASIC_INFORMATION *buff, size_t lengt
                 count++;
                 break;
             }
-            else if(address > prev_region_end && address < region.BaseAddress)
+            else if(address >= prev_region_end && address < region.BaseAddress)
             {
-                // Requested address does not lie within a region for this process; set error number
-                set_error(SP_ERROR_INVALID_PARAMETER);
-                return count * sizeof(MEMORY_BASIC_INFORMATION);
+                // Requested address does not lie within a region for this process; set permissions to none:
+                buff->Protect = MEM_PROTECT_NONE;
+                buff->BaseAddress = prev_region_end;
+                buff->RegionSize = (size_t)((uint8_t*)region.BaseAddress - (uint8_t*)prev_region_end);
+                buff->Type = MEM_PRIVATE;
+                count++;
+                break;
             }
-            prev_region_end = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region end point
+            prev_region_end = (uint8_t *)region.BaseAddress+region.RegionSize; // Store region size and end point
         }
         if(count == 0) // Starting region was not valid; set error number
         {
@@ -274,12 +278,12 @@ void parse_mem_map_region(const char *maps_entry, MEMORY_BASIC_INFORMATION *mem_
 //  base address is higher than the last address in the current region:
 void *next_mem_region(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATION *next)
 {
-    MEMORY_BASIC_INFORMATION buf[2]; // Temporary buffer (serves a few purposes)
+    MEMORY_BASIC_INFORMATION buf; // Temporary buffer (serves a few purposes)
     if(next == NULL)
     { // If next is null, use temporary buffer but still return the next region's base address
-        next = buf;
+        next = &buf;
     }
-    if(current == NULL || current->BaseAddress == NULL)
+    if(current == NULL)
     { // No "current" memory region specified; get the first memory region in the process  
         if(virtual_query(get_process_base(), next, sizeof(MEMORY_BASIC_INFORMATION)) < sizeof(MEMORY_BASIC_INFORMATION))
         {
@@ -293,13 +297,18 @@ void *next_mem_region(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATIO
     }
     else
     {
-        if(virtual_query(current->BaseAddress, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
+        if(virtual_query(current->BaseAddress, next, sizeof(buf)) < sizeof(buf)) // Obtain current region info
         {   // virtual_query failed
             return NULL;
         }
         else
         {
-            memcpy(next, &buf[1], sizeof(MEMORY_BASIC_INFORMATION));
+            // Move past the current region:
+            if(virtual_query((void*)(reinterpret_cast<uint8_t*>(next->BaseAddress) + next->RegionSize), next, sizeof(buf)) < sizeof(buf))
+            {
+                // virtual_query failed
+                return NULL;
+            }
             return next->BaseAddress;
         }
     }
@@ -310,20 +319,26 @@ void *next_mem_region(MEMORY_BASIC_INFORMATION *current, MEMORY_BASIC_INFORMATIO
 //  base address is higher than the given address:
 void *next_mem_region(void *current)
 {
-    MEMORY_BASIC_INFORMATION buf[2]; // Temporary buffer
+    MEMORY_BASIC_INFORMATION buf; // Temporary buffer
     if(current == NULL)
     { // No "current" memory region specified; get the first memory region in the process  
         return get_process_base();
     }
     else
     {
-        if(virtual_query(current, buf, sizeof(MEMORY_BASIC_INFORMATION) * 2) < sizeof(MEMORY_BASIC_INFORMATION) * 2)
+        if(virtual_query(current, &buf, sizeof(buf)) < sizeof(buf)) // Obtain current region info
         {   // virtual_query failed
             return NULL;
         }
         else
         {
-            return buf[1].BaseAddress;
+            // Move past the current region:
+            if(virtual_query((void*)(reinterpret_cast<uint8_t*>(buf.BaseAddress) + buf.RegionSize), &buf, sizeof(buf)) < sizeof(buf))
+            {
+                // virtual_query failed
+                return NULL;
+            }
+            return buf.BaseAddress;
         }
     }
 }
