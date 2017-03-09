@@ -220,16 +220,38 @@ bool compare_byte_arrays(uint8_t *mem, uint8_t *aob, size_t length) // No mask
 // Checks if a region of memory should be scanned with the current scan settings:
 bool is_aob_scannable(MEMORY_BASIC_INFORMATION *mem_info)
 {
-    return (
-        mem_info->Protect != MEM_PROTECT_NONE &&         // Check if memory is non-accessible.
-        !(AOBS_SKIP_MAPPED_MEM && mem_info->Type == MEM_MAPPED) &&    // Check if memory is mapped and skipping mapped memory is on.
-        !(AOBS_SKIP_EXECUTABLE_MEM && ( // Check if executable memory should be skipped.
-            mem_info->Protect == MEM_PROTECT_X ||
-            mem_info->Protect == MEM_PROTECT_RX ||
-            mem_info->Protect == MEM_PROTECT_WX ||
-            mem_info->Protect == MEM_PROTECT_RWX
-        ))
-    );
+    uint32_t allow_mask = MEM_PROTECT_R | MEM_PROTECT_WX | MEM_PROTECT_RW; // Protected regions we do want to search
+
+	uint32_t protect_mask = MEM_PROTECT_NONE; // Protected regions we don't want to search
+	if(AOBS_SKIP_EXECUTABLE_MEM) // Check if executable memory should be skipped
+	{
+		protect_mask |= (MEM_PROTECT_X | MEM_PROTECT_RX | MEM_PROTECT_WX | MEM_PROTECT_RWX);
+	}
+
+	uint32_t type_mask = 0;
+	if(AOBS_SKIP_MAPPED_MEM) // Check if mapped memory should be searched
+	{
+		type_mask |= MEM_MAPPED;
+	}
+
+	#ifdef _WIN32
+	allow_mask |= PAGE_WRITECOMBINE;
+	return (
+		(mem_info->Protect & allow_mask)
+		&& !(mem_info->Protect & protect_mask)
+		&& !(mem_info->Protect & type_mask)
+		&& !(mem_info->Protect & PAGE_GUARD)
+		&& !(mem_info->Protect & PAGE_NOCACHE)
+		&& !(mem_info->State & MEM_FREE)
+		);
+	#else
+	return (
+		(mem_info->Protect & allow_mask)
+		&& (mem_info->Protect != MEM_PROTECT_NONE)
+		&& !(mem_info->Protect & protect_mask)
+		&& !(mem_info->Protect & type_mask)
+		);
+	#endif // _WIN32
 }
 
 
