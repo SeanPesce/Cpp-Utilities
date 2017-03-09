@@ -100,7 +100,7 @@
     //  https://msdn.microsoft.com/en-us/library/windows/desktop/aa366775(v=vs.85).aspx
     typedef struct SP_MEMORY_BASIC_INFORMATION {
         void*       BaseAddress;
-        void*       AllocationBase; // Unused for now
+        void*       AllocationBase;
         void*       AllocationProtect; // Unused for now
         size_t      RegionSize;
         uint32_t    State; // Unused for now
