@@ -68,12 +68,6 @@ void *aob_scan(uint8_t *aob, bool *mask, size_t length, void *start)
             set_error(SP_ERROR_INVALID_ADDRESS);
             return NULL;
         }
-        else 
-        {
-            // Adjust region base and size to account for not starting at the base address:
-            region.RegionSize -= (size_t)((uint8_t*)start - (uint8_t*)region.BaseAddress);
-            region.BaseAddress = start;
-        }
     }
     else
     {
