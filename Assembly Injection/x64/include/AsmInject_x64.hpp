@@ -25,7 +25,10 @@ const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (
                 PUSH_RAX_INSTR = 0x50,          // PUSH %rax instruction byte value
                 POP_RAX_INSTR = 0x58,           // POP %rax instruction byte value
                 MOVABS_RAX_INSTR_OPCODE[2] = { 0x48,   // MOVABS %rax, imm64 opcode value
-                                                0xB8 };
+                                                0xB8 },
+				JMP_RM64_RIP[6] = { 0xFF, 0x25,	// JMP [%rip] instruction bytecode (JMP r/m64 format)
+									0x00, 0x00,
+									0x00, 0x00 };
 //
 // Length (in bytes) of various instruction opcodes:
 const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instruction
@@ -38,7 +41,9 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
             POP_RAX_INSTR_LENGTH = 1,       // POP %rax instruction. NOTE: POP r64 instuction lengths can vary, but we will only use POP %rax
             MOVABS_OPCODE_LENGTH = 2,       // MOVABS r64, imm64 instruction opcode
             MOVABS_OPERAND_LENGTH = 8,      // MOVABS r64, imm64 instruction operand
-            MOVABS_INSTR_LENGTH = 10;       // MOVABS r64, imm64 instruction
+            MOVABS_INSTR_LENGTH = 10,       // MOVABS r64, imm64 instruction
+			JMP_RM64_RIP_LENGTH = 6,		// JMP r/m64 instruction (specifically, JMP [%rip])
+			DQ_INSTR_LENGTH = 8;			// DQ imm64 pseudo instruction
 
 
 
@@ -59,7 +64,7 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
 
 
 
-/* inject_jmp_14b
+/* inject_jmp_14b_deprecated
  *  Injects code using an absolute JMP instruction (JMP r/m64) at the given address. Users
  *      should start an injected function with "POP %rax" and use "PUSH %rax" before their
  *      final return JMP when using this injection method.
@@ -95,13 +100,13 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
  *                          overwriting existing instructions at the injection location.
  *  @param asm_code  A pointer to an assembly function (to be used as a code cave).
  */
-void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code);
+void inject_jmp_14b_deprecated(void *inject_at, void *ret_to, int nops, void *asm_code);	// @TODO: replace this with new safer/simpler/faster inject_jmp_14b()
 
 
 
 /* inject_jmp_5b
  *  Injects an relative JMP instruction (JMP rel32) at the given address. The JMP rel32 instruction
- *      jumps to a local code cave with an inject_jmp_14b instruction sequence, seen below.
+ *      jumps to a local code cave with an inject_jmp_14b_deprecated instruction sequence, seen below.
  *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
  *      inserted into %rax. This code injection technique requires only 5 immediate bytes, but
  *      it requires at least 19 bytes of local storage.
@@ -140,7 +145,7 @@ void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code);
  *                          overwriting existing instructions at the injection location.
  *  @param asm_code          A pointer to an assembly function (to be used as a code cave).
  *  @param local_trampoline  The address of the local trampoline function (structured the same as a
- *                          inject_jmp_14b), which must start in the range:
+ *                          inject_jmp_14b_deprecated), which must start in the range:
  *                          [inject_at-2³¹+5,inject_at+2³¹+4]
  *  @param tramp_nops    The number of NOP instructions to be written after the local trampoline.
  *                          This could be necessary if the user wrote their trampoline function over
@@ -153,7 +158,7 @@ void inject_jmp_5b(void *inject_at, void *ret_to, int nops, void *asm_code,
 
 /* inject_jmp_2b
  *  Injects an relative JMP instruction (JMP rel8) at the given address. The JMP rel8 instruction
- *      jumps to a local code cave with an inject_jmp_14b instruction sequence, seen below.
+ *      jumps to a local code cave with an inject_jmp_14b_deprecated instruction sequence, seen below.
  *      The second jump instruction is a JMP r/m64, and jumps to an absolute 64-bit address (8 bytes)
  *      inserted into %rax. This is the smallest possible code injection, at only 2 bytes, but
  *      it requires at least 16 bytes of local storage.
@@ -192,7 +197,7 @@ void inject_jmp_5b(void *inject_at, void *ret_to, int nops, void *asm_code,
  *                          overwriting existing instructions at the injection location.
  *  @param asm_code          A pointer to an assembly function (to be used as a code cave).
  *  @param local_trampoline  The address of the local trampoline function (structured the same as a
- *                          inject_jmp_14b), which must start in the range:
+ *                          inject_jmp_14b_deprecated), which must start in the range:
  *                          [inject_at+129, inject_at-126]
  *  @param tramp_nops    The number of NOP instructions to be written after the local trampoline.
  *                          This could be necessary if the user wrote their trampoline function over

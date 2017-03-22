@@ -10,7 +10,7 @@
  *      Registers preserved? No
  *          User must start their code with POP %rax and end their code with PUSH %rax/MOVABS %rax, ret_to/JMP %rax
  */
-void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code)
+void inject_jmp_14b_deprecated_deprecated(void *inject_at, void *ret_to, int nops, void *asm_code)
 {
     // Write the injected bytecode and store the final write offset (relative to the injection point):
     int pop_rax_offset = write_jmp_rax_14b(inject_at, asm_code, nops); // The returned offset is also the offset of the POP %rax instruction
