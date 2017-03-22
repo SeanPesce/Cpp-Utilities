@@ -64,6 +64,12 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
 
 
 
+/**
+ */
+
+
+
+
 /* inject_jmp_14b_deprecated
  *  Injects code using an absolute JMP instruction (JMP r/m64) at the given address. Users
  *      should start an injected function with "POP %rax" and use "PUSH %rax" before their
@@ -71,6 +77,8 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
  *  
  *  WARNING: This injection functions is unsafe; it doesn't preserve %rax and requires the user
  *        to format their injected function with specific instructions to avoid data corruption.
+ *		  It was deprecated for this reason, and it is strongly recommended to use inject_jmp_14b()
+ *		  instead.
  *
  * Notes:
  *  Space required: 14 bytes
