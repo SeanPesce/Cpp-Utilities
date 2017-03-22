@@ -55,10 +55,11 @@ void asm_code_example()
     // The first ASM instruction is +4 from a function's base address when using GCC/G++ 64-bit
     __asm__ volatile
     (
-        "POP %rax\n"
+        "POP %rax\n" // Mandatory function start for JMP %rax injections
 
         // User code would normally go here
         
+        // Mandatory ending instructions for JMP %rax injections:
         "PUSH %rax\n"
         "MOVABS %rax, [JUMPBACK_ADDRESS]\n" // To reference an outside variable, might need to prefix it with "_"
         "JMP %rax\n"
