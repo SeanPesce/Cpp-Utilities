@@ -130,13 +130,7 @@ int write_jmp_rax_14b(void *write_to, void *jmp_to, int nops)
     // MOVABS %rax, imm64:
     *(uint16_t*)((uint8_t*)write_to + writeOffset) = *(uint16_t*)MOVABS_RAX_INSTR_OPCODE; // Opcode of MOVABS %rax, imm64
     writeOffset += MOVABS_OPCODE_LENGTH;
-    #ifdef _MSC_VER
-        // Using a Microsoft compiler; jump straight to the injected function:
-        *(uint64_t*)((uint8_t*)write_to + writeOffset) = (uint64_t)jmp_to; // Operand of MOVABS %rax, imm64
-    #else
-        // Using non-MS compiler; GCC in-line ASM starts +4 bytes from asm_code:
-        *(uint64_t*)((uint8_t*)write_to + writeOffset) = (uint64_t)((uint8_t*)jmp_to+4); // Operand of MOVABS %rax, imm64
-    #endif // _MSC_VER
+    *(uint64_t*)((uint8_t*)write_to + writeOffset) = (uint64_t)((uint8_t*)jmp_to + SP_ASM_FUNC_START_OFFSET); // Operand of MOVABS %rax, imm64
     writeOffset += MOVABS_OPERAND_LENGTH;
     //
     //

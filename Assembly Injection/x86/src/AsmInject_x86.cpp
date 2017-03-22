@@ -20,7 +20,7 @@ void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void 
 		write_jmp_rel32(inject_at, asm_code, nops);
     #else
         // Using non-MS compiler; GCC ASM starts +3 bytes from &asm_code:
-        write_jmp_rel32(inject_at, (uint8_t*)asm_code+3, nops);
+        write_jmp_rel32(inject_at, (uint8_t*)asm_code + SP_ASM_FUNC_START_OFFSET, nops);
     #endif // _MSC_VER
 
     // Calculate the address of the next instruction after the injected JMP and write it to the in-line ASM function's return JMP:
