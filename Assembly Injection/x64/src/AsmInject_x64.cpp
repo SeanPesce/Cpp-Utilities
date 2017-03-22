@@ -4,11 +4,32 @@
 
 
 
+/**
+	Recommended method of injection on 64-bit systems due to simplicity and unlimited range
+	
+	Notes:
+       Space required: 14 bytes
+       Registers preserved? Yes
+ */
+void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code)
+{
+	write_jmp_rip_rm64(inject_at, NOP_COUNT + DQ_INSTR_LENGTH); // Write the JMP r/m64 instruction
+
+	*(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_RIP_LENGTH) = (uint64_t)asm_code; // Overwrite next instruction with address of injected assembly function 
+
+
+	*(uint64_t*)ret_to = (uint64_t)(((uint8_t*)inject_at) + JMP_RM64_RIP_LENGTH + DQ_INSTR_LENGTH);
+}
+
+
+
+
 /* Injects code using a JMP r/m64 instruction at the given address.
  *  Notes:
  *      Space required: 14 bytes
  *      Registers preserved? No
  *          User must start their code with POP %rax and end their code with PUSH %rax/MOVABS %rax, ret_to/JMP %rax
+ *	WARNING: This function is deprecated. Use inject_jmp_14b() instead.
  */
 void inject_jmp_14b_deprecated(void *inject_at, void *ret_to, int nops, void *asm_code)
 {
@@ -146,6 +167,23 @@ int write_jmp_rax_14b(void *write_to, void *jmp_to, int nops)
     memset((void*)((uint8_t*)write_to + writeOffset + POP_RAX_INSTR_LENGTH), NOP_INSTR_OPCODE, nops);
 
     return writeOffset;
+}
+
+
+
+/**
+	Absolute 64-bit jump technique:
+
+	JMP QWORD PTR [%RIP]
+	DQ 1111111111111111h ; imm64 is a placeholder value here; in practice it would be the address of injected code
+
+	Requires 14 bytes
+*/
+void write_jmp_rip_rm64(void *write_to, int nops)
+{
+	memcpy(write_to, JMP_RM64_RIP, JMP_RM64_RIP_LENGTH); // Write the JMP r/m64 instruction
+
+	memset(((uint8_t*)write_to) + JMP_RM64_RIP_LENGTH, NOP_INSTR_OPCODE, nops); // Write the trailing NOP instructions
 }
 
 

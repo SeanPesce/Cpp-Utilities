@@ -64,9 +64,18 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
 
 
 
-/**
+ /**
+	inject_jmp_14b(void*, void*, int, void*)
+ 
+	This is the recommended method of injection on 64-bit systems due to simplicity and unlimited range.
+	
+	Notes:
+       Space required: 14 bytes
+       Registers preserved? Yes
+	   
+	@TODO: Finish documentation
  */
-
+void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code);
 
 
 
@@ -108,7 +117,7 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
  *                          overwriting existing instructions at the injection location.
  *  @param asm_code  A pointer to an assembly function (to be used as a code cave).
  */
-void inject_jmp_14b_deprecated(void *inject_at, void *ret_to, int nops, void *asm_code);	// @TODO: replace this with new safer/simpler/faster inject_jmp_14b()
+void inject_jmp_14b_deprecated(void *inject_at, void *ret_to, int nops, void *asm_code);
 
 
 
@@ -250,6 +259,18 @@ void write_bytecode_2b(void *inject_at, int nops, void *local_trampoline, int tr
   *     POP %rax                // %rax is restored upon returning here
   */
 int write_jmp_rax_14b(void *inject_at, void *jmp_to, int nops);
+
+
+
+/**
+	write_jmp_rip_rm64(void*, int)
+
+	Writes a JMP QWORD PTR [%RIP] instruction that jumps from the specified write_to address.
+
+	@param write_to	The address where the JMP r/m64 instruction will be written.
+	@param nops The number of NOP instructions to be written after the JMP r/m64 instruction.
+*/
+void write_jmp_rip_rm64(void *write_to, int nops);
 
 
 
