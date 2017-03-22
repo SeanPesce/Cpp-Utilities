@@ -1,33 +1,5 @@
 .vscode
 *.VC.db
-Assembly Injection (x86)/bin
-Assembly Injection (x86)/build
-Assembly Injection (x86)/asm
-Assembly Injection (x86)/ipch
-Assembly Injection (x86)/Release
-Assembly Injection (x86)/Debug
-Assembly Injection (x86)/x64
-Assembly Injection (x86)/test/bin
-Assembly Injection (x86)/test/build
-Assembly Injection (x86)/test/asm
-Assembly Injection (x86)/test/ipch
-Assembly Injection (x86)/test/Release
-Assembly Injection (x86)/test/Debug
-Assembly Injection (x86)/test/x64
-Assembly Injection (x64)/bin
-Assembly Injection (x64)/build
-Assembly Injection (x64)/asm
-Assembly Injection (x64)/ipch
-Assembly Injection (x64)/Release
-Assembly Injection (x64)/Debug
-Assembly Injection (x64)/x64
-Assembly Injection (x64)/test/bin
-Assembly Injection (x64)/test/build
-Assembly Injection (x64)/test/asm
-Assembly Injection (x64)/test/ipch
-Assembly Injection (x64)/test/Release
-Assembly Injection (x64)/test/Debug
-Assembly Injection (x64)/test/x64
 IO/bin
 IO/build
 IO/asm
@@ -56,6 +28,10 @@ System Utilities/test/ipch
 System Utilities/test/Release
 System Utilities/test/Debug
 System Utilities/test/x64
+System Utilities/test/SP_SysUtils.sln
+System Utilities/test/SP_SysUtils.vcxproj
+System Utilities/test/SP_SysUtils.vcxproj.filters
+
 AoB Scan/bin
 AoB Scan/build
 AoB Scan/asm
@@ -69,19 +45,11 @@ AoB Scan/test/asm
 AoB Scan/test/ipch
 AoB Scan/test/Release
 AoB Scan/test/Debug
-AoB Scan/d3d9/x64
-DLL Wrappers/d3d9/ipch
-DLL Wrappers/d3d9/Release
-DLL Wrappers/d3d9/Debug
-DLL Wrappers/d3d9/x64
-DLL Wrappers/d3d8/ipch
-DLL Wrappers/d3d8/Release
-DLL Wrappers/d3d8/Debug
-DLL Wrappers/d3d8/x64
-DLL Wrappers/wrappit/bin
-DLL Wrappers/wrappit/build
-DLL Wrappers/wrappit/x64/bin
-DLL Wrappers/wrappit/x64/build
+AoB Scan/test/AoB Scan.sln
+AoB Scan/test/AoB Scan.vcxproj
+AoB Scan/test/AoB Scan.vcxproj.filters
+
+
 
 
 
@@ -387,3 +355,47 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+
+
+
+
+
+############################ End of Visual Studio ignores ############################
+
+
+
+
+
+!Assembly Injection/x64
+!Assembly Injection/x86
+Assembly Injection/x86/bin
+Assembly Injection/x86/build
+Assembly Injection/x86/asm
+Assembly Injection/x86/ipch
+Assembly Injection/x86/Release
+Assembly Injection/x86/Debug
+Assembly Injection/x86/x64
+Assembly Injection/x86/test/bin
+Assembly Injection/x86/test/build
+Assembly Injection/x86/test/asm
+Assembly Injection/x86/test/ipch
+Assembly Injection/x86/test/Release
+Assembly Injection/x86/test/Debug
+Assembly Injection/x86/test/x64
+Assembly Injection/x64/bin
+Assembly Injection/x64/build
+Assembly Injection/x64/asm
+Assembly Injection/x64/ipch
+Assembly Injection/x64/Release
+Assembly Injection/x64/Debug
+Assembly Injection/x64/x64
+Assembly Injection/x64/test/bin
+Assembly Injection/x64/test/build
+Assembly Injection/x64/test/asm
+Assembly Injection/x64/test/ipch
+Assembly Injection/x64/test/Release
+Assembly Injection/x64/test/Debug
+Assembly Injection/x64/test/x64
+
+
