@@ -26,9 +26,7 @@ const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (
                 POP_RAX_INSTR = 0x58,           // POP %rax instruction byte value
                 MOVABS_RAX_INSTR_OPCODE[2] = { 0x48,   // MOVABS %rax, imm64 opcode value
                                                 0xB8 },
-				JMP_RM64_RIP[6] = { 0xFF, 0x25,	// JMP [%rip] instruction bytecode (JMP r/m64 format)
-									0x00, 0x00,
-									0x00, 0x00 };
+				JMP_RM64_RIP_OPCODE[2] = { 0xFF, 0x25}; //  JMP QWORD PTR [%RIP] (JMP r/m64) instruction opcode
 //
 // Length (in bytes) of various instruction opcodes:
 const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instruction
@@ -42,7 +40,8 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
             MOVABS_OPCODE_LENGTH = 2,       // MOVABS r64, imm64 instruction opcode
             MOVABS_OPERAND_LENGTH = 8,      // MOVABS r64, imm64 instruction operand
             MOVABS_INSTR_LENGTH = 10,       // MOVABS r64, imm64 instruction
-			JMP_RM64_RIP_LENGTH = 6,		// JMP r/m64 instruction (specifically, JMP [%rip])
+			JMP_RM64_OPCODE_LENGTH = 2,		// JMP r/m64 opcode
+			JMP_RM64_INSTR_LENGTH = 6,		// JMP r/m64 instruction
 			DQ_INSTR_LENGTH = 8;			// DQ imm64 pseudo instruction
 
 
@@ -263,14 +262,28 @@ int write_jmp_rax_14b(void *inject_at, void *jmp_to, int nops);
 
 
 /**
-	write_jmp_rip_rm64(void*, int)
+	write_jmp_rm64_rip(void*, void*, int)
 
 	Writes a JMP QWORD PTR [%RIP] instruction that jumps from the specified write_to address.
 
 	@param write_to	The address where the JMP r/m64 instruction will be written.
+	@param jmp_to	After the JMP instruction executes, %rip = jmp_to
 	@param nops The number of NOP instructions to be written after the JMP r/m64 instruction.
 */
-void write_jmp_rip_rm64(void *write_to, int nops);
+void write_jmp_rm64_rip(void *write_to, void *jmp_to, int nops);
+
+
+
+/**
+	write_jmp_rm64_rip(void*, int32_t, int)
+
+	Writes a JMP QWORD PTR [%RIP+offset] instruction that jumps from the specified write_to address.
+
+	@param write_to	The address where the JMP r/m64 instruction will be written.
+	@param offset	After the JMP instruction executes, %rip = %rip + offset
+	@param nops The number of NOP instructions to be written after the JMP r/m64 instruction.
+*/
+void write_jmp_rm64_rip(void *write_to, int32_t offset, int nops);
 
 
 

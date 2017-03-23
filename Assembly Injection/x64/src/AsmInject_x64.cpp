@@ -5,20 +5,26 @@
 
 
 /**
-	Recommended method of injection on 64-bit systems due to simplicity and unlimited range
+	Recommended method of injection on 64-bit systems due to simplicity and unlimited range.
 	
 	Notes:
        Space required: 14 bytes
        Registers preserved? Yes
+	   
+	   
+	Absolute 64-bit jump technique:
+
+	JMP QWORD PTR [%RIP+0x0]
+	DQ imm64 	; imm64 is the address of injected code
+	
  */
 void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code)
 {
-	write_jmp_rip_rm64(inject_at, NOP_COUNT + DQ_INSTR_LENGTH); // Write the JMP r/m64 instruction
+	write_jmp_rm64_rip(inject_at, 0, NOP_COUNT + DQ_INSTR_LENGTH); // Write the JMP [%rip+0x0] instruction
 
-	*(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_RIP_LENGTH) = (uint64_t)asm_code; // Overwrite next instruction with address of injected assembly function 
+	*(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH) = (uint64_t)asm_code; // Overwrite next instruction with address of injected function
 
-
-	*(uint64_t*)ret_to = (uint64_t)(((uint8_t*)inject_at) + JMP_RM64_RIP_LENGTH + DQ_INSTR_LENGTH);
+	*(uint64_t*)ret_to = (uint64_t)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH);
 }
 
 
@@ -171,19 +177,26 @@ int write_jmp_rax_14b(void *write_to, void *jmp_to, int nops)
 
 
 
-/**
-	Absolute 64-bit jump technique:
-
-	JMP QWORD PTR [%RIP]
-	DQ 1111111111111111h ; imm64 is a placeholder value here; in practice it would be the address of injected code
-
-	Requires 14 bytes
-*/
-void write_jmp_rip_rm64(void *write_to, int nops)
+// Writes a JMP rm64 (specifically, JMP [%rip]) instruction from write_to to jmp_to, and inserts trailing NOPs if necessary
+void write_jmp_rm64_rip(void *write_to, void* jmp_to, int nops)
 {
-	memcpy(write_to, JMP_RM64_RIP, JMP_RM64_RIP_LENGTH); // Write the JMP r/m64 instruction
+	*(uint16_t*)write_to = *(uint16_t*)JMP_RM64_RIP_OPCODE; // Write the JMP r/m64 instruction opcode
 
-	memset(((uint8_t*)write_to) + JMP_RM64_RIP_LENGTH, NOP_INSTR_OPCODE, nops); // Write the trailing NOP instructions
+	*(uint32_t*)((uint8_t*)write_to + JMP_RM64_OPCODE_LENGTH) = (uint32_t)calculate_jmp_offset(write_to, jmp_to, JMP_RM64_INSTR_LENGTH); // Write the JMP r/m64 instruction operand
+
+	memset(((uint8_t*)write_to) + JMP_RM64_INSTR_LENGTH, NOP_INSTR_OPCODE, nops); // Write the trailing NOP instructions
+}
+
+
+
+// Writes a JMP rm64 (specifically, JMP [%rip]) instruction from write_to using the given offset, and inserts trailing NOPs if necessary
+void write_jmp_rm64_rip(void *write_to, int32_t offset, int nops)
+{
+	*(uint16_t*)write_to = *(uint16_t*)JMP_RM64_RIP_OPCODE; // Write the JMP r/m64 instruction opcode
+
+	*(uint32_t*)((uint8_t*)write_to + JMP_RM64_OPCODE_LENGTH) = offset; // Write the JMP r/m64 instruction operand
+
+	memset(((uint8_t*)write_to) + JMP_RM64_INSTR_LENGTH, NOP_INSTR_OPCODE, nops); // Write the trailing NOP instructions
 }
 
 
