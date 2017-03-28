@@ -1,19 +1,17 @@
 ; Made by Sean P
 
 
-_DATA SEGMENT
+.DATA
 
 PUBLIC JUMPBACK_ADDRESS
 
 JUMPBACK_ADDRESS DQ 1111111111111111h
 
-_DATA ENDS
 
 
+.CODE
 
-_CODE SEGMENT
-
-asm_code_example proc
+asm_code_example PROC
 	pop rax
 
 	;  User code would normally go here
@@ -21,8 +19,7 @@ asm_code_example proc
 	push rax
 	mov rax, QWORD PTR [JUMPBACK_ADDRESS]
 	jmp rax
-asm_code_example endp
+asm_code_example ENDP
 
-_CODE ENDS
 
 END
