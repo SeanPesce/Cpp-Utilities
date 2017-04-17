@@ -309,7 +309,7 @@ size_t string_to_aob(const char *str_aob, uint8_t *aob, bool *mask)
         {
             const char byte_chars[3] = { str_aob[c], str_aob[c+1], '\0' };
 
-            sscanf(byte_chars, "%2x", (unsigned int*)&aob[pos]); // Parse next 2 characters as a hex byte and store in aob
+            sscanf_s(byte_chars, "%2x", (unsigned int*)&aob[pos]); // Parse next 2 characters as a hex byte and store in aob
 
             mask[pos] = true; // Set pattern mask to non-wildcard
             pos++;
