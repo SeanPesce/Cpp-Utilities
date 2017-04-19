@@ -10,6 +10,20 @@
 #include <fstream>	// ofstream
 #include <iostream> // cout, endl
 #include <limits>	// numeric_limits
+#include <sstream>  // stringstream
+
+#ifdef _WIN32
+	#include <Windows.h>
+#endif // _WIN32
+
+
+
+/////////////////////// Constants ///////////////////////
+#ifdef _WIN32
+	#define GetAsyncKeyboardState get_async_keyboard_state
+	#define _SP_KEY_DOWN_ 2147483648
+	#define _SP_KEY_TOGGLED_ 1
+#endif // _WIN32
 
 
 
@@ -64,6 +78,42 @@ void enter_to_continue(const char* prompt, const char* continue_msg);
 	@return 1 on success; 0 if the file could not be written.
  */
 int file_write_text(const char *file, const char *msg);
+
+
+
+/////////////////////// Keyboard I/O ///////////////////////
+
+
+/**
+	get_vk_hotkey(const char*, const char*, const char*)
+	
+	Parses config file for a specified hotkey, denoted as a virtual key code.
+	
+	For more info on virtual key codes:
+		https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
+	
+	@param settings_file	Name of the file that will be parsed for the hotkey (generally an .ini file)
+	@param section			Title of the section of the settings file where the key will be found (Format in the file should be "[section]")
+	@param key_name			Name of the key where the hotkey value is specified (Format in the file should be "key_name=XX", where "XX"
+							denotes a hex-formatted virtual key code)
+	
+	@return the virtual key code for the specified hotkey as an unsigned int
+ */
+unsigned int get_vk_hotkey(const char *settings_file, const char *section, const char *key_name);
+
+#ifdef _WIN32
+
+/**
+	get_async_keyboard_state(SHORT*)
+	
+	Gets the async key state for all 256 virtual keys and stores them in the given buffer.
+	Note: The buffer must be at least the size of an array of 256 BYTEs.
+	
+	@param keyboard_state_buffer Buffer where async key state data will be stored
+ */
+void get_async_keyboard_state(SHORT *keyboard_state_buffer);
+
+#endif // _WIN32
 
 
 #endif // SP_IO_HPP
