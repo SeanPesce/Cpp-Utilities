@@ -1,4 +1,4 @@
-// Made by Sean P
+// Author: Sean Pesce
 
 #pragma once
 
@@ -7,10 +7,12 @@
 
 
 
+#include <chrono>	// localtime_s
 #include <fstream>	// ofstream
 #include <iostream> // cout, endl
 #include <limits>	// numeric_limits
 #include <sstream>  // stringstream
+#include <string>	// to_string
 
 #ifdef _WIN32
 	#include <Windows.h>
@@ -75,9 +77,33 @@ void enter_to_continue(const char* prompt, const char* continue_msg);
 	@param file	Path and file name of the file to write to.
 	@param msg	The string that will be written to file.
 	
-	@return 1 on success; 0 if the file could not be written.
+	@return 1 on success; return 0 if the file could not be written.
  */
 int file_write_text(const char *file, const char *msg);
+
+
+
+/////////////////////// Text Data I/O ///////////////////////
+
+
+/**
+	generate_current_timestamp(char*, bool)
+
+	Constructs a timestamp string for the current 24-hour time,
+	formatted as "HH:MM:SS" or "[HH:MM:SS]", and stores it in
+	the specified char* buffer with a trailing null character.
+
+	@param timestamp_string_buff	A buffer to hold the generated timestamp string.
+									The buffer must be AT LEAST sizeof(char[11]) if
+									surround_with_brackets is true, and must be AT
+									LEAST sizeof(char[9]) if surround_with_brackets
+									is false.
+	@param surround_with_brackets	Specifies whether the generated timestamp should
+									be contained within bracket characters ('[' and ']').
+
+	@return 0 on success; return localtime_s error code on failure.
+*/
+int generate_current_timestamp(char *timestamp_string_buff, bool surround_with_brackets);
 
 
 
