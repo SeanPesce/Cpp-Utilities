@@ -20,13 +20,20 @@
 
 
 
-/////////////////////// Constants ///////////////////////
+/////////////////////// Constants & Enums ///////////////////////
 #ifdef _WIN32
 	#define GetAsyncKeyboardState get_async_keyboard_state
 	#define _SP_KEY_DOWN_ 2147483648
 	#define _SP_KEY_TOGGLED_ 1
 #endif // _WIN32
 
+// Enumerator whose values denote different date string formats
+enum SP_DATE_STRING_FORMATS {
+	SP_DATE_MMDDYYYY,	// 12/31/9999
+	SP_DATE_DDMMYYYY,	// 31/12/9999
+	SP_DATE_MMDDYY,		// 12/31/99
+	SP_DATE_DDMMYY		// 31/12/99
+};
 
 
 /////////////////////// Shell I/O ///////////////////////
@@ -104,6 +111,45 @@ int file_write_text(const char *file, const char *msg);
 	@return 0 on success; return localtime_s error code on failure.
 */
 int generate_current_timestamp(char *timestamp_string_buff, bool surround_with_brackets);
+
+
+/**
+	generate_current_date(char*, bool, int, char)
+
+	Constructs a formatted date string for the current day and
+	stores it in the specified char* buffer with a trailing null
+	character. Available date formats are as follows:
+	
+		31/12/9999
+		12/31/9999
+		31/12/99
+		12/31/99
+
+	Format variations can be specified using values from the
+	SP_DATE_STRING_FORMATS enum. Date strings can also be optionally
+	enclosed in brackets.
+
+	@param date_string_buff			A buffer to hold the generated date string. Minimum
+									necessary buffer size ranges from sizeof(char[9])
+									to sizeof(char[13]), depending on the chosen format.
+	@param surround_with_brackets	Specifies whether the generated date string should
+									be contained within bracket characters ('[' and ']').
+	@param format					The date format, specified by a value in the
+									SP_DATE_STRING_FORMATS enum. If an invalid format
+									is given, the function defaults to SP_DATE_DDMMYYYY.
+	@param separator				The character separator between the day/month/year fields
+									in the formatted date string (Generally '/' or '-').
+
+	@return 0 on success; return localtime_s error code on failure.
+*/
+int generate_current_date(char *date_string_buff, bool surround_with_brackets, int format, char separator);
+
+/**
+	generate_current_date(char*, bool, int)
+
+	Calls @generate_current_date(char*, bool, int, char) with separator='/'.
+*/
+int generate_current_date(char *date_string_buff, bool surround_with_brackets, int format);
 
 
 
