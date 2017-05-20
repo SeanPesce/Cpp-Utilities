@@ -4,6 +4,11 @@
 #include "SP_IO.hpp"
 
 
+#ifdef max
+	#undef max	// Fixes issues with <std::streamsize>::max() on Windows
+#endif // max
+
+
 // Prints the program name and author information:
 void sp_print_intro(const char* program_name)
 {
