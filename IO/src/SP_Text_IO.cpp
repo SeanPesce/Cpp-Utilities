@@ -34,6 +34,104 @@ int file_append_text(const char *file, const char *msg)
 	return 0;
 }
 
+
+// Obtains a list of all key/value pairs from the specified section of a configuration file
+int get_private_profile_string_section(const char *file, const char *section, std::list<std::string> *keys)
+{
+	std::ifstream in_stream;
+	in_stream.open(file, std::ifstream::in); // Open file
+	std::string line;
+
+	if (!in_stream.is_open())
+	{
+		// Handle error
+		return -1;
+	}
+
+	// Find section header
+	std::string section_start = std::string("[").append(section).append("]");
+	while (std::getline(in_stream, line))
+	{
+		int index = -1;
+		if((index = line.find(section_start.c_str(), 0, section_start.length())) < 0)
+		{
+			// Current line does not contain the given section header
+			line.clear();
+			continue;
+		}
+
+		if (index == line.find_first_not_of(" \t"))
+		{
+			// Found desired section
+			break;
+		}
+		else
+		{
+			// Line contains section header, but header is commented out
+			line.clear();
+		}
+	}
+
+	// Reached end of file without finding the section
+	if (line.length() == 0)
+	{
+		in_stream.close();
+		return -1;
+	}
+
+	int key_pair_count = 0; // Number of valid key/value pairs parsed from the file
+
+	// Continue reading each line until EOF or another line that starts with "[", and store all valid keys
+	while (std::getline(in_stream, line))
+	{
+		// If line starts with '[', new section header was found
+		int index = line.find_first_of("[", 0);
+		if (index >= 0 && index == line.find_first_not_of(" \t"))
+		{
+			// Found next section; stop reading values
+			break;
+		}
+		else if((index = line.find_first_not_of(" \t")) >= 0)
+		{
+			char key_c_str[_SP_MAX_PP_KEY_LENGTH_ + 1];
+			char value_c_str[_SP_MAX_PP_STRING_VAL_LENGTH_ + 1];
+			key_c_str[0] = '\0';
+			value_c_str[0] = '\0';
+			key_c_str[_SP_MAX_PP_KEY_LENGTH_] = '\0';
+			value_c_str[_SP_MAX_PP_STRING_VAL_LENGTH_] = '\0';
+
+			//std::regex regex("^[a-zA-Z_]+[a-zA-Z0-9_]*[= ][^ \r\n\t]+");
+			// If line starts with [a-zA-Z0-9_], get all characters until "=" or " " and store as key name, and get next word token and store as key value
+			#ifdef _WIN32
+				int count = sscanf_s(&line.c_str()[index], "%[a-zA-Z0-9_]%*[= \t]%[^\t\r\n ]", key_c_str, _SP_MAX_PP_KEY_LENGTH_, value_c_str, _SP_MAX_PP_STRING_VAL_LENGTH_);
+			#else
+				int count = sscanf(&line.c_str()[index], "%[a-zA-Z0-9_]%*[= \t]%[^\t\r\n ]", key_c_str, value_c_str);
+			#endif // _WIN32
+			if (count < 2)
+			{
+				// Check for and handle errors
+			}
+			else
+			{
+				// Add the key/value pair to the list
+				keys->push_back(std::string(key_c_str));
+				keys->push_back(std::string(value_c_str));
+				key_pair_count++;
+			}
+		}
+	}
+	in_stream.close();
+
+	// Return number of key/value pairs that were successfully read from the file
+	return key_pair_count;
+}
+
+
+
+
+/////////////////////// General Text Data I/O ///////////////////////
+
+
 // Constructs a timestamp string for the current 24-hour time and stores it in the specified buffer.
 int get_current_timestamp_string(char *timestamp_string_buff, bool surround_with_brackets)
 {

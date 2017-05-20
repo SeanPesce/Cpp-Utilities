@@ -11,6 +11,7 @@
 #include <fstream>	// ofstream
 #include <iostream> // cout, endl
 #include <limits>	// numeric_limits
+#include <list>		// std::list
 #include <sstream>  // stringstream
 #include <string>	// to_string
 
@@ -26,6 +27,9 @@
 	#define _SP_KEY_DOWN_ 2147483648
 	#define _SP_KEY_TOGGLED_ 1
 #endif // _WIN32
+
+#define _SP_MAX_PP_KEY_LENGTH_ 128			// Maximum length for private profile keys
+#define _SP_MAX_PP_STRING_VAL_LENGTH_ 128	// Maximum length for private profile string values
 
 // Enumerator whose values denote different date string formats
 enum SP_DATE_STRING_FORMATS {
@@ -103,8 +107,26 @@ int file_write_text(const char *file, const char *msg);
 int file_append_text(const char *file, const char *msg);
 
 
+/**
+	get_private_profile_string_section(const char*, const char*, std::list<std::string>*)
 
-/////////////////////// Text Data I/O ///////////////////////
+	Obtains a list of all key/value pairs from the specified section of the
+	specified configuration file. Each key/value pair is defined on a separate line
+	and specified by the key name followed by any combination/number of '=', ' ',
+	and/or '\t' characters.
+	
+	@param file		Path and file name of the configuration file (generally a .ini file).
+	@param section	The name of the section to be parsed (formatted as "[section]" in the file).
+	@param keys		The list that will be populated with parsed key/value pairs.
+	
+	@return	Number of key/value pairs that were successfully parsed from the specified
+			file, or -1 if errors were encountered.
+ */
+int get_private_profile_string_section(const char *file, const char *section, std::list<std::string> *keys);
+
+
+
+/////////////////////// General Text Data I/O ///////////////////////
 
 
 /**
