@@ -1,4 +1,4 @@
-// Made by Sean P
+// Author: Sean Pesce
 
 #pragma once
 
@@ -8,6 +8,7 @@
 
 #include <cstdint> // uint32_t
 #include <cstring> // size_t, strcmp(), memcpy()
+#include <vector> // std::vector
 
 #ifdef _WIN32
 	#include <Windows.h> // GetSystemInfo(), GetNativeSystemInfo(), GetProcAddress(), GetCurrentProcess(), IsWow64Process(), VirtualProtect(), SetLastError()
@@ -108,6 +109,78 @@
         uint32_t    Type;
     } MEMORY_BASIC_INFORMATION;
 #endif // _WIN32
+
+
+
+
+///////////// Classes /////////////
+
+
+/*
+	Multi-level pointer class
+*/
+class SpPointer {
+
+public:
+	void *base = NULL; // Starting address of multi-level pointer
+	std::vector<long> offsets; // Chain of offsets used to resolve the final address
+
+
+	// Constructors/destructor
+	SpPointer()
+	{
+		base = NULL;
+	}
+	SpPointer(void *starting_address, std::vector<long> new_offsets)
+	{
+		base = starting_address;
+		for (auto offset : new_offsets)
+		{
+			offsets.push_back(offset);
+		}
+	}
+	SpPointer(void *starting_address)
+	{
+		base = starting_address;
+	}
+
+	~SpPointer(){};
+
+
+	// Returns final resolved address
+	void *SpPointer::resolve()
+	{
+		void *address = base;
+		for (auto offset : offsets)
+		{
+			address = (void*)((*(uint64_t*)address) + offset);
+		}
+		return address;
+	}
+
+	// Writes a value to the resolved address
+	template <typename T>
+	void SpPointer::write(T value)
+	{
+		*(T*)resolve() = value;
+	}
+	
+	// Copies memory from given source address to the resolved address
+	template <typename T>
+	void SpPointer::write_copy(T *source)
+	{
+		memcpy(resolve(), source, sizeof(T));
+	}
+
+	// Reads a value from the resolved address to the given buffer
+	template <typename T>
+	void SpPointer::read(T *buffer)
+	{
+		*buffer = *(T*)resolve();
+	}
+};
+
+
 
 
 ///////////// Function prototypes /////////////
