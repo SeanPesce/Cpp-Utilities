@@ -31,6 +31,7 @@
 #define _SP_MAX_PP_KEY_LENGTH_ 128			// Maximum length for private profile keys
 #define _SP_MAX_PP_STRING_VAL_LENGTH_ 128	// Maximum length for private profile string values
 
+
 // Enumerator whose values denote different date string formats
 enum SP_DATE_STRING_FORMATS {
 	SP_DATE_MMDDYYYY,	// 12/31/9999
@@ -38,6 +39,13 @@ enum SP_DATE_STRING_FORMATS {
 	SP_DATE_MMDDYY,		// 12/31/99
 	SP_DATE_DDMMYY		// 31/12/99
 };
+
+
+// Represents a function bound to a keypress
+typedef struct SP_KEY_FUNCTION {
+	unsigned int key;	// Virtual key code
+	int (*function)();	// Function called when key is pressed
+} SP_KEY_FUNCTION;
 
 
 /////////////////////// Shell I/O ///////////////////////
@@ -318,9 +326,27 @@ int append_current_date_string(std::string *date_string, bool surround_with_brac
 	@param key_name			Name of the key where the hotkey value is specified (Format in the file should be "key_name=XX", where "XX"
 							denotes a hex-formatted virtual key code)
 	
-	@return the virtual key code for the specified hotkey as an unsigned int
+	@return the virtual key code for the specified hotkey as an unsigned int (zero on failure)
  */
 unsigned int get_vk_hotkey(const char *settings_file, const char *section, const char *key_name);
+
+
+/**
+	add_function_keybind(unsigned int, int (*)(), std::list<SP_KEY_FUNCTION>*)
+
+	Adds a new keybound function to the given list.
+
+	For more info on virtual key codes:
+	https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396
+
+	@param key		Virtual key code of the key that calls the given function when pressed
+	@param function	Function called when key is pressed
+	@param binds	Pointer to a list of keybound functions; the new key function is added to the end of this list
+
+	@return 0 on success; non-zero value on failure
+ */
+int add_function_keybind(unsigned int key, int (*function)(), std::list<SP_KEY_FUNCTION> *binds);
+
 
 #ifdef _WIN32
 
