@@ -1,4 +1,4 @@
-// Made by Sean P
+// Author: Sean Pesce
 
 /*  
     CREDITS:
@@ -32,8 +32,11 @@
 
 ///////////// Global Flags & Variables /////////////
 
-bool AOBS_SKIP_EXECUTABLE_MEM = false;   // If true, memory with "Executable" flag will NOT be searched
-bool AOBS_SKIP_MAPPED_MEM = true;        // If true, MEM_MAPPED memory will NOT be searched
+bool AOBS_SKIP_EXECUTABLE_MEM = _AOBS_SKIP_EXECUTABLE_MEM_DEFAULT_;	// If true, memory with "Executable" flag will NOT be searched
+bool AOBS_SKIP_MAPPED_MEM = _AOBS_SKIP_MAPPED_MEM_DEFAULT_;			// If true, MEM_MAPPED memory will NOT be searched
+
+size_t MAX_AOB_LENGTH = _MAX_AOB_LENGTH_DEFAULT_;				// Maximum allowed length for queried byte arrays
+size_t MAX_AOBSCAN_RESULTS = _MAX_AOBSCAN_RESULTS_DEFAULT_;		// Configurable upper limit for number of results that can be returned from an AoB scan
 
 
 
@@ -43,7 +46,7 @@ bool AOBS_SKIP_MAPPED_MEM = true;        // If true, MEM_MAPPED memory will NOT 
 
 // Scans all accessible regions of current process memory for an array of
 //  bytes (AoB), beginning at the given starting address:
-void *aob_scan(uint8_t *aob, bool *mask, size_t length, void *start)
+void *aob_scan(uint8_t *aob, size_t length, bool *mask, void *start, std::vector<uint8_t*> *results)
 {
     MEMORY_BASIC_INFORMATION region;
     void *result = NULL;
@@ -53,7 +56,7 @@ void *aob_scan(uint8_t *aob, bool *mask, size_t length, void *start)
         set_error(SP_ERROR_INVALID_PARAMETER);
         return NULL;
     }
-    else if(length > SP_AOB_MAX_LENGTH)
+    else if(length > MAX_AOB_LENGTH)
     {
         set_error(SP_ERROR_INSUFFICIENT_BUFFER); // AoB is too long
         return NULL;
@@ -80,7 +83,7 @@ void *aob_scan(uint8_t *aob, bool *mask, size_t length, void *start)
     {
         if(is_aob_scannable(&region) && region.RegionSize >= length)
         {
-            result = find_aob((uint8_t*)region.BaseAddress, region.RegionSize, aob, mask, length);
+            result = find_aob((uint8_t*)region.BaseAddress, region.RegionSize, aob, length, mask, results);
 
             if(result != NULL)
             {
@@ -88,120 +91,147 @@ void *aob_scan(uint8_t *aob, bool *mask, size_t length, void *start)
                 {
                     result = NULL; // Don't let the scan return the address of the search array
                 }
-                else
+                else if(results == NULL)
                 {
+					// Only return first result
                     return result;
                 }
+				else
+				{
+					result = NULL; // Set current result to NULL to continue searching
+
+					if (results->size() >= MAX_AOBSCAN_RESULTS)
+					{
+						// Max results reached; stop searching
+						return (void*)results->at(0);
+					}
+				}
             }
             
         }
     }while(next_mem_region(&region, &region) != NULL);
 
-    return NULL;
+
+	if (results == NULL || results->size() == 0)
+	{
+		set_error(SP_NO_ERROR);
+		return NULL;
+	}
+	else
+	{
+		return (void*)results->at(0);
+	}
 }
 
 
 // Convenient override functions for aob_scan:
-void *aob_scan(uint8_t *aob, bool *mask, size_t length)
-{
-    return aob_scan(aob, mask, length, NULL); // If no starting address was specified, use NULL and scan will begin at process base
-}
-
-void *aob_scan(uint8_t *aob, size_t length, void *start)
-{
-    // If no mask was specified, pass NULL to indicate all bytes must match
-    return aob_scan(aob, NULL, length, start);
-}
-
-void *aob_scan(uint8_t *aob, size_t length)
-{
-    // If no mask was specified, pass NULL to indicate all bytes must match
-    return aob_scan(aob, NULL, length, NULL); // If no starting address was specified, use NULL and scan will begin at process base
-}
-
-void *aob_scan(const char *str_aob, void *start)
+void *aob_scan(const char *str_aob, void *start, std::vector<uint8_t*> *results)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
     std::vector<uint8_t> aob(str_aob_len);
     std::vector<char> mask(str_aob_len);
     size_t length = string_to_aob(str_aob, aob.data(), (bool*)mask.data());
-    return aob_scan(aob.data(), (bool*)mask.data(), length, start);
+	
+	void *result;
+	uint32_t err = SP_NO_ERROR;
+	if ((result = aob_scan(aob.data(), length, (bool*)mask.data(), start, results)) == NULL) err = get_error();
+	// @TODO: Free memory
+	set_error(err);
+	return result;
 }
 
-void *aob_scan(char *str_aob, void *start)
+void *aob_scan(char *str_aob, void *start, std::vector<uint8_t*> *results)
 {
-    size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob((const char *)str_aob, aob.data(), (bool*)mask.data());
-    return aob_scan(aob.data(), (bool*)mask.data(), length, start);
+	size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
+	std::vector<uint8_t> aob(str_aob_len);
+	std::vector<char> mask(str_aob_len);
+	size_t length = string_to_aob((const char *)str_aob, aob.data(), (bool*)mask.data());
+	
+	void *result;
+	uint32_t err = SP_NO_ERROR;
+	if ((result = aob_scan(aob.data(), length, (bool*)mask.data(), start, results)) == NULL) err = get_error();
+	// @TODO: Free memory
+	set_error(err);
+	return result;
 }
 
-void *aob_scan(std::string *str_aob, void *start)
-{
-    size_t str_aob_len = std::char_traits<char>::length(str_aob->c_str()); // Length of str_aob != length of final byte array
-    std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob(str_aob->c_str(), aob.data(), (bool*)mask.data());
-    return aob_scan(aob.data(), (bool*)mask.data(), length, start);
-}
-
-void *aob_scan(const char *str_aob)
-{
-    size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob(str_aob, aob.data(), (bool*)mask.data());
-    return aob_scan(aob.data(), (bool*)mask.data(), length, NULL);
-}
-
-void *aob_scan(char *str_aob)
-{
-    size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
-    std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob((const char *)str_aob, aob.data(), (bool*)mask.data());
-    return aob_scan(aob.data(), (bool*)mask.data(), length, NULL);
-}
-
-void *aob_scan(std::string *str_aob)
+void *aob_scan(std::string *str_aob, void *start, std::vector<uint8_t*> *results)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob->c_str()); // Length of str_aob != length of final byte array
     std::vector<uint8_t> aob(str_aob_len);
     std::vector<char> mask(str_aob_len);
     size_t length = string_to_aob(str_aob->c_str(), aob.data(), (bool*)mask.data());
-    return aob_scan(aob.data(), (bool*)mask.data(), length, NULL);
+
+	void *result;
+	uint32_t err = SP_NO_ERROR;
+	if ((result = aob_scan(aob.data(), length, (bool*)mask.data(), start, results)) == NULL) err = get_error();
+	// @TODO: Free memory
+	set_error(err);
+	return result;
 }
+
 
 
 // Searches for an AoB within a given section of memory:
-void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, bool *mask, size_t length)
+void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, size_t length, bool *mask, std::vector<uint8_t*> *results)
 {
     uint8_t *end = base + region_size - length;
 
     for(; base <= end; ++base)
     {
-        if(mask != NULL && compare_byte_arrays(base, aob, mask, length))
+        if(mask != NULL && compare_byte_arrays(base, aob, length, mask))
         {
-            if(base != aob)
+            if(base != aob) // Make sure the matching AoB isn't just our search array in the stack
             {
-                return base; // Make sure the matching AoB isn't just our search array in the stack
+				if (results == NULL)
+				{
+					return base; 
+				}
+				else
+				{
+					results->push_back((uint8_t*)base); // Add current result to the results list
+					if (results->size() >= MAX_AOBSCAN_RESULTS)
+					{
+						// Max results reached; stop searching
+						return (void*)results->at(0);
+					}
+				}
             }
         }
         else if(compare_byte_arrays(base, aob, length)) // No mask
         {
-            if(base != aob)
-            {
-                return base; // Make sure the matching AoB isn't just our search array in the stack
-            }
+			if (base != aob) // Make sure the matching AoB isn't just our search array in the stack
+			{
+				if (results == NULL)
+				{
+					return base;
+				}
+				else
+				{
+					results->push_back((uint8_t*)base); // Add current result to the results list
+					if (results->size() >= MAX_AOBSCAN_RESULTS)
+					{
+						// Max results reached; stop searching
+						return (void*)results->at(0);
+					}
+				}
+			}
         }
     }
-    return NULL;
+    
+	if (results == NULL || results->size() == 0)
+	{
+		return NULL;
+	}
+	else
+	{
+		return (void*)results->at(0);
+	}
 }
 
 
 // Returns true if both byte arrays are identical (excluding wildcard bytes):
-bool compare_byte_arrays(uint8_t *mem, uint8_t *aob, bool *mask, size_t length)
+bool compare_byte_arrays(uint8_t *mem, uint8_t *aob, size_t length, bool *mask)
 {
     uint8_t *end = aob + length;
     for(; aob < end; mem++, aob++, mask++)
@@ -275,7 +305,7 @@ size_t string_to_aob(const char *str_aob, uint8_t *aob, bool *mask)
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
     size_t pos = 0; // Position in final byte array
 
-    for(int c = 0; c < str_aob_len; c++ /* lol */)
+    for(int c = 0; c < (int)str_aob_len; c++ /* lol */)
     {
         if(str_aob[c] == ' ') // Skip spaces
         {
@@ -321,7 +351,7 @@ size_t string_to_aob(const char *str_aob, uint8_t *aob, bool *mask)
 }
 
 
-// Overload of string_to_aob using a non-constant char *:
+// Overload of string_to_aob using a non-constant char pointer:
 size_t string_to_aob(char *str_aob, uint8_t *aob, bool *mask)
 {
     return string_to_aob((const char *)str_aob, aob, mask);
@@ -338,7 +368,9 @@ size_t string_to_aob(std::string *str_aob, uint8_t *aob, bool *mask)
 // Sets global search flags to their default values:
 void reset_aob_scan_settings()
 {
-    AOBS_SKIP_EXECUTABLE_MEM = false;
-    AOBS_SKIP_MAPPED_MEM = true;
+	AOBS_SKIP_EXECUTABLE_MEM = _AOBS_SKIP_EXECUTABLE_MEM_DEFAULT_;
+	AOBS_SKIP_MAPPED_MEM = _AOBS_SKIP_MAPPED_MEM_DEFAULT_;
+	MAX_AOB_LENGTH = _MAX_AOB_LENGTH_DEFAULT_;
+	MAX_AOBSCAN_RESULTS = _MAX_AOBSCAN_RESULTS_DEFAULT_;
 }
 
