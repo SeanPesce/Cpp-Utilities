@@ -51,10 +51,10 @@ const int   JMP_REL8_INSTR_LENGTH = 2,      // 'JMP short' (JMP rel8) instructio
 //
 // Offset from function start address when jumping to assembly code:
 // (can be changed to accomodate different compilers and/or calling conventions)
-#ifdef _MSCVER
-    int SP_ASM_FUNC_START_OFFSET = 0; // Using a Microsoft compiler; jump straight to the injected function
+#ifdef _MSC_VER
+	#define SP_ASM_FUNC_START_OFFSET = 0; // Using a Microsoft compiler; jump straight to the injected function
 #else
-    int SP_ASM_FUNC_START_OFFSET = 4; // Using non-MS compiler; GCC in-line ASM starts +4 bytes from asm_code
+	#define SP_ASM_FUNC_START_OFFSET = 4; // Using non-MS compiler; GCC in-line ASM starts +4 bytes from asm_code
 #endif // _MSCVER
 
 
