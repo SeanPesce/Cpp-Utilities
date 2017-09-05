@@ -26,44 +26,79 @@ public:
 	~SpPointer();
 	
 
-	// Returns final resolved address
+	// Returns final resolved address (or NULL if address is inaccessible)
 	void *resolve();
 
 	// Writes a value to the resolved address
 	template <typename T>
-	void write(T value);
+	uint32_t write(T value);
 
 	// Copies memory from given source address to the resolved address
 	template <typename T>
-	void write_copy(T *source);
+	uint32_t write_copy(T *source);
 
 	// Reads a value from the resolved address to the given buffer
 	template <typename T>
-	void read(T *buffer);
+	uint32_t read(T *buffer);
 };
 
 
 
 
-// Writes a value to the resolved address
+/*
+	Writes a value to the resolved address.
+
+	@param value	Value to be written to the resolved address
+
+	@return			SP_NO_ERROR (0) on success; if pointer resolution fails, SP_ERROR_INVALID_ADDRESS is returned instead.
+*/
 template <typename T>
-void SpPointer::write(T value)
+uint32_t SpPointer::write(T value)
 {
-	*(T*)resolve() = value;
+	void *resolved_address = resolve();
+	if (resolved_address == NULL)
+		return SP_ERROR_INVALID_ADDRESS;
+
+	*(T*)resolved_address = value;
+	return 0;
 }
 
-// Copies memory from given source address to the resolved address
+
+/*
+	Copies memory from given source address to the resolved address.
+
+	@param source	Starting address of the source data
+
+	@return			SP_NO_ERROR (0) on success; if pointer resolution fails, SP_ERROR_INVALID_ADDRESS is returned instead.
+*/
 template <typename T>
-void SpPointer::write_copy(T *source)
+uint32_t SpPointer::write_copy(T *source)
 {
-	memcpy(resolve(), source, sizeof(T));
+	void *resolved_address = resolve();
+	if (resolved_address == NULL)
+		return SP_ERROR_INVALID_ADDRESS;
+
+	memcpy(resolved_address, source, sizeof(T));
+	return 0;
 }
 
-// Reads a value from the resolved address to the given buffer
+
+/*
+	Reads a value from the resolved address to the given buffer.
+
+	@param buffer	Buffer to store the value that was read from the resolved address
+
+	@return			SP_NO_ERROR (0) on success; if pointer resolution fails, SP_ERROR_INVALID_ADDRESS is returned instead.
+*/
 template <typename T>
-void SpPointer::read(T *buffer)
+uint32_t SpPointer::read(T *buffer)
 {
-	*buffer = *(T*)resolve();
+	void *resolved_address = resolve();
+	if (resolved_address == NULL)
+		return SP_ERROR_INVALID_ADDRESS;
+
+	*buffer = *(T*)resolved_address;
+	return 0;
 }
 
 #endif _SP_POINTER_CLASS_H_
