@@ -9,6 +9,12 @@
 #ifndef _SP_POINTER_CLASS_H_
 	#define _SP_POINTER_CLASS_H_
 
+#ifdef _WIN32
+	#include <winerror.h>
+#else
+	#include <errno.h>
+#endif // _WIN32
+
 #include <vector>
 
 
