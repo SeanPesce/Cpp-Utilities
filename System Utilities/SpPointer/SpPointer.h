@@ -57,7 +57,11 @@ uint32_t SpPointer::write(T value)
 {
 	void *resolved_address = resolve();
 	if (resolved_address == NULL)
-		return SP_ERROR_INVALID_ADDRESS;
+	#ifdef _WIN32
+		return ERROR_INVALID_ADDRESS;
+	#else
+		return EFAULT;
+	#endif // _WIN32
 
 	*(T*)resolved_address = value;
 	return 0;
@@ -76,7 +80,11 @@ uint32_t SpPointer::write_copy(T *source)
 {
 	void *resolved_address = resolve();
 	if (resolved_address == NULL)
-		return SP_ERROR_INVALID_ADDRESS;
+		#ifdef _WIN32
+			return ERROR_INVALID_ADDRESS;
+		#else
+			return EFAULT;
+		#endif // _WIN32
 
 	memcpy(resolved_address, source, sizeof(T));
 	return 0;
@@ -95,7 +103,11 @@ uint32_t SpPointer::read(T *buffer)
 {
 	void *resolved_address = resolve();
 	if (resolved_address == NULL)
-		return SP_ERROR_INVALID_ADDRESS;
+		#ifdef _WIN32
+			return ERROR_INVALID_ADDRESS;
+		#else
+			return EFAULT;
+		#endif // _WIN32
 
 	*buffer = *(T*)resolved_address;
 	return 0;
