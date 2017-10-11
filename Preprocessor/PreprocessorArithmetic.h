@@ -5,6 +5,10 @@
 
 #pragma once
 
+//#ifndef _SP_PREPROCESSOR_ARITHMETIC_H_
+//	#define _SP_PREPROCESSOR_ARITHMETIC_H_
+
+
 #define MUL(A,B) NUM(GLUE(P,A)(GLUE_I(P,B)()))
 #define ADD(A,B) NUM(GLUE(P,A)(),GLUE_I(P,B)())
 #define GLUE(X,Y) GLUE_I(X,Y)
@@ -322,3 +326,6 @@
 #define P255(...) P254(__VA_ARGS__),__VA_ARGS__
 
 // MUL(32, ADD(3, 4))
+
+
+// #endif // _SP_PREPROCESSOR_ARITHMETIC_H_
