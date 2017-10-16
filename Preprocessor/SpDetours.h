@@ -24,6 +24,9 @@
 #define SP_HOOK_INIT(P, RETURN_DATATYPE, CALLING_CONVENTION, ...)typedef RETURN_DATATYPE##(CALLING_CONVENTION *t##P)(##__VA_ARGS__);t##P o##P;RETURN_DATATYPE hk##P(##__VA_ARGS__)
 //	{
 //		return o##P(args);
+//
+//		// Outside of a preprocessor macro, the previous line would look like this:
+//      // return oP(args);
 //	}
 
 
@@ -36,7 +39,7 @@
 #define SP_WAIT_FOR_HOOK_PROC_ATTACH(P, lib, ms) while(!(o##P=(t##P)GetProcAddress(GetModuleHandle(lib),#P))){Sleep(ms);}DetourTransactionBegin();DetourUpdateThread(GetCurrentThread());DetourAttach(&(PVOID&)o##P,hk##P);DetourTransactionCommit();if(o##P==NULL){SetLastError(ERROR_PROC_NOT_FOUND);}else{SetLastError(ERROR_SUCCESS);}
 
 // Attempts to hook the function P in the library lib, retrying for a total of n attempts (waiting ms milliseconds between each attempt) if the procedure isn't found. If successful, system error code is set to ERROR_SUCCESS. If the macro fails, system error code is set to ERROR_PROC_NOT_FOUND.
-#define SP_WAIT_FOR_HOOK_PROC_ATTACH(P, lib, retries, ms) {for(int i=0;i<retries&&!(o##P=(t##P)GetProcAddress(GetModuleHandle(lib),#P));i++){o##P=NULL;Sleep(ms);}}if(o##P!=NULL){DetourTransactionBegin();DetourUpdateThread(GetCurrentThread());DetourAttach(&(PVOID&)o##P,hk##P);DetourTransactionCommit();}if(o##P==NULL){SetLastError(ERROR_PROC_NOT_FOUND);}else{SetLastError(ERROR_SUCCESS);}
+#define SP_WAIT_N_FOR_HOOK_PROC_ATTACH(P, lib, retries, ms) {for(int i=0;i<retries&&!(o##P=(t##P)GetProcAddress(GetModuleHandle(lib),#P));i++){o##P=NULL;Sleep(ms);}}if(o##P!=NULL){DetourTransactionBegin();DetourUpdateThread(GetCurrentThread());DetourAttach(&(PVOID&)o##P,hk##P);DetourTransactionCommit();}if(o##P==NULL){SetLastError(ERROR_PROC_NOT_FOUND);}else{SetLastError(ERROR_SUCCESS);}
 
 
 

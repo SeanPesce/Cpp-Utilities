@@ -2,6 +2,7 @@
 
 
 #include "SP_IO.hpp"
+#include <clocale>
 
 
 // Writes a string to a text file:
@@ -53,7 +54,7 @@ int get_private_profile_string_section(const char *file, const char *section, st
 	while (std::getline(in_stream, line))
 	{
 		int index = -1;
-		if((index = line.find(section_start.c_str(), 0, section_start.length())) < 0)
+		if((index = (int)line.find(section_start.c_str(), 0, section_start.length())) < 0)
 		{
 			// Current line does not contain the given section header
 			line.clear();
@@ -85,13 +86,13 @@ int get_private_profile_string_section(const char *file, const char *section, st
 	while (std::getline(in_stream, line))
 	{
 		// If line starts with '[', new section header was found
-		int index = line.find_first_of("[", 0);
+		int index = (int)line.find_first_of("[", 0);
 		if (index >= 0 && index == line.find_first_not_of(" \t"))
 		{
 			// Found next section; stop reading values
 			break;
 		}
-		else if((index = line.find_first_not_of(" \t")) >= 0)
+		else if((index = (int)line.find_first_not_of(" \t")) >= 0)
 		{
 			char key_c_str[_SP_MAX_PP_KEY_LENGTH_ + 1];
 			char value_c_str[_SP_MAX_PP_STRING_VAL_LENGTH_ + 1];
@@ -632,4 +633,115 @@ int append_current_date_string(std::string *date_string, bool surround_with_brac
 int append_current_date_string(std::string *date_string, bool surround_with_brackets, int format)
 {
 	return append_current_date_string(date_string, surround_with_brackets, format, '/');
+}
+
+
+
+// Converts a wide character string (UTF-16) to a multibyte string (char* string).
+int string_wide_to_mb(wchar_t *in_string, std::string &out_string, bool append)
+{
+	if (in_string == NULL)
+	{
+#ifdef _WIN32
+		return ERROR_INVALID_ADDRESS;
+#else
+		return EFAULT;
+#endif // _WIN32
+	}
+
+	if (!append)
+		out_string.clear();
+
+	char *buffer = NULL;
+	size_t chars_converted;
+	errno_t ret_val = 0;
+
+	size_t len = std::wstring(in_string).length();
+	if (len == 0)
+		return 0;
+
+	buffer = (char*)malloc(sizeof(char) * (len + 1));
+
+	if(buffer == NULL)
+#ifdef _WIN32
+		return ERROR_NOT_ENOUGH_MEMORY;
+#else
+		return ENOMEM;
+#endif // _WIN32
+
+	std::setlocale(LC_ALL, "en_US.utf8");
+	if ((ret_val = wcstombs_s(&chars_converted, buffer, len + 1, in_string, sizeof(wchar_t)*(len+1))) || chars_converted == (size_t)-1)
+	{
+		// Error converting from wide char to char
+		free(buffer);
+
+		if (ret_val != 0)
+			return ret_val;
+		else
+#ifdef _WIN32
+			return ERROR_BAD_FORMAT;
+#else
+			return EBADF;
+#endif // _WIN32
+	}
+	
+	out_string.append(buffer);
+
+	free(buffer);
+	return 0;
+}
+
+
+// Converts a multibyte string(char* string) to a wide character string(UTF - 16).
+int string_mb_to_wide(char *in_string, std::wstring &out_string, bool append)
+{
+	if (in_string == NULL)
+	{
+#ifdef _WIN32
+		return ERROR_INVALID_ADDRESS;
+#else
+		return EFAULT;
+#endif // _WIN32
+	}
+
+	if (!append)
+		out_string.clear();
+
+	wchar_t *buffer = NULL;
+	size_t chars_converted;
+	errno_t ret_val = 0;
+
+	size_t len = std::string(in_string).length();
+	if (len == 0)
+		return 0;
+
+	buffer = (wchar_t*)malloc(sizeof(wchar_t) * (len + 1));
+
+	if(buffer == NULL)
+#ifdef _WIN32
+		return ERROR_NOT_ENOUGH_MEMORY;
+#else
+		return ENOMEM;
+#endif // _WIN32
+
+	std::setlocale(LC_ALL, "en_US.utf8");
+	if ((ret_val = mbstowcs_s(&chars_converted, buffer, len + 1, in_string, sizeof(char)*(len+1))) || chars_converted == (size_t)-1)
+	{
+		// Error converting from wide char to char
+		free(buffer);
+
+		if (ret_val != 0)
+			return ret_val;
+		else
+#ifdef _WIN32
+			return ERROR_BAD_FORMAT;
+#else
+			return EBADF;
+#endif // _WIN32
+	}
+	
+	out_string.append(buffer);
+
+	free(buffer);
+	return 0;
 }
