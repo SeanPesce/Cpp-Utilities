@@ -15,16 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\SpSearchStringSet.h">
+    <ClInclude Include="SpSearchStringSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SpSssOverloads.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="SpSearchStringSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
