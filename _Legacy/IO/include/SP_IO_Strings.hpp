@@ -7,7 +7,7 @@
 	#define _SP_IO_STRINGS_HPP_
 
 
-// #define _SP_DEFINE_VK_NAME_STRINGS_		// Must be defined to use Virtual-key code name strings (opt-in by default because it increases filesize by a few KB)
+// #define _SP_DEFINE_VK_NAME_STRINGS_		// Must be defined to use Virtual-key code name strings (opt-in by default because it increases file size by a few KB)
 
 
 #ifdef _WIN32

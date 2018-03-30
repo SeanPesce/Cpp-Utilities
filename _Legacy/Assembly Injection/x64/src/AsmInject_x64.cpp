@@ -140,7 +140,7 @@ void write_bytecode_2b(void *inject_at, int nops, void *local_trampoline, int tr
 
 
 
-// Writes bytecode for the series of instructions to perform an abolute JMP r64 (using JMP %rax)
+// Writes bytecode for the series of instructions to perform an absolute JMP r64 (using JMP %rax)
 //  and restore the register upon returning. Also overwrites remaining garbage bytecode with
 //  the specified number of NOP instructions.
 int write_jmp_rax_14b(void *write_to, void *jmp_to, int nops)

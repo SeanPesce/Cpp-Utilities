@@ -259,7 +259,7 @@ void *next_mem_region(void *current);
 
 
 /*get_page_base(void *)
- * Obtains the base address of a process page that contains the given memory adress.
+ * Obtains the base address of a process page that contains the given memory address.
  *
  * @param address	The memory address that resides within the page.
  */
