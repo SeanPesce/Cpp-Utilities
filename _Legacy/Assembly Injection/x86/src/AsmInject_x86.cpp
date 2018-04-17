@@ -34,8 +34,6 @@ static void check_valid_injection(uint32_t adr){
 
 void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void *asm_code)
 {
-
-    check_valid_injection((uint32_t)inject_at);
     // The remaining 4 bytes of the instruction are the operand, specifying the offset from this address to the code cave:
     #ifdef _MSC_VER
         // Using a Microsoft compiler; jump straight to the code cave:
