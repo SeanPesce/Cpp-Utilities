@@ -29,6 +29,7 @@
     <ProjectGuid>{684C621D-C8AA-4470-AD5C-855707758EDA}</ProjectGuid>
     <RootNamespace>AsmInject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>SP_AsmInjectx86</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

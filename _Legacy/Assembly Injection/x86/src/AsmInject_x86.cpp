@@ -18,7 +18,7 @@ static std::set<uint32_t> injected_locations;
 
 static void check_valid_injection(uint32_t adr){
     //TODO: can still be a bug where we inject not at the exact same place but within 5 bytes, and partially overwrite the previous jump
-    if (injected_locations.find(adr) != injected_locations.end()) {
+    if (injected_locations.find(adr) == injected_locations.end()) {
         injected_locations.insert(adr);
     }
     else {
