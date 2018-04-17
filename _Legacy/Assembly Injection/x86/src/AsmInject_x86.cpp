@@ -8,12 +8,34 @@
  */
 
 #include "AsmInject_x86.hpp"
+#include <set>
+#ifdef _MSC_VER
+#include <Windows.h>
+#endif
 
+//For every injection, save the location we're injecting to and check if we've already injected there before
+static std::set<uint32_t> injected_locations;
 
+static void check_valid_injection(uint32_t adr){
+    //TODO: can still be a bug where we inject not at the exact same place but within 5 bytes, and partially overwrite the previous jump
+    if (injected_locations.find(adr) != injected_locations.end()) {
+        injected_locations.insert(adr);
+    }
+    else {
+        fprintf(stderr, "Attempted to inject at same location twice. @%d\n", adr);
+        #ifdef _MSC_VER
+            char* error_str = (char*)malloc(100);
+            sprintf_s(error_str, 100, "Attempted to inject at same location twice. @%d", adr);
+            MessageBox(NULL, error_str, NULL, MB_OK);
+        #endif
+        abort();
+    }
+}
 
 void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void *asm_code)
 {
 
+    check_valid_injection((uint32_t)inject_at);
     // The remaining 4 bytes of the instruction are the operand, specifying the offset from this address to the code cave:
     #ifdef _MSC_VER
         // Using a Microsoft compiler; jump straight to the code cave:
@@ -32,6 +54,8 @@ void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void 
 // Writes a JMP rel8 instruction from write_to to jmp_to, and inserts trailing NOPs (if necessary):
 void write_jmp_rel8(void *write_to, void *jmp_to, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
     *(uint8_t*)write_to = JMP_REL8_INSTR_OPCODE; // Write opcode byte
     
     *((uint8_t*)write_to+1) = (int8_t)calculate_jmp_offset(write_to, jmp_to, JMP_REL8_INSTR_LENGTH); // Write operand byte
@@ -45,6 +69,8 @@ void write_jmp_rel8(void *write_to, void *jmp_to, int nops)
 // Writes a JMP rel8 instruction from write_to using the given offset, and inserts trailing NOPs if necessary
 void write_jmp_rel8(void *write_to, int8_t offset, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
     *(uint8_t*)write_to = JMP_REL8_INSTR_OPCODE; // Write opcode byte
     
     *((int8_t*)write_to+1) = offset; // Write operand byte
@@ -58,6 +84,8 @@ void write_jmp_rel8(void *write_to, int8_t offset, int nops)
 // Writes a JMP rel32 instruction from write_to to jmp_to, and inserts trailing NOPs (if necessary):
 void write_jmp_rel32(void *write_to, void *jmp_to, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
     *(uint8_t*)write_to = JMP_REL32_INSTR_OPCODE; // Write opcode byte
     
     *(uint32_t*)((uint8_t*)write_to+1) = (int32_t)calculate_jmp_offset(write_to, jmp_to, JMP_REL32_INSTR_LENGTH); // Write operand bytes
@@ -71,6 +99,8 @@ void write_jmp_rel32(void *write_to, void *jmp_to, int nops)
 // Writes a JMP rel32 instruction from write_to using the given offset, and inserts trailing NOPs if necessary
 void write_jmp_rel32(void *write_to, int32_t offset, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
     *(uint8_t*)write_to = JMP_REL32_INSTR_OPCODE; // Write opcode byte
     
     *(int32_t*)((uint8_t*)write_to+1) = offset; // Write operand bytes
@@ -84,6 +114,8 @@ void write_jmp_rel32(void *write_to, int32_t offset, int nops)
 // Writes a CALL rel32 instruction from write_to to procedure, and inserts trailing NOPs if necessary
 void write_call_rel32(void *write_to, void *procedure, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
     *(uint8_t*)write_to = CALL_REL32_INSTR_OPCODE; // Write opcode byte
     
     *(uint32_t*)((uint8_t*)write_to+1) = (int32_t)calculate_jmp_offset(write_to, procedure, CALL_REL32_INSTR_LENGTH); // Write operand bytes
@@ -97,6 +129,8 @@ void write_call_rel32(void *write_to, void *procedure, int nops)
 // Writes a CALL rel32 instruction from write_to using the given offset, and inserts trailing NOPs if necessary
 void write_call_rel32(void *write_to, int32_t offset, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
     *(uint8_t*)write_to = CALL_REL32_INSTR_OPCODE; // Write opcode byte
     
     *(int32_t*)((uint8_t*)write_to+1) = offset; // Write operand bytes
@@ -110,6 +144,8 @@ void write_call_rel32(void *write_to, int32_t offset, int nops)
 // Writes a "near return" (RET) instruction to write_to and inserts trailing NOPs if necessary
 void write_ret(void *write_to, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
 	*(uint8_t*)write_to = RET_INSTR_OPCODE; // Write instruction
 	
 	// Erase trailing garbage bytes from overwritten instruction at write address:
@@ -121,6 +157,8 @@ void write_ret(void *write_to, int nops)
 // Writes a "far return" (RET) instruction to write_to and inserts trailing NOPs if necessary
 void write_ret_far(void *write_to, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
 	*(uint8_t*)write_to = RET_FAR_INSTR_OPCODE; // Write instruction
 	
 	// Erase trailing garbage bytes from overwritten instruction at write address:
@@ -133,6 +171,8 @@ void write_ret_far(void *write_to, int nops)
 //  inserts trailing NOPs if necessary
 void write_ret_imm16(void *write_to, uint16_t pop_bytes, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
 	*(uint8_t*)write_to = RET_IMM16_INSTR_OPCODE; // Write opcode byte
 
 	*(uint16_t*)((uint8_t*)write_to+1) = pop_bytes; // Write operand bytes
@@ -147,6 +187,8 @@ void write_ret_imm16(void *write_to, uint16_t pop_bytes, int nops)
 //  inserts trailing NOPs if necessary
 void write_ret_far_imm16(void *write_to, uint16_t pop_bytes, int nops)
 {
+    check_valid_injection((uint32_t)write_to);
+
 	*(uint8_t*)write_to = RET_FAR_IMM16_INSTR_OPCODE; // Write opcode byte
 
 	*(uint16_t*)((uint8_t*)write_to+1) = pop_bytes; // Write operand bytes
