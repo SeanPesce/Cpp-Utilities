@@ -41,6 +41,27 @@ public:
     inline ~pointer(){}
 
 
+    pointer& operator=(const sp::mem::pointer<T>& other)
+    {
+        if (this != &other)
+        {
+            this->assign(other);
+        }
+        return *this;
+    }
+
+    T& operator*()
+    {
+        return *this->resolve();
+    }
+
+    inline void assign(const sp::mem::pointer<T>& other)
+    {
+        this->_base = other.base();
+        this->_offsets = other.offsets();
+    }
+
+
     // Accessors
 
     inline void* base() const
@@ -98,6 +119,8 @@ public:
         // Resolved address is readable
         return (T*)address;
     }
+
+    // @TODO: Overload operator[] to access intermediate pointer addresses
 
 
     /*

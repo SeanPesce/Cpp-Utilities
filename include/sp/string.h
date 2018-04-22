@@ -212,6 +212,21 @@ std::basic_string<charT> replace(const std::basic_string<charT> &in, charT find,
     return s;
 }
 
+// Replaces characters if they appear in the given set of characters to replace
+template <typename charT>
+std::basic_string<charT> replace_chars(const std::basic_string<charT> &in, const std::basic_string<charT> &chars, charT replace_with)
+{
+    std::basic_string<charT> s = in;
+    int i = 0;
+    while (s[i] != (charT)0) { // While not '\0' (end of string)
+        if (chars.find(s[i]) != std::basic_string<charT>::npos) {
+            s[i] = replace_with;
+        }
+        i++;
+    }
+    return s;
+}
+
 
 // Converts a multibyte string (char) to a wide character string (wchar_t)
 std::wstring mb_to_wide(const std::string &in, const std::string &locale = LOCALE);

@@ -209,6 +209,10 @@
     <ClInclude Include="include\sp\file.h" />
     <ClInclude Include="include\sp\file\file_overloads.hpp" />
     <ClInclude Include="include\sp\file\path.h" />
+    <ClInclude Include="include\sp\gui\console.h" />
+    <ClInclude Include="include\sp\gui\console\console_message.h" />
+    <ClInclude Include="include\sp\gui\console\console_output.h" />
+    <ClInclude Include="include\sp\gui\console\console_output_interface.h" />
     <ClInclude Include="include\sp\gui\input\text\caret.h" />
     <ClInclude Include="include\sp\gui\message_box.h" />
     <ClInclude Include="include\sp\io.h" />
@@ -231,6 +235,7 @@
     <ClInclude Include="include\sp\os\windows\com\interface\iunknown.h" />
     <ClInclude Include="include\sp\os\windows\com\interface\iunknown_impl.hpp" />
     <ClInclude Include="include\sp\os\windows\dll.h" />
+    <ClInclude Include="include\sp\preprocessor.h" />
     <ClInclude Include="include\sp\sp.h" />
     <ClInclude Include="include\sp\string.h" />
     <ClInclude Include="include\sp\string\string_overloads.hpp" />
@@ -238,6 +243,7 @@
     <ClInclude Include="include\sp\system\process.h" />
     <ClInclude Include="include\sp\system\process\child.h" />
     <ClInclude Include="include\sp\utilities.h" />
+    <ClInclude Include="include\sp\utility\history.h" />
     <ClInclude Include="lib\inih\cpp\INIReader.h" />
     <ClInclude Include="lib\inih\ini.h" />
   </ItemGroup>

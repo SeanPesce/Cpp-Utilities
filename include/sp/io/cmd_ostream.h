@@ -43,6 +43,7 @@ public:
     cmd_ostream(const sp::io::cmd_ostream&) = delete; // Disable copy constructor
     ~cmd_ostream() { terminate(); }
 
+    // @TODO: Overload operator<< for printing
 
     bool print(const std::string &message = "", bool append_line_feed = true)
     {

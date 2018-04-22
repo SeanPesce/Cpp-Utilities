@@ -22,7 +22,7 @@ __SP_NAMESPACE
 namespace mem {
 
 
-class byte_patch : public sp::mem::patch {
+class byte_patch : public sp::mem::patch_interface {
 
 protected:
 
@@ -187,7 +187,7 @@ public:
         this->_patch_data = data;
     }
 
-}; // class patch
+}; // class byte_patch
 
 
 } // namespace mem

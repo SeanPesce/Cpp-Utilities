@@ -17,7 +17,7 @@ __SP_NAMESPACE
 namespace mem {
 
 
-class patch {
+class patch_interface {
 
 protected:
 
@@ -27,8 +27,8 @@ protected:
 public:
 
     // Constructors/destructors
-    patch() {}
-    virtual inline ~patch() {}
+    patch_interface() {}
+    virtual inline ~patch_interface() {}
 
     // Apply patch data
     virtual inline bool apply() const = 0;
@@ -36,7 +36,7 @@ public:
     // Restore original data
     virtual inline bool restore() const = 0;
 
-}; // class patch
+}; // class patch_interface
 
 
 } // namespace mem

@@ -151,6 +151,12 @@
     <Filter Include="Header Files\sp\memory\patch">
       <UniqueIdentifier>{a3d9c24b-7d7e-421a-bbe1-b8ee7b87997c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sp\gui\console">
+      <UniqueIdentifier>{9abe429a-c78f-4f9b-aeeb-7380a1fc49d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\utility">
+      <UniqueIdentifier>{29750c30-ce0f-4a4e-80f0-5d8921a6c68a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\inih\cpp\INIReader.cpp">
@@ -420,6 +426,24 @@
     </ClInclude>
     <ClInclude Include="include\sp\memory\patch\byte_patch.h">
       <Filter>Header Files\sp\memory\patch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\gui\console\console_output_interface.h">
+      <Filter>Header Files\sp\gui\console</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\gui\console\console_output.h">
+      <Filter>Header Files\sp\gui\console</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\utility\history.h">
+      <Filter>Header Files\sp\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\gui\console\console_message.h">
+      <Filter>Header Files\sp\gui\console</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\gui\console.h">
+      <Filter>Header Files\sp\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\preprocessor.h">
+      <Filter>Header Files\sp\utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
