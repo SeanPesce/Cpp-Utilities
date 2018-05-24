@@ -27,21 +27,39 @@ protected:
     interface_t*  _interface;
     unsigned long _ref_count;
 
-public:
-    static const GUID GUID;
+    virtual inline void _wrap(interface_t **original)
+    {
+        _interface = *original;
+        *original = this;
+    }
 
-    iunknown(interface_t *original);
-    virtual ~iunknown();
+public:
+
+    iunknown(){}
+
+    iunknown(interface_t **original)
+    {
+        this->_wrap(original);
+    }
+
+    virtual ~iunknown() {}
+
+
+    virtual inline const GUID guid()
+    {
+        return __uuidof(interface_t);
+    }
+
 
     // Wrapped interface methods
-    ULONG   AddRef();
-    HRESULT QueryInterface(REFIID riid, void **ppvObject);
-    ULONG   Release();
+    virtual ULONG   AddRef();
+    virtual HRESULT QueryInterface(REFIID riid, void **ppvObject);
+    virtual ULONG   Release();
 
-    inline interface_t*  get() const;
-    inline void          set(interface_t* new_interface);
-    inline unsigned long ref_count() const;
-    inline void          set_ref_count(unsigned long count);
+    virtual inline interface_t*  get() const;
+    virtual inline void          set(interface_t* new_interface);
+    virtual inline unsigned long ref_count() const;
+    virtual inline void          set_ref_count(unsigned long count);
 }; // class iunknown
 
 

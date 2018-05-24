@@ -22,7 +22,7 @@
     <ProjectGuid>{7D78781B-5796-4E64-9CBB-4A448FBC249E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>sp_utils</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,13 +41,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -73,18 +73,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -171,6 +175,8 @@
     <ClCompile Include="src\os\windows.cpp" />
     <ClCompile Include="src\os\windows\com\com_main.cpp" />
     <ClCompile Include="src\os\windows\com\interface\iunknown.cpp" />
+    <ClCompile Include="src\os\windows\dll.cpp" />
+    <ClCompile Include="src\sp.cpp" />
     <ClCompile Include="src\string.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +187,30 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sp\config\ini_cfg.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext1.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext1_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext2.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext2_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext3.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext3_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext4.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext4_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device1.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device2.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device2_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device3.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device3_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device4.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device4_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device5.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device5_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device1_impl.hpp" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\id3d11devicechild.h" />
+    <ClInclude Include="include\sp\dx\d3d11\interface\id3d11devicechild_impl.hpp" />
     <ClInclude Include="include\sp\dx\d3d9\d3d9_exports.h" />
     <ClInclude Include="include\sp\dx\d3d9\d3d9_hooks.h" />
     <ClInclude Include="include\sp\dx\d3d9\d3d9_main.h" />
@@ -188,6 +218,16 @@
     <ClInclude Include="include\sp\dx\dxgi\dxgi_exports.h" />
     <ClInclude Include="include\sp\dx\dxgi\dxgi_hooks.h" />
     <ClInclude Include="include\sp\dx\dxgi\dxgi_main.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice1.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice2.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice3.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice4.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice1_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice2_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice3_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice4_impl.hpp" />
     <ClInclude Include="include\sp\dx\dxgi\interface\factory\idxgifactory.h" />
     <ClInclude Include="include\sp\dx\dxgi\interface\factory\idxgifactory1.h" />
     <ClInclude Include="include\sp\dx\dxgi\interface\factory\idxgifactory1_impl.hpp" />
@@ -200,8 +240,22 @@
     <ClInclude Include="include\sp\dx\dxgi\interface\factory\idxgifactory5.h" />
     <ClInclude Include="include\sp\dx\dxgi\interface\factory\idxgifactory5_impl.hpp" />
     <ClInclude Include="include\sp\dx\dxgi\interface\factory\idxgifactory_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgiadapter.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgiadapter_impl.hpp" />
     <ClInclude Include="include\sp\dx\dxgi\interface\idxgiobject.h" />
     <ClInclude Include="include\sp\dx\dxgi\interface\idxgiobject_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgisubobject.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgisubobject_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain1.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain1_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain2.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain2_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain3.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain3_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain4.h" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain4_impl.hpp" />
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain_impl.hpp" />
     <ClInclude Include="include\sp\dx\dx_main.h" />
     <ClInclude Include="include\sp\environment.h" />
     <ClInclude Include="include\sp\error.h" />
@@ -235,6 +289,7 @@
     <ClInclude Include="include\sp\os\windows\com\interface\iunknown.h" />
     <ClInclude Include="include\sp\os\windows\com\interface\iunknown_impl.hpp" />
     <ClInclude Include="include\sp\os\windows\dll.h" />
+    <ClInclude Include="include\sp\preferences\user_setting.h" />
     <ClInclude Include="include\sp\preprocessor.h" />
     <ClInclude Include="include\sp\sp.h" />
     <ClInclude Include="include\sp\string.h" />

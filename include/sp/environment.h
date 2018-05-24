@@ -49,7 +49,8 @@ inline std::string hostname()
         // Handle error
         _hostname = "";
         sp::err::set(SP_ERR_INVALID_NAME);
-    } else
+    }
+    else
     {
         _hostname = buff;
     }
@@ -67,7 +68,8 @@ inline std::string username()
         // Handle error
         _username = "";
         sp::err::set(SP_ERR_USER_PROFILE);
-    } else
+    }
+    else
     {
         _username = buff;
     }
@@ -179,7 +181,8 @@ inline std::string system_dir()
         // Handle error
         _system_dir = "";
         sp::err::set(SP_ERR_INVALID_DIR);
-    } else
+    }
+    else
     {
         _system_dir = buff;
     }

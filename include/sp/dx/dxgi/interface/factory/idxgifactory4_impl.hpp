@@ -19,17 +19,17 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory4<interface_t>::EnumAdapterByLuid(LUID AdapterLuid, REFIID riid, void **ppvAdapter)
 {
-    return _interface->EnumAdapterByLuid(AdapterLuid, riid, ppvAdapter);
+    return this->_interface->EnumAdapterByLuid(AdapterLuid, riid, ppvAdapter);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory4<interface_t>::EnumWarpAdapter(REFIID riid, void **ppvAdapter)
 {
-    return _interface->EnumWarpAdapter(riid, ppvAdapter);
+    return this->_interface->EnumWarpAdapter(riid, ppvAdapter);
 }
 
 

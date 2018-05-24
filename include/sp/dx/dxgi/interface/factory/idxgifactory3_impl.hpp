@@ -19,10 +19,10 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 UINT factory3<interface_t>::GetCreationFlags()
 {
-    return _interface->GetCreationFlags();
+    return this->_interface->GetCreationFlags();
 }
 
 

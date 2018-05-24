@@ -15,8 +15,7 @@ namespace os  {
 namespace win {
 namespace com {
 
-template <class interface_t>
-const GUID iunknown<interface_t>::GUID = __uuidof(interface_t);
+
 
 } // namespace com
 } // namespace win

@@ -86,9 +86,7 @@ std::basic_string<charT> to_lowercase(const std::basic_string<charT> &in)
 // Converts a character to uppercase
 template <typename charT>
 inline charT to_upper(charT c) {
-    if (c >= (charT)'a' && c <= (charT)'z')
-        return c + ((charT)'A' - (charT)'a');
-    return c;
+    return std::toupper(c);
 }
 
 

@@ -20,7 +20,7 @@
  */
 void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code)
 {
-	write_jmp_rm64_rip(inject_at, 0, NOP_COUNT + DQ_INSTR_LENGTH); // Write the JMP [%rip+0x0] instruction
+	write_jmp_rm64_rip(inject_at, 0, nops + DQ_INSTR_LENGTH); // Write the JMP [%rip+0x0] instruction
 
 	*(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH) = (uint64_t)asm_code; // Overwrite next instruction with address of injected function
 

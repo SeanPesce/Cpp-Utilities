@@ -19,38 +19,38 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory<interface_t>::CreateSoftwareAdapter(HMODULE Module, IDXGIAdapter **ppAdapter)
 {
-    return _interface->CreateSoftwareAdapter(Module, ppAdapter);
+    return this->_interface->CreateSoftwareAdapter(Module, ppAdapter);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory<interface_t>::CreateSwapChain(IUnknown *pDevice, DXGI_SWAP_CHAIN_DESC *pDesc, IDXGISwapChain **ppSwapChain)
 {
-    return _interface->CreateSwapChain(pDevice, pDesc, ppSwapChain);
+    return this->_interface->CreateSwapChain(pDevice, pDesc, ppSwapChain);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory<interface_t>::EnumAdapters(UINT Adapter, IDXGIAdapter **ppAdapter)
 {
-    return _interface->EnumAdapters(Adapter, ppAdapter);
+    return this->_interface->EnumAdapters(Adapter, ppAdapter);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory<interface_t>::GetWindowAssociation(HWND *pWindowHandle)
 {
-    return _interface->GetWindowAssociation(pWindowHandle);
+    return this->_interface->GetWindowAssociation(pWindowHandle);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory<interface_t>::MakeWindowAssociation(HWND WindowHandle, UINT Flags)
 {
-    return _interface->MakeWindowAssociation(WindowHandle, Flags);
+    return this->_interface->MakeWindowAssociation(WindowHandle, Flags);
 }
 
 

@@ -157,6 +157,27 @@
     <Filter Include="Header Files\sp\utility">
       <UniqueIdentifier>{29750c30-ce0f-4a4e-80f0-5d8921a6c68a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sp\preferences">
+      <UniqueIdentifier>{32d10ff2-4b14-4c7e-8943-d156fbaec5f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\dx\d3d11">
+      <UniqueIdentifier>{e7fb805a-d950-48c5-af47-75a2ff94263d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\dx\d3d11\interface">
+      <UniqueIdentifier>{2311b255-ee38-499e-81d0-d0cb437171ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\dx\d3d11\interface\device">
+      <UniqueIdentifier>{b8750df6-a93c-4789-b322-e33d40b8fbcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\dx\d3d11\interface\context">
+      <UniqueIdentifier>{5fe1a197-122c-4a9f-905c-d606b4b019a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\dx\dxgi\interface\device">
+      <UniqueIdentifier>{700887e6-f0c6-4e7c-847b-7d1afd7ab6ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sp\dx\dxgi\interface\swapchain">
+      <UniqueIdentifier>{9025ea8b-87db-470c-893f-8769ade64513}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\inih\cpp\INIReader.cpp">
@@ -230,6 +251,12 @@
     </ClCompile>
     <ClCompile Include="src\log.cpp">
       <Filter>Source Files\sp\log</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp.cpp">
+      <Filter>Source Files\sp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os\windows\dll.cpp">
+      <Filter>Source Files\sp\os\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -444,6 +471,153 @@
     </ClInclude>
     <ClInclude Include="include\sp\preprocessor.h">
       <Filter>Header Files\sp\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\preferences\user_setting.h">
+      <Filter>Header Files\sp\preferences</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device1.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device1_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device2.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device2_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device3.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device3_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device4.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device4_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device5.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\device\id3d11device5_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\id3d11devicechild.h">
+      <Filter>Header Files\sp\dx\d3d11\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\id3d11devicechild_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext1.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext1_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext2.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext2_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext3.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext3_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext4.h">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\d3d11\interface\context\id3d11devicecontext4_impl.hpp">
+      <Filter>Header Files\sp\dx\d3d11\interface\context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgiadapter.h">
+      <Filter>Header Files\sp\dx\dxgi\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgiadapter_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice1.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice2.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice3.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice4.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice4_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice1_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice2_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\device\idxgidevice3_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\device</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgisubobject.h">
+      <Filter>Header Files\sp\dx\dxgi\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\idxgisubobject_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain1_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain2.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain2_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain3.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain3_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain4.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain4_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain_impl.hpp">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain1.h">
+      <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

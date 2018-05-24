@@ -235,7 +235,7 @@ long write_text(const std::basic_string<charT> &file, const std::basic_string<ch
         // Failed to open output file
         return SP_ERR_WRITE;
     }
-    out << data << std::endl;
+    out << data;
     out.close();
     return SP_ERR_SUCCESS;
 }
@@ -250,7 +250,7 @@ long append_text(const std::basic_string<charT> &file, const std::basic_string<c
         // Failed to open output file
         return SP_ERR_WRITE;
     }
-    out << data << std::endl;
+    out << data;
     out.close();
     return SP_ERR_SUCCESS;
 }

@@ -19,31 +19,31 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT object<interface_t>::GetParent(REFIID riid, void **ppParent)
 {
-    return _interface->GetParent(riid, ppParent);
+    return this->_interface->GetParent(riid, ppParent);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT object<interface_t>::GetPrivateData(REFGUID Name, UINT *pDataSize, void *pData)
 {
-    return _interface->GetPrivateData(Name, pDataSize, pData);
+    return this->_interface->GetPrivateData(Name, pDataSize, pData);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT object<interface_t>::SetPrivateData(REFGUID Name, UINT DataSize, const void *pData)
 {
-    return _interface->SetPrivateData(Name, DataSize, pData);
+    return this->_interface->SetPrivateData(Name, DataSize, pData);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT object<interface_t>::SetPrivateDataInterface(REFGUID Name, const IUnknown *pUnknown)
 {
-    return _interface->SetPrivateDataInterface(Name, pUnknown);
+    return this->_interface->SetPrivateDataInterface(Name, pUnknown);
 }
 
 

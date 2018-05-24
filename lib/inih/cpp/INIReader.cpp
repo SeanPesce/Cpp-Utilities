@@ -24,16 +24,9 @@ int INIReader::ParseError() const
     return _error;
 }
 
-string INIReader::Get(const string& section, const string& name, const string& default_value) const
-{
-    string key = MakeKey(section, name);
-    // Use _values.find() here instead of _values.at() to support pre C++11 compilers
-    return _values.count(key) ? _values.find(key)->second : default_value;
-}
-
 long INIReader::GetInteger(const string& section, const string& name, long default_value) const
 {
-    string valstr = Get(section, name, "");
+    string valstr = Get<std::string>(section, name, "");
     const char* value = valstr.c_str();
     char* end;
     // This parses "1234" (decimal) and also "0x4D2" (hex)
@@ -43,7 +36,7 @@ long INIReader::GetInteger(const string& section, const string& name, long defau
 
 double INIReader::GetReal(const string& section, const string& name, double default_value) const
 {
-    string valstr = Get(section, name, "");
+    string valstr = Get<std::string>(section, name, "");
     const char* value = valstr.c_str();
     char* end;
     double n = strtod(value, &end);
@@ -52,7 +45,7 @@ double INIReader::GetReal(const string& section, const string& name, double defa
 
 bool INIReader::GetBoolean(const string& section, const string& name, bool default_value) const
 {
-    string valstr = Get(section, name, "");
+    string valstr = Get<std::string>(section, name, "");
     // Convert to lower case to make string comparisons case-insensitive
     std::transform(valstr.begin(), valstr.end(), valstr.begin(), ::tolower);
     if (valstr == "true" || valstr == "yes" || valstr == "on" || valstr == "1")
@@ -63,14 +56,14 @@ bool INIReader::GetBoolean(const string& section, const string& name, bool defau
         return default_value;
 }
 
-uint8_t INIReader::GetVkCode(const string& section, const string& name) const
+uint8_t INIReader::GetVkCode(const string& section, const string& name, uint8_t default_value) const
 {
-    string valstr = Get(section, name, "0");
-    unsigned short vk_code = 0;
+    string valstr = Get<std::string>(section, name, "0");
+    unsigned short vk_code = default_value;
     std::stringstream in;
     in << std::hex << valstr;
     in >> vk_code;
-    return (uint8_t)vk_code;
+    return static_cast<uint8_t>(vk_code);
 }
 
 string INIReader::MakeKey(const string& section, const string& name)

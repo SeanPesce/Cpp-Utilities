@@ -20,18 +20,8 @@ namespace win {
 namespace com {
 
 
-template <class interface_t>
-iunknown<interface_t>::iunknown(interface_t *original)
-{
-    _interface = original;
-}
 
-
-template <class interface_t>
-iunknown<interface_t>::~iunknown() {}
-
-
-template <class interface_t>
+template <typename interface_t>
 ULONG iunknown<interface_t>::AddRef()
 {
     _ref_count = _interface->AddRef();
@@ -39,14 +29,14 @@ ULONG iunknown<interface_t>::AddRef()
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT iunknown<interface_t>::QueryInterface(REFIID riid, void **ppvObject)
 {
     return _interface->QueryInterface(riid, ppvObject);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 ULONG iunknown<interface_t>::Release()
 {
     _ref_count = _interface->Release();
@@ -54,28 +44,28 @@ ULONG iunknown<interface_t>::Release()
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 inline interface_t* iunknown<interface_t>::get() const
 {
     return _interface;
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 inline void iunknown<interface_t>::set(interface_t *new_interface)
 {
     _interface = new_interface;
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 inline unsigned long iunknown<interface_t>::ref_count() const
 {
     return _ref_count;
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 inline void iunknown<interface_t>::set_ref_count(unsigned long count)
 {
     _ref_count = count;
@@ -86,6 +76,9 @@ inline void iunknown<interface_t>::set_ref_count(unsigned long count)
 } // namespace win
 } // namespace os
 __SP_NAMESPACE_CLOSE // namespace sp
+
+
+template class sp::os::win::com::iunknown<IUnknown>;
 
 
 #endif // _WIN32

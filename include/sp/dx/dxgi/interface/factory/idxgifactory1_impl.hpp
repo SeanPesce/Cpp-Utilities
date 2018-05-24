@@ -19,17 +19,17 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory1<interface_t>::EnumAdapters1(UINT Adapter, IDXGIAdapter1 **ppAdapter)
 {
-    return _interface->EnumAdapters1(Adapter, ppAdapter);
+    return this->_interface->EnumAdapters1(Adapter, ppAdapter);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 BOOL factory1<interface_t>::IsCurrent()
 {
-    return _interface->IsCurrent();
+    return this->_interface->IsCurrent();
 }
 
 

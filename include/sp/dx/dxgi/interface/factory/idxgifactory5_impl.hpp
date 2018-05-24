@@ -19,10 +19,10 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory5<interface_t>::CheckFeatureSupport(DXGI_FEATURE Feature, void *pFeatureSupportData, UINT FeatureSupportDataSize)
 {
-    return _interface->CheckFeatureSupport(Feature, pFeatureSupportData, FeatureSupportDataSize);
+    return this->_interface->CheckFeatureSupport(Feature, pFeatureSupportData, FeatureSupportDataSize);
 }
 
 

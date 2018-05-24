@@ -10,7 +10,6 @@
 #define SP_INPUT_OUTPUT_CMD_OUTPUT_STREAM_H_
 
 #include "sp/sp.h"
-#include "sp/string.h"
 #include "sp/environment.h"
 #include "sp/system/process/child.h"
 
@@ -23,7 +22,7 @@
 
 
 __SP_NAMESPACE
-namespace io   {
+namespace io {
 
 
 // Class for printing messages to external cmd window
@@ -33,7 +32,9 @@ private:
     std::string _title;
 
 public:
-    cmd_ostream(const std::string &title = "CMD Output")
+    class defaults;
+
+    cmd_ostream(const std::string& title = cmd_ostream::defaults::title)
             : sp::sys::proc::child("", "", true, 0)
     {
         _title = title;
@@ -43,50 +44,71 @@ public:
     cmd_ostream(const sp::io::cmd_ostream&) = delete; // Disable copy constructor
     ~cmd_ostream() { terminate(); }
 
-    // @TODO: Overload operator<< for printing
 
-    bool print(const std::string &message = "", bool append_line_feed = true)
+    bool print(const std::string& message) const
     {
         uint32_t bytes_written = 0;
-        std::string line_feed = "";
-        if (append_line_feed) {
-            line_feed = "\n";
-        }
-        if (running()) {
+        if (running())
+        {
             if (!WriteFile(io.stdin_write,
-                            std::string(message).append(line_feed).c_str(),
-                            static_cast<DWORD>(message.length() + line_feed.length()),
+                            message.c_str(),
+                            static_cast<DWORD>(message.length()),
                             reinterpret_cast<DWORD*>(&bytes_written),
-                            NULL)) {
+                            NULL))
+            {
                 // Handle error
                 return false;
             }
-        } else {
+        }
+        else
+        {
             return false;
         }
         return true;
     }
 
 
-    inline std::string title() const
+    inline const std::string& title() const
     {
         return _title;
     }
 
 
-    inline void set_title(const std::string &new_title)
+    inline void set_title(const std::string& new_title)
     {
-        if (_title != new_title) {
+        if (_title != new_title)
+        {
             _title = new_title;
             restart();
         }
     }
+
+    class defaults {
+    public:
+        static constexpr const char* title = "CMD Output";
+    private:
+        defaults() = delete;
+    };
 
 }; // class cmd_ostream
 
 
 } // namespace io
 __SP_NAMESPACE_CLOSE // namespace sp
+
+
+inline const sp::io::cmd_ostream& operator<< (const sp::io::cmd_ostream& os, const std::string& message)
+{
+    os.print(message);
+    return os;
+}
+
+inline const sp::io::cmd_ostream& operator<< (const sp::io::cmd_ostream& os, char message)
+{
+    os.print(std::string(1, message));
+    return os;
+}
+
 
 #undef SP_IO_CMD_OUT_LAUNCH_CMD_
 

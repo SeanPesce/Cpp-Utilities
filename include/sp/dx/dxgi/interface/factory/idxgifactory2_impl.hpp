@@ -19,80 +19,80 @@ namespace dx   {
 namespace dxgi {
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::CreateSwapChainForComposition(IUnknown *pDevice, const DXGI_SWAP_CHAIN_DESC1 *pDesc, IDXGIOutput *pRestrictToOutput, IDXGISwapChain1 **ppSwapChain)
 {
-    return _interface->CreateSwapChainForComposition(pDevice, pDesc, pRestrictToOutput, ppSwapChain);
+    return this->_interface->CreateSwapChainForComposition(pDevice, pDesc, pRestrictToOutput, ppSwapChain);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::CreateSwapChainForCoreWindow(IUnknown *pDevice, IUnknown *pWindow, const DXGI_SWAP_CHAIN_DESC1 *pDesc, IDXGIOutput *pRestrictToOutput, IDXGISwapChain1 **ppSwapChain)
 {
-    return _interface->CreateSwapChainForCoreWindow(pDevice, pWindow, pDesc, pRestrictToOutput, ppSwapChain);
+    return this->_interface->CreateSwapChainForCoreWindow(pDevice, pWindow, pDesc, pRestrictToOutput, ppSwapChain);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::CreateSwapChainForHwnd(IUnknown *pDevice, HWND hWnd, const DXGI_SWAP_CHAIN_DESC1 *pDesc, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc, IDXGIOutput *pRestrictToOutput, IDXGISwapChain1 **ppSwapChain)
 {
-    return _interface->CreateSwapChainForHwnd(pDevice, hWnd, pDesc, pFullscreenDesc, pRestrictToOutput, ppSwapChain);
+    return this->_interface->CreateSwapChainForHwnd(pDevice, hWnd, pDesc, pFullscreenDesc, pRestrictToOutput, ppSwapChain);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::GetSharedResourceAdapterLuid(HANDLE hResource, LUID *pLuid)
 {
-    return _interface->GetSharedResourceAdapterLuid(hResource, pLuid);
+    return this->_interface->GetSharedResourceAdapterLuid(hResource, pLuid);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 BOOL factory2<interface_t>::IsWindowedStereoEnabled()
 {
-    return _interface->IsWindowedStereoEnabled();
+    return this->_interface->IsWindowedStereoEnabled();
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::RegisterOcclusionStatusEvent(HANDLE hEvent, DWORD *pdwCookie)
 {
-    return _interface->RegisterOcclusionStatusEvent(hEvent, pdwCookie);
+    return this->_interface->RegisterOcclusionStatusEvent(hEvent, pdwCookie);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::RegisterOcclusionStatusWindow(HWND WindowHandle, UINT wMsg, DWORD *pdwCookie)
 {
-    return _interface->RegisterOcclusionStatusWindow(WindowHandle, wMsg, pdwCookie);
+    return this->_interface->RegisterOcclusionStatusWindow(WindowHandle, wMsg, pdwCookie);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::RegisterStereoStatusEvent(HANDLE hEvent, DWORD *pdwCookie)
 {
-    return _interface->RegisterStereoStatusEvent(hEvent, pdwCookie);
+    return this->_interface->RegisterStereoStatusEvent(hEvent, pdwCookie);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 HRESULT factory2<interface_t>::RegisterStereoStatusWindow(HWND WindowHandle, UINT wMsg, DWORD *pdwCookie)
 {
-    return _interface->RegisterStereoStatusWindow(WindowHandle, wMsg, pdwCookie);
+    return this->_interface->RegisterStereoStatusWindow(WindowHandle, wMsg, pdwCookie);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 void factory2<interface_t>::UnregisterOcclusionStatus(DWORD dwCookie)
 {
-    return _interface->UnregisterOcclusionStatus(dwCookie);
+    return this->_interface->UnregisterOcclusionStatus(dwCookie);
 }
 
 
-template <class interface_t>
+template <typename interface_t>
 void factory2<interface_t>::UnregisterStereoStatus(DWORD dwCookie)
 {
-    return _interface->UnregisterStereoStatus(dwCookie);
+    return this->_interface->UnregisterStereoStatus(dwCookie);
 }
 
 
