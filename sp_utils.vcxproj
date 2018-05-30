@@ -73,17 +73,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
-    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <TargetName>$(ProjectName)_dbg_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
-    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <TargetName>$(ProjectName)_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Configuration)\$(Platform)\</OutDir>
-    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+    <TargetName>$(ProjectName)_dbg_$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>bin\$(Configuration)\$(Platform)\obj\</IntDir>
@@ -98,6 +98,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_dbg_x86.pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,6 +112,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_dbg_$(Platform).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -127,6 +129,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_x86.pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,6 +147,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_$(Platform).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
