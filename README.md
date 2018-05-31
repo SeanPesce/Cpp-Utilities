@@ -9,6 +9,7 @@ My personal library of useful & reusable C++ code for Windows and UNIX systems.
  * [Visual Studio 2015](https://www.visualstudio.com/vs/older-downloads/)  
  * [Visual Studio 2017](https://www.visualstudio.com/)  
  * [Visual Studio Code](https://code.visualstudio.com/)  
+ * [inih](https://github.com/benhoyt/inih) - .INI file parsing library  
 
 ## Author  
 
