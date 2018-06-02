@@ -20,19 +20,19 @@ __SP_NAMESPACE
 namespace mem {
 
 
-template<class T>
+template<class T = void*, class intT = long long>
 class pointer {
 
 protected:
 
     void* _base = NULL; // Starting address of multi-level pointer
-    std::vector<long> _offsets; // Chain of offsets used to resolve the final address
+    std::vector<intT> _offsets; // Chain of offsets used to resolve the final address
 
 
 public:
 
     // Constructors/destructors
-    pointer(void* starting_address = NULL, const std::vector<long>& new_offsets = {})
+    pointer(void* starting_address = NULL, const std::vector<intT>& new_offsets = {})
     {
         this->_base   = starting_address;
         this->_offsets = new_offsets;
@@ -69,7 +69,7 @@ public:
         return this->_base;
     }
 
-    inline std::vector<long> offsets() const
+    inline std::vector<intT> offsets() const
     {
         return this->_offsets;
     }
@@ -154,7 +154,7 @@ public:
         this->_base = base;
     }
 
-    inline void set_offsets(const std::vector<long>& offsets)
+    inline void set_offsets(const std::vector<intT>& offsets)
     {
         this->_offsets = offsets;
     }
