@@ -20,9 +20,9 @@ __SP_NAMESPACE
 namespace mem {
 
 
-template<class T = void*, class intT = long long>
+template<class T = void*, class intT = std::ptrdiff_t>
 class pointer {
-
+    
 protected:
 
     void* _base = NULL; // Starting address of multi-level pointer
@@ -179,7 +179,7 @@ public:
         return SP_ERR_SUCCESS;
     }
 
-}; // class pointer
+}; // class pointer<T, intT>
 
 
 } // namespace mem
