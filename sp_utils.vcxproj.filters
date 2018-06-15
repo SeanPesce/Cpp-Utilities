@@ -619,5 +619,8 @@
     <ClInclude Include="include\sp\dx\dxgi\interface\swapchain\idxgiswapchain1.h">
       <Filter>Header Files\sp\dx\dxgi\interface\swapchain</Filter>
     </ClInclude>
+    <ClInclude Include="keybinds.h">
+      <Filter>Header Files\sp\io</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
