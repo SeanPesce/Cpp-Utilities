@@ -13,26 +13,36 @@
 #include <Windows.h>
 #endif
 
-//For every injection, save the location we're injecting to and check if we've already injected there before
+// For every injection, save the location we're injecting to and check if we've already injected there before
 static std::set<uint32_t> injected_locations;
 
-static void check_valid_injection(uint32_t adr){
-    //TODO: can still be a bug where we inject not at the exact same place but within 5 bytes, and partially overwrite the previous jump
-    if (injected_locations.find(adr) == injected_locations.end()) {
-        injected_locations.insert(adr);
+// Checks if the specified address already has a code injection present
+static void check_valid_injection(uint32_t address)
+{
+    // @TODO: can still be a bug where we inject not at the exact same place but within 5 bytes, and partially overwrite the previous jump
+    if (injected_locations.find(address) == injected_locations.end())
+    {
+        injected_locations.insert(address);
     }
-    else {
-        fprintf(stderr, "Attempted to inject at same location twice. @%d\n", adr);
+    else
+    {
+        fprintf(stderr, "Attempted to inject at same location twice. @%d\n", address);
         #ifdef _MSC_VER
             char* error_str = (char*)malloc(100);
-            sprintf_s(error_str, 100, "Attempted to inject at same location twice. @%d", adr);
+            sprintf_s(error_str, 100, "Attempted to inject at same location twice. @%d", address);
             MessageBox(NULL, error_str, NULL, MB_OK);
         #endif
         abort();
     }
 }
 
-void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void *asm_code)
+// Removes a previous injection entry
+void forget_injection(uint32_t address)
+{
+    injected_locations.erase(address);
+}
+
+void inject_jmp_5b(uint8_t *inject_at, uint32_t *return_jmp_addr, int nops, void *asm_code)
 {
     // The remaining 4 bytes of the instruction are the operand, specifying the offset from this address to the code cave:
     #ifdef _MSC_VER
@@ -44,7 +54,7 @@ void inject_jmp_5b(uint8_t *inject_at, uint32_t *returnJumpAddr, int nops, void 
     #endif // _MSC_VER
 
     // Calculate the address of the next instruction after the injected JMP and write it to the in-line ASM function's return JMP:
-    *returnJumpAddr = ((uint32_t)inject_at + JMP_REL32_INSTR_LENGTH);
+    *return_jmp_addr = ((uint32_t)inject_at + JMP_REL32_INSTR_LENGTH);
 }
 
 
