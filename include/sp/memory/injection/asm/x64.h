@@ -264,7 +264,7 @@ inline void write_call_rel32(void *write_to, int32_t offset, int nops)
  *  @param write_to  The address where the RET instruction will be written.
  *  @param nops The number of NOP instructions to be written after the RET instruction.
  */
-void write_ret(void *write_to, int nops)
+inline void write_ret(void *write_to, int nops)
 {
     *(uint8_t*)write_to = RET_INSTR_OPCODE; // Write instruction
     
