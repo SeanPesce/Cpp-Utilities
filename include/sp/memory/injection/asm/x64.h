@@ -14,6 +14,7 @@
 
 #include "sp/sp.h"
 #include "sp/memory.h"
+#include <unordered_map>
 
 
 __SP_NAMESPACE
@@ -21,6 +22,15 @@ namespace mem  {
 namespace code {
 namespace x64  {
 
+typedef struct {
+    std::vector<uint64_t>* functions;
+    void* handler_function;
+} TrackChainInjection;
+
+// For every injection, save the location we're injecting to and check if we've already injected there before
+// Also, track chain injections
+// @TODO: can still be a bug where we inject not at the exact same starting place but within the written to range, and partially overwrite the previous jump
+extern std::unordered_map<uint64_t, TrackChainInjection*> injected_locations;
 
 // Byte values of various opcodes and/or full instructions:
 const uint8_t   JMP_REL8_INSTR_OPCODE = 0xEB,   // Short JMP opcode byte value (JMP rel8)
@@ -376,7 +386,36 @@ inline void write_bytecode_2b(void *inject_at, int nops, void *local_trampoline,
     write_jmp_rel8((uint8_t*)local_trampoline+retJmpOffset, (uint8_t*)inject_at+JMP_REL8_INSTR_LENGTH, tramp_nops);
 }
 
+#define MAX_POSSIBLE_FUNCTION_CHAIN 10
 
+/*
+ * Helper function for logging a injection
+ */
+inline void log_injection(void *inject_at, void *asm_code, bool chain_function)
+{
+    if (chain_function)
+    {
+        TrackChainInjection* track_struct = (TrackChainInjection*)malloc(sizeof(TrackChainInjection));
+
+        std::vector<uint64_t>* called_funcs = new std::vector<uint64_t>();
+        called_funcs->push_back((uint64_t)asm_code);
+
+        track_struct->functions = called_funcs;
+        //we can only malloc this once (since the previous calls have to know where to return to), so malloc max chunk up front
+        track_struct->handler_function = malloc((MAX_POSSIBLE_FUNCTION_CHAIN + 1) * (JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH));
+#ifdef _WIN32
+        sp::mem::set_protection(track_struct->handler_function, (MAX_POSSIBLE_FUNCTION_CHAIN + 1) * (JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH), MEM_PROTECT_RWX);
+#else // UNIX
+        sp::mem::set_protection(track_struct->handler_function, 2, MEM_PROTECT_RWX);
+#endif // _WIN32
+
+        injected_locations.emplace((uint64_t)inject_at, track_struct);
+    }
+    else
+    {
+        injected_locations.emplace((uint64_t)inject_at, (TrackChainInjection*)NULL);
+    }
+}
 
  /**
     inject_jmp_14b(void*, void*, int, void*)
@@ -388,21 +427,94 @@ inline void write_bytecode_2b(void *inject_at, int nops, void *local_trampoline,
        Registers preserved? Yes
        
     @TODO: Finish documentation
+
+    @param chain_function   Optional boolean which specifies that this injection point is to be made
+                            usable for multiple injections. That is, multiple injections to this location
+                            will simply cause each injected code to be called in order. This is done to
+                            save space, so that one injection point can be reused for multiple injections.
+                            It must be set for every injection to a location.
+                            Critial error if not provided and an injection has already occured here.
  */
-inline void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code)
+inline void inject_jmp_14b(void *inject_at, void *ret_to, int nops, void *asm_code, bool chain_function = false)
 {
-    // Remove memory protections
-#ifdef _WIN32
-    sp::mem::set_protection(inject_at, 14 + nops, MEM_PROTECT_RWX);
-#else // UNIX
-    sp::mem::set_protection(inject_at, 2, MEM_PROTECT_RWX);
-#endif // _WIN32
+    auto found_injection = injected_locations.find((uint64_t)inject_at);
 
-    write_jmp_rm64_rip(inject_at, 0, nops + DQ_INSTR_LENGTH); // Write the JMP [%rip+0x0] instruction
+    if (!chain_function){
 
-    *(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH) = (uint64_t)asm_code; // Overwrite next instruction with address of injected function
+        // Abort, double injection detected
+        if (found_injection != injected_locations.end()) {
+            fprintf(stderr, "Attempted to inject at same location twice. @%I64d\n", (uint64_t)inject_at);
+            #ifdef _MSC_VER
+                char* error_str = (char*)malloc(100);
+                sprintf_s(error_str, 100, "Attempted to inject at same location twice. @%I64d", (uint64_t)inject_at);
+                MessageBox(NULL, error_str, NULL, MB_OK);
+            #endif
+            abort();
+        }
 
-    *(uint64_t*)ret_to = (uint64_t)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH);
+        log_injection(inject_at, asm_code, chain_function);
+
+        // Remove memory protections
+        #ifdef _WIN32
+            sp::mem::set_protection(inject_at, (JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH) + nops, MEM_PROTECT_RWX);
+        #else // UNIX
+            sp::mem::set_protection(inject_at, 2, MEM_PROTECT_RWX);
+        #endif // _WIN32
+
+        write_jmp_rm64_rip(inject_at, 0, nops + DQ_INSTR_LENGTH); // Write the JMP [%rip+0x0] instruction
+
+        *(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH) = (uint64_t)asm_code; // Overwrite next instruction with address of injected function
+
+        *(uint64_t*)ret_to = (uint64_t)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH);
+    }
+
+    else
+    {
+        // First injection here, save entry
+        if (found_injection == injected_locations.end()) {
+            log_injection(inject_at, asm_code, chain_function);
+            found_injection = injected_locations.find((uint64_t)inject_at);
+
+            //1st inject actions
+
+            // Remove memory protections
+            #ifdef _WIN32
+                sp::mem::set_protection(inject_at, (JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH) + nops, MEM_PROTECT_RWX);
+            #else // UNIX
+                sp::mem::set_protection(inject_at, 2, MEM_PROTECT_RWX);
+            #endif // _WIN32
+
+            write_jmp_rm64_rip(inject_at, 0, nops + DQ_INSTR_LENGTH); // Write the JMP [%rip+0x0] instruction
+
+            *(uint64_t*)(((uint8_t*)inject_at) + JMP_RM64_INSTR_LENGTH) = (uint64_t)(found_injection->second->handler_function); // Overwrite next instruction with address of handler function
+        }
+        //>1st injection, append entry
+        else {
+            found_injection->second->functions->push_back((uint64_t)asm_code);
+
+            if (found_injection->second->functions->size() > MAX_POSSIBLE_FUNCTION_CHAIN) {
+                fprintf(stderr, "Unable to chain that many functions.\n");
+                #ifdef _MSC_VER
+                    MessageBox(NULL, "Unable to chain that many functions", NULL, MB_OK);
+                #endif
+                abort();
+            }
+        }
+
+        //Add 1 call to the helper that calls the chained functions
+        size_t i = found_injection->second->functions->size() - 1;
+
+        uint64_t current_loc = (uint64_t)(found_injection->second->handler_function) + i * (JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH);
+        write_jmp_rm64_rip((void*)current_loc, 0, DQ_INSTR_LENGTH);
+        *(uint64_t*)(((uint8_t*)current_loc) + JMP_RM64_INSTR_LENGTH) = (*(found_injection->second->functions))[i];
+
+        //Specify the location this asm call has to return to
+        *(uint64_t*)ret_to = (uint64_t)(((uint8_t*)current_loc) + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH);
+
+        //Add the jump back to original code to the end
+        write_jmp_rm64_rip((void*)((current_loc) + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH), 0, DQ_INSTR_LENGTH);
+        *(uint64_t*)(current_loc + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH + JMP_RM64_INSTR_LENGTH) = (uint64_t)inject_at + JMP_RM64_INSTR_LENGTH + DQ_INSTR_LENGTH;
+    }
 }
 
 

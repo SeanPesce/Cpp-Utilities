@@ -12,7 +12,7 @@ namespace mem  {
 namespace code {
 namespace x64  {
 
-
+ std::unordered_map<uint64_t, TrackChainInjection*> injected_locations;
 
 // Writes bytecode for the series of instructions to perform an absolute JMP r64 (using JMP %rax)
 //  and restore the register upon returning. Also overwrites remaining garbage bytecode with
