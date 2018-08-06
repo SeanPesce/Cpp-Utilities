@@ -120,6 +120,20 @@ public:
         return (T*)address;
     }
 
+    // Same as resolve, but with no safety checks
+    T* fast_resolve() const
+    {
+        void *address = this->_base;
+
+        for (auto offset : this->_offsets)
+        {
+            // continue resolution of pointer
+            address = (void*)((*(uint64_t*)address) + offset);
+        }
+
+        return (T*)address;
+    }
+
     // @TODO: Overload operator[] to access intermediate pointer addresses
 
 
