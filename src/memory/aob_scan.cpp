@@ -53,7 +53,7 @@ size_t MAX_AOBSCAN_RESULTS = MAX_AOBSCAN_RESULTS_DEFAULT_; // Configurable upper
 
 // Scans all accessible regions of current process memory for an array of
 //  bytes (AoB), beginning at the given starting address:
-void *aob_scan(uint8_t *aob, size_t length, bool *mask, void *start, std::vector<uint8_t*> *results)
+void *aob_scan(uint8_t *aob, size_t length, uint8_t *mask, void *start, std::vector<uint8_t*> *results)
 {
     MEMORY_BASIC_INFORMATION region;
     void *result = NULL;
@@ -133,7 +133,7 @@ void *aob_scan(uint8_t *aob, size_t length, bool *mask, void *start, std::vector
 
 
 // Searches for an AoB within a given section of memory:
-void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, size_t length, bool *mask, std::vector<uint8_t*> *results)
+void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, size_t length, uint8_t *mask, std::vector<uint8_t*> *results)
 {
     uint8_t *end = base + region_size - length;
 
@@ -214,9 +214,10 @@ bool is_aob_scannable(MEMORY_BASIC_INFORMATION *mem_info)
         (mem_info->Protect & allow_mask)
         //&& !(mem_info->Protect & protect_mask)
         //&& !(mem_info->Protect & type_mask)
-        && !(mem_info->Protect & PAGE_GUARD)
+        && !(mem_info->Protect & (PAGE_GUARD | PAGE_NOCACHE | PAGE_NOACCESS))
         //&& !(mem_info->Protect & PAGE_NOCACHE)
         //&& !(mem_info->State & MEM_FREE)
+        && (mem_info->State & MEM_COMMIT)
         );
 #else
     return (
@@ -231,7 +232,7 @@ bool is_aob_scannable(MEMORY_BASIC_INFORMATION *mem_info)
 
 // Converts a C string-formatted, null-terminated string representing an AoB to a true byte
 //  array and generates a corresponding mask for determining wildcards.
-size_t string_to_aob(const char* str_aob, uint8_t* aob, bool *mask)
+size_t string_to_aob(const char* str_aob, uint8_t* aob, uint8_t *mask)
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob != length of final byte array
     size_t pos = 0; // Position in final byte array

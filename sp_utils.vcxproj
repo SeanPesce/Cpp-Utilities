@@ -113,6 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_dbg_$(Platform).pdb</ProgramDataBaseFileName>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +149,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_$(Platform).pdb</ProgramDataBaseFileName>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

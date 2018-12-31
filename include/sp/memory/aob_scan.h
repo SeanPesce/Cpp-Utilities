@@ -82,7 +82,7 @@ extern size_t MAX_AOBSCAN_RESULTS;       // Configurable upper limit for number 
 
     @return         The length of the resulting byte and mask arrays.
 */
-size_t string_to_aob(const char *str_aob, uint8_t *aob, bool *mask);
+size_t string_to_aob(const char *str_aob, uint8_t *aob, uint8_t *mask);
 
 
 /*
@@ -94,7 +94,7 @@ size_t string_to_aob(const char *str_aob, uint8_t *aob, bool *mask);
     See @string_to_aob(const char*, uint8_t*, bool*) for string format, parameter,
     and return value information.
 */
-inline size_t string_to_aob(char *str_aob, uint8_t *aob, bool *mask)
+inline size_t string_to_aob(char *str_aob, uint8_t *aob, uint8_t *mask)
 {
     return string_to_aob((const char *)str_aob, aob, mask);
 }
@@ -109,7 +109,7 @@ inline size_t string_to_aob(char *str_aob, uint8_t *aob, bool *mask)
     See @string_to_aob(const char*, uint8_t*, bool*) for string format, parameter,
     and return value information.
 */
-inline size_t string_to_aob(std::string& str_aob, uint8_t *aob, bool *mask)
+inline size_t string_to_aob(std::string& str_aob, uint8_t *aob, uint8_t *mask)
 {
     return string_to_aob(str_aob.c_str(), aob, mask);
 }
@@ -133,7 +133,7 @@ inline size_t string_to_aob(std::string& str_aob, uint8_t *aob, bool *mask)
 
     @return     The address of the first matching byte array in memory, if one exists; if not, returns NULL.
 */
-void *aob_scan(uint8_t *aob, size_t length, bool *mask = NULL, void *start = NULL, std::vector<uint8_t*> *results = NULL);
+void *aob_scan(uint8_t *aob, size_t length, uint8_t *mask = NULL, void *start = NULL, std::vector<uint8_t*> *results = NULL);
 
 
 // Overloaded versions of aob_scan; see @aob_scan(uint8_t*, size_t, bool*, void*, std::vector<uint8_t*>*) for more info:
@@ -143,11 +143,11 @@ inline void *aob_scan(const char *str_aob, void *start = NULL, std::vector<uint8
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob >= length of final byte array
     std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob(str_aob, aob.data(), (bool*)mask.data());
+    std::vector<uint8_t> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob, aob.data(), mask.data());
     void *result;
     uint32_t err = SP_ERR_NONE;
-    if ((result = aob_scan(aob.data(), length, (bool*)mask.data(), start, results)) == NULL)
+    if ((result = aob_scan(aob.data(), length, mask.data(), start, results)) == NULL)
         err = sp::err::get();
     sp::err::set(err);
     return result;
@@ -158,11 +158,11 @@ inline void *aob_scan(char *str_aob, void *start = NULL, std::vector<uint8_t*> *
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob); // Length of str_aob >= length of final byte array
     std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob((const char *)str_aob, aob.data(), (bool*)mask.data());
+    std::vector<uint8_t> mask(str_aob_len);
+    size_t length = string_to_aob((const char *)str_aob, aob.data(), mask.data());
     void *result;
     uint32_t err = SP_ERR_NONE;
-    if ((result = aob_scan(aob.data(), length, (bool*)mask.data(), start, results)) == NULL)
+    if ((result = aob_scan(aob.data(), length, mask.data(), start, results)) == NULL)
         err = sp::err::get();
     sp::err::set(err);
     return result;
@@ -173,11 +173,11 @@ inline void *aob_scan(std::string& str_aob, void *start = NULL, std::vector<uint
 {
     size_t str_aob_len = std::char_traits<char>::length(str_aob.c_str()); // Length of str_aob >= length of final byte array
     std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob(str_aob.c_str(), aob.data(), (bool*)mask.data());
+    std::vector<uint8_t> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob.c_str(), aob.data(), mask.data());
     void *result;
     uint32_t err = SP_ERR_NONE;
-    if ((result = aob_scan(aob.data(), length, (bool*)mask.data(), start, results)) == NULL)
+    if ((result = aob_scan(aob.data(), length, mask.data(), start, results)) == NULL)
         err = sp::err::get();
     sp::err::set(err);
     return result;
@@ -204,7 +204,7 @@ inline void *aob_scan(std::string& str_aob, void *start = NULL, std::vector<uint
 
     @return     The address of the first matching byte array in memory, if one exists; if not, returns NULL.
 */
-void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, size_t length, bool *mask = NULL, std::vector<uint8_t*> *results = NULL);
+void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, size_t length, uint8_t *mask = NULL, std::vector<uint8_t*> *results = NULL);
 
 
 
@@ -222,13 +222,18 @@ void *find_aob(uint8_t *base, size_t region_size, uint8_t *aob, size_t length, b
 
     @return     true if the byte arrays match; false otherwise.
 */
-inline bool compare_byte_arrays(uint8_t *mem, uint8_t *aob, size_t length, bool *mask)
+inline bool compare_byte_arrays(uint8_t *mem, uint8_t *aob, size_t length, uint8_t *mask)
 {
     uint8_t *end = aob + length;
     for (; aob < end; mem++, aob++, mask++)
     {
-        if (*mask && *mem != *aob)
-        {
+        __try {
+            if (*mask && *mem != *aob)
+            {
+                return false;
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
             return false;
         }
     }
@@ -249,8 +254,13 @@ inline bool compare_byte_arrays(uint8_t *mem, uint8_t *aob, size_t length) // No
     uint8_t *end = aob + length;
     for (; aob < end; mem++, aob++)
     {
-        if (*mem != *aob)
-        {
+        __try {
+            if (*mem != *aob)
+            {
+                return false;
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
             return false;
         }
     }
@@ -274,10 +284,10 @@ inline bool compare_byte_arrays(std::string& str_aob, uint8_t *byte_aob, bool us
 {
     size_t str_aob_len = str_aob.length(); // Length of str_aob >= length of final byte array
     std::vector<uint8_t> aob(str_aob_len);
-    std::vector<char> mask(str_aob_len);
-    size_t length = string_to_aob(str_aob, aob.data(), (bool*)mask.data());
+    std::vector<uint8_t> mask(str_aob_len);
+    size_t length = string_to_aob(str_aob, aob.data(), mask.data());
     if (use_mask)
-        return compare_byte_arrays(aob.data(), byte_aob, length, (bool*)mask.data());
+        return compare_byte_arrays(aob.data(), byte_aob, length, mask.data());
     else
         return compare_byte_arrays(aob.data(), byte_aob, length);
 }
