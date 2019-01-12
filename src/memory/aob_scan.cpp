@@ -34,6 +34,12 @@
 
 #include <stdio.h>  // sscanf()
 #include <sstream>  // stringstream
+#ifdef _WIN32
+#include <intsafe.h>
+#include <tlhelp32.h>
+#else
+fail
+#endif
 
 
 __SP_NAMESPACE
@@ -55,7 +61,6 @@ size_t MAX_AOBSCAN_RESULTS = MAX_AOBSCAN_RESULTS_DEFAULT_; // Configurable upper
 //  bytes (AoB), beginning at the given starting address:
 void *aob_scan(uint8_t *aob, size_t length, uint8_t *mask, void *start, std::vector<uint8_t*> *results)
 {
-    MEMORY_BASIC_INFORMATION region;
     void *result = NULL;
 
     if (aob == NULL || length <= 0)
@@ -69,55 +74,121 @@ void *aob_scan(uint8_t *aob, size_t length, uint8_t *mask, void *start, std::vec
         return NULL;
     }
 
-    if(start != NULL)
+    //-----enumerate the heap list-----
+    PHANDLE addrHeaps;
+    SIZE_T BytesToAllocate;
+
+    // Get number of active heaps for the current process
+    DWORD CalcdNumberOfHeaps = GetProcessHeaps(0, NULL);
+    if (CalcdNumberOfHeaps == 0) {
+        return NULL;
+    }
+    // Calculate the buffer size.
+    HRESULT Result = SIZETMult(CalcdNumberOfHeaps, sizeof(*addrHeaps), &BytesToAllocate);
+    if (Result != S_OK) {
+        return NULL;
+    }
+    // Get a handle to the default process heap.
+    HANDLE hDefaultProcessHeap = GetProcessHeap();
+    if (hDefaultProcessHeap == NULL) {
+        return NULL;
+    }
+    // Allocate the buffer from the default process heap.
+    addrHeaps = (PHANDLE)HeapAlloc(hDefaultProcessHeap, 0, BytesToAllocate);
+    if (addrHeaps == NULL) {
+        return NULL;
+    }
+
+    // Retrieve handles to the process heaps and print them to stdout. 
+    // Note that heap functions should be called only on the default heap of the process
+    // or on private heaps that your component creates by calling HeapCreate.
+    DWORD NumberOfHeaps = GetProcessHeaps(CalcdNumberOfHeaps, addrHeaps);
+
+    // Compare the latest number of heaps with the original number of heaps.
+    // If the latest number is larger than the original number, another
+    // component has created a new heap and the buffer is too small.
+    if (NumberOfHeaps == 0 || NumberOfHeaps > CalcdNumberOfHeaps) {
+        return NULL;
+    }
+
+    for (DWORD HeapsIndex = 0; HeapsIndex < NumberOfHeaps; ++HeapsIndex)
     {
-        // Get the region of the starting address, if it was specified:
-        if (virtual_query(start, &region, sizeof(region)) < sizeof(region))
-        {
-            // Invalid address; set error number
-            sp::err::set(SP_ERR_INVALID_ADDRESS);
+        HANDLE curHeap = addrHeaps[HeapsIndex];
+        PROCESS_HEAP_ENTRY Entry;
+        Entry.lpData = NULL;
+
+        while (HeapWalk(curHeap, &Entry) != FALSE) {
+            if ((Entry.wFlags & PROCESS_HEAP_ENTRY_BUSY) != 0) {
+                result = find_aob((uint8_t*)Entry.lpData, Entry.cbData, aob, length, mask, results);
+
+                if (result != NULL) {
+                    if (result == aob) { // Found our own search AoB in the stack
+                        result = NULL; // Don't let the scan return the address of the search array
+                    }
+                    else if (results == NULL) {
+                        // Only return first result
+                        return result;
+                    }
+                    else {
+                        result = NULL; // Set current result to NULL to continue searching
+                        if (results->size() >= MAX_AOBSCAN_RESULTS) {
+                            // Max results reached; stop searching
+                            return (void*)results->at(0);
+                        }
+                    }
+                }
+            }
+        }
+        DWORD LastError = GetLastError();
+        if (LastError != ERROR_NO_MORE_ITEMS) {
             return NULL;
         }
     }
-    else
-    {
-        region.BaseAddress = NULL; // First call to next_mem_region(&region, &region) gets process base if region.BaseAddress == NULL
-        region.RegionSize = 0;
-        region.Protect = MEM_PROTECT_NONE;
+
+    HeapFree(hDefaultProcessHeap, 0, addrHeaps);
+
+    //-----enumerate the module list and modulue's memory-----
+    HANDLE hModuleSnap = INVALID_HANDLE_VALUE;
+    MODULEENTRY32 me32;
+    me32.dwSize = sizeof(MODULEENTRY32);
+    hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
+    if (hModuleSnap == INVALID_HANDLE_VALUE) {
+        return NULL;
+    }
+    if (!Module32First(hModuleSnap, &me32)) {
+        CloseHandle(hModuleSnap);
+        return NULL;
     }
 
+    //for each module in the list
     do
     {
-        if (is_aob_scannable(&region) && region.RegionSize >= length)
+        MEMORY_BASIC_INFORMATION mod_info;
+        sp::mem::virtual_query((void*)me32.modBaseAddr, &mod_info, sizeof(MEMORY_BASIC_INFORMATION));
+        if (is_aob_scannable(&mod_info) && me32.modBaseSize >= length)
         {
-            result = find_aob((uint8_t*)region.BaseAddress, region.RegionSize, aob, length, mask, results);
+            result = find_aob((uint8_t*)me32.modBaseAddr, me32.modBaseSize, aob, length, mask, results);
 
-            if (result != NULL)
-            {
-                if (result == aob) // Found our own search AoB in the stack
-                {
+            if (result != NULL) {
+                if (result == aob) { // Found our own search AoB in the stack
                     result = NULL; // Don't let the scan return the address of the search array
                 }
-                else if (results == NULL)
-                {
+                else if (results == NULL) {
                     // Only return first result
                     return result;
                 }
-                else
-                {
+                else {
                     result = NULL; // Set current result to NULL to continue searching
-
-                    if (results->size() >= MAX_AOBSCAN_RESULTS)
-                    {
+                    if (results->size() >= MAX_AOBSCAN_RESULTS) {
                         // Max results reached; stop searching
                         return (void*)results->at(0);
                     }
                 }
             }
-            
         }
-    } while (sp::mem::next_region(&region, &region) != NULL);
+    } while (Module32Next(hModuleSnap, &me32));
 
+    CloseHandle(hModuleSnap);
 
     if (results == NULL || results->size() == 0)
     {
