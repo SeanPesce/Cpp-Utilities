@@ -31,6 +31,15 @@ private:
     // Window title
     std::string _title;
 
+
+protected:
+
+    inline void _refresh_command()
+    {
+        _command = SP_IO_CMD_OUT_LAUNCH_CMD_;
+    }
+
+
 public:
     class defaults;
 
@@ -38,7 +47,7 @@ public:
             : sp::sys::proc::child("", "", true, 0)
     {
         _title = title;
-        _command = SP_IO_CMD_OUT_LAUNCH_CMD_;
+        _refresh_command();
     }
 
     cmd_ostream(const sp::io::cmd_ostream&) = delete; // Disable copy constructor
@@ -79,7 +88,7 @@ public:
         if (_title != new_title)
         {
             _title = new_title;
-            _command = SP_IO_CMD_OUT_LAUNCH_CMD_;
+            _refresh_command();
             restart();
         }
     }

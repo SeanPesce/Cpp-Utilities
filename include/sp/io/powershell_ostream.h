@@ -44,6 +44,15 @@ private:
     std::string _bg_color;
     std::string _fg_color;
 
+
+protected:
+
+    inline void _refresh_command()
+    {
+        _command = SP_IO_POWERSHELL_OUT_LAUNCH_CMD_;
+    }
+
+
 public:
     class defaults;
 
@@ -73,7 +82,7 @@ public:
         _title = title;
         _bg_color = ps_ostream::defaults::bg_color;
         _fg_color = ps_ostream::defaults::fg_color;
-        _command = SP_IO_POWERSHELL_OUT_LAUNCH_CMD_;
+        _refresh_command();
     }
 
     ps_ostream(const sp::io::ps_ostream&) = delete; // Disable copy constructor
@@ -126,7 +135,7 @@ public:
         if (_title != new_title)
         {
             _title = new_title;
-            _command = SP_IO_POWERSHELL_OUT_LAUNCH_CMD_;
+            _refresh_command();
             restart();
         }
     }
@@ -139,7 +148,7 @@ public:
         if (_bg_color != color && ps_ostream::COLORS.find(color) != ps_ostream::COLORS.end())
         {
             _bg_color = color;
-            _command = SP_IO_POWERSHELL_OUT_LAUNCH_CMD_;
+            _refresh_command();
             restart();
             return true;
         }
@@ -154,11 +163,42 @@ public:
         if (_fg_color != color && ps_ostream::COLORS.find(color) != ps_ostream::COLORS.end())
         {
             _fg_color = color;
-            _command = SP_IO_POWERSHELL_OUT_LAUNCH_CMD_;
+            _refresh_command();
             restart();
             return true;
         }
         return false;
+    }
+
+
+    inline bool set_colors(const std::string& new_bg_color, const std::string& new_fg_color)
+    {
+        bool result = false;
+        std::string bg_color = sp::str::to_lowercase(new_bg_color);
+        std::string fg_color = sp::str::to_lowercase(new_fg_color);
+
+        if (ps_ostream::COLORS.find(bg_color) != ps_ostream::COLORS.end() &&
+            ps_ostream::COLORS.find(fg_color) != ps_ostream::COLORS.end()) {
+
+            if (_bg_color != bg_color)
+            {
+                _bg_color = bg_color;
+                result = true;
+            }
+
+            if (_fg_color != fg_color)
+            {
+                _fg_color = fg_color;
+                result = true;
+            }
+
+            if (result)
+            {
+                _refresh_command();
+                restart();
+            }
+        }
+        return result;
     }
 
     class defaults {
