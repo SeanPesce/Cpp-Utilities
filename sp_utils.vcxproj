@@ -22,19 +22,19 @@
     <ProjectGuid>{7D78781B-5796-4E64-9CBB-4A448FBC249E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>sp_utils</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -99,6 +99,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_dbg_x86.pdb</ProgramDataBaseFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -114,6 +115,7 @@
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_dbg_$(Platform).pdb</ProgramDataBaseFileName>
       <ExceptionHandling>Async</ExceptionHandling>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,6 +133,7 @@
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_x86.pdb</ProgramDataBaseFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,6 +153,7 @@
       <AdditionalIncludeDirectories>include;lib;lib/inih;lib/inih/cpp;</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(SolutionDir)\bin\$(Configuration)\$(Platform)\$(ProjectName)_$(Platform).pdb</ProgramDataBaseFileName>
       <ExceptionHandling>Async</ExceptionHandling>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -278,6 +282,7 @@
     <ClInclude Include="include\sp\io.h" />
     <ClInclude Include="include\sp\io\cmd_ostream.h" />
     <ClInclude Include="include\sp\io\keybinds.h" />
+    <ClInclude Include="include\sp\io\powershell_ostream.h" />
     <ClInclude Include="include\sp\io\vk_names.h" />
     <ClInclude Include="include\sp\log.h" />
     <ClInclude Include="include\sp\main.h" />

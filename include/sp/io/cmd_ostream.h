@@ -79,6 +79,7 @@ public:
         if (_title != new_title)
         {
             _title = new_title;
+            _command = SP_IO_CMD_OUT_LAUNCH_CMD_;
             restart();
         }
     }

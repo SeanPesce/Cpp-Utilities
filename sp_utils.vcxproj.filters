@@ -622,5 +622,8 @@
     <ClInclude Include="include\sp\io\keybinds.h">
       <Filter>Header Files\sp\io</Filter>
     </ClInclude>
+    <ClInclude Include="include\sp\io\powershell_ostream.h">
+      <Filter>Header Files\sp\io</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

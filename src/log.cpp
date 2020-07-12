@@ -13,7 +13,7 @@ __SP_NAMESPACE
 
 bool log::_overwrite_on_init = log::defaults::overwrite_on_init; // Overwrite log file during initialization
 std::string log::_file = log::defaults::file;
-io::cmd_ostream log::_ostream;
+io::ps_ostream log::_ostream;
 bool log::_initialized = log::initialize();
 const log::printer log::out;
 

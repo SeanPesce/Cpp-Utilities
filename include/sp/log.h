@@ -10,7 +10,7 @@
 #define SP_UTILITY_LOG_H_
 
 #include "sp/sp.h"
-#include "sp/io/cmd_ostream.h"
+#include "sp/io/powershell_ostream.h"
 #include "sp/file.h"
 #include <string>
 #include <iostream>
@@ -38,7 +38,7 @@ private:
     static bool _initialized;
     static bool _overwrite_on_init; // Overwrite log file during initialization
     static std::string _file;
-    static io::cmd_ostream _ostream;
+    static io::ps_ostream _ostream;
 
 
 public:
@@ -51,7 +51,7 @@ public:
     static inline bool initialized() { return log::_initialized; }
     static inline bool overwrite_on_init() { return log::_overwrite_on_init; }
     static inline const std::string& file() { return log::_file; }
-    static inline io::cmd_ostream& ostream() { return log::_ostream; }
+    static inline io::ps_ostream& ostream() { return log::_ostream; }
 
 
     static inline void set_overwrite_on_init(bool overwrite)
