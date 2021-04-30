@@ -15,10 +15,6 @@ namespace io {
         int(*function)();	// Function called when key is pressed
     } SP_KEY_FUNCTION;
 
-#define _SP_KEY_DOWN_ 0x80000000    // You'd have to use this as a bitmask
-#define _SP_KEY_UP_   0x00000000
-#define _SP_KEY_MISS_ 0x00000001    // Missed a keypress
-
     class keybinds {
     private:
         // Stores all function/keybind mappings
@@ -43,25 +39,6 @@ namespace io {
             else {
                 return 0;
             }
-        }
-
-        static inline void check_hotkeys_original() {
-            SHORT keyboard_state_buffer[256];
-            for (int key = 0; key < 256; key++)
-            {
-                keyboard_state_buffer[key] = GetAsyncKeyState(key);
-            }
-
-            std::vector<SP_KEY_FUNCTION>::const_iterator key_func_iterator;
-            for (key_func_iterator = keybinds_list().begin(); key_func_iterator != keybinds_list().end(); key_func_iterator++)
-            {
-                if (key_func_iterator->key != 0 && (keyboard_state_buffer[key_func_iterator->key] & _SP_KEY_DOWN_))
-                {
-                    key_func_iterator->function();
-                    break;
-                }
-            }
-            
         }
 
         static inline void check_hotkeys() {
