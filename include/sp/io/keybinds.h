@@ -59,8 +59,8 @@ namespace io {
                     key_func_iterator->function();
                     break;
                 }
-                sp::io::keybinds::prev_keyboard_state_buffer[key_func_iterator->key] = keyboard_state_buffer[key_func_iterator->key];
             }
+            memcpy(sp::io::keybinds::prev_keyboard_state_buffer, keyboard_state_buffer, 256);
         }
 
     };
