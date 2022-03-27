@@ -180,7 +180,7 @@ long dump_memory(void *source, size_t size, const std::basic_string<charT> &new_
 
     // Trim whitespace
     charT trim_mask[5] = { (charT)' ', (charT)'\r', (charT)'\n', (charT)'\t', (charT)0 };
-    string::trim(new_file, std::basic_string<charT>(trim_mask));
+    std::string::trim(new_file, std::basic_string<charT>(trim_mask));
 
     // Remove leading slashes
     while (new_file[0] == (charT)'\\')
