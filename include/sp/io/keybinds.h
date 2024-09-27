@@ -15,8 +15,6 @@ namespace io {
         int(*function)();	// Function called when key is pressed
     } SP_KEY_FUNCTION;
 
-#define _SP_KEY_DOWN_ 0x80000000
-
     class keybinds {
     private:
         // Stores all function/keybind mappings
@@ -25,8 +23,11 @@ namespace io {
             static std::vector<SP_KEY_FUNCTION> theInstance;
             return theInstance;
         }
+        // Stores the previous frames data
+        inline static SHORT prev_keyboard_state_buffer[256];
 
     public:
+        
         static inline unsigned int register_hotkey_function(unsigned int vk_hotkey, int(*function)())
         {
             if (vk_hotkey > 0 && function != NULL)
@@ -50,12 +51,16 @@ namespace io {
             std::vector<SP_KEY_FUNCTION>::const_iterator key_func_iterator;
             for (key_func_iterator = keybinds_list().begin(); key_func_iterator != keybinds_list().end(); key_func_iterator++)
             {
-                if (key_func_iterator->key != 0 && (keyboard_state_buffer[key_func_iterator->key] & _SP_KEY_DOWN_))
-                {
+                if (
+                    key_func_iterator->key != 0 &&
+                    (keyboard_state_buffer[key_func_iterator->key] < 0) &&
+                    sp::io::keybinds::prev_keyboard_state_buffer[key_func_iterator->key] == 0)
+                   {
                     key_func_iterator->function();
                     break;
                 }
             }
+            memcpy(sp::io::keybinds::prev_keyboard_state_buffer, keyboard_state_buffer, 256);
         }
 
     };
